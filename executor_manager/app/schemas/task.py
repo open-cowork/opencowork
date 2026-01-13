@@ -22,6 +22,7 @@ class TaskCreateRequest(BaseModel):
     prompt: str
     config: TaskConfig
     user_id: str
+    session_id: str | None = None
     scheduled_at: datetime | None = None
 
 

@@ -20,11 +20,12 @@ task_service = TaskService()
 
 @router.post("", response_model=ResponseSchema[TaskCreateResponse])
 async def create_task(request: TaskCreateRequest) -> JSONResponse:
-    """Create a task and schedule it for execution."""
+    """Create a task and schedule it for execution. If session_id is provided, continues existing conversation."""
     result = await task_service.create_task(
         user_id=request.user_id,
         prompt=request.prompt,
         config=request.config.model_dump(),
+        session_id=request.session_id,
     )
     return Response.success(data=result.model_dump(), message="Task created")
 

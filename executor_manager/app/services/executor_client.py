@@ -18,6 +18,7 @@ class ExecutorClient:
         callback_url: str,
         callback_token: str,
         config: dict,
+        sdk_session_id: str | None = None,
     ) -> str:
         """Call Executor to execute a task.
 
@@ -28,6 +29,7 @@ class ExecutorClient:
             callback_url: Callback URL
             callback_token: Callback token
             config: Task configuration
+            sdk_session_id: Claude SDK session ID for resuming conversations
         """
         async with httpx.AsyncClient() as client:
             response = await client.post(
@@ -38,6 +40,7 @@ class ExecutorClient:
                     "callback_url": callback_url,
                     "callback_token": callback_token,
                     "config": config,
+                    "sdk_session_id": sdk_session_id,
                 },
                 timeout=300.0,
             )

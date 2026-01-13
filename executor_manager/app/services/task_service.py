@@ -28,6 +28,7 @@ class TaskService:
         user_id: str,
         prompt: str,
         config: dict,
+        session_id: str | None = None,
     ) -> TaskCreateResponse:
         """Create a task and schedule it for execution.
 
@@ -35,6 +36,7 @@ class TaskService:
             user_id: User ID who created the task
             prompt: Task prompt for the agent
             config: Task configuration dictionary
+            session_id: Optional existing session ID to continue conversation
 
         Returns:
             TaskCreateResponse with task_id, session_id, and container info
@@ -48,11 +50,21 @@ class TaskService:
 
         try:
             backend_client = BackendClient()
-            session_id = await backend_client.create_session(
-                user_id=user_id, config=config
-            )
 
-            logger.info(f"Created session {session_id} for task {task_id}")
+            # Continue existing session or create new one
+            if session_id:
+                # Get existing session info
+                session_data = await self.get_session_status(session_id)
+                sdk_session_id = session_data.sdk_session_id
+                logger.info(f"Reusing existing session {session_id} for task {task_id}")
+            else:
+                # Create new session
+                session_info = await backend_client.create_session(
+                    user_id=user_id, config=config
+                )
+                session_id = session_info["session_id"]
+                sdk_session_id = session_info.get("sdk_session_id")
+                logger.info(f"Created session {session_id} for task {task_id}")
 
             container_url = None
             container_id = config.get("container_id")
@@ -72,7 +84,7 @@ class TaskService:
 
             scheduler.add_job(
                 TaskDispatcher.dispatch,
-                args=[task_id, session_id, prompt, config],
+                args=[task_id, session_id, prompt, config, sdk_session_id],
                 id=task_id,
                 replace_existing=True,
             )

@@ -26,6 +26,7 @@ class TaskDispatcher:
         session_id: str,
         prompt: str,
         config: dict,
+        sdk_session_id: str | None = None,
     ) -> None:
         """Dispatch task to executor.
 
@@ -34,6 +35,7 @@ class TaskDispatcher:
             session_id: Session ID
             prompt: Task prompt
             config: Task configuration
+            sdk_session_id: Claude SDK session ID for resuming conversations
         """
         settings = get_settings()
         executor_client = ExecutorClient()
@@ -69,6 +71,7 @@ class TaskDispatcher:
                 callback_url=callback_url,
                 callback_token=callback_token,
                 config=config,
+                sdk_session_id=sdk_session_id,
             )
 
             logger.info(f"Task {task_id} dispatched successfully to executor")

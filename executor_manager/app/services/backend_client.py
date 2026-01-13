@@ -10,8 +10,8 @@ class BackendClient:
         self.settings = get_settings()
         self.base_url = self.settings.backend_url
 
-    async def create_session(self, user_id: str, config: dict) -> str:
-        """Create a session, returns session_id."""
+    async def create_session(self, user_id: str, config: dict) -> dict:
+        """Create a session, returns session info dict with session_id and sdk_session_id."""
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 f"{self.base_url}/api/v1/sessions",
@@ -19,7 +19,7 @@ class BackendClient:
             )
             response.raise_for_status()
             data = response.json()
-            return data["data"]["session_id"]
+            return data["data"]
 
     async def update_session_status(self, session_id: str, status: str) -> None:
         """Update session status."""
