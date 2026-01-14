@@ -1,0 +1,25 @@
+enabled = true
+
+[[rules]]
+id = "immediate"
+kind = "interval"
+schedule_modes = ["immediate"]
+seconds = 2
+start_immediately = true
+
+[[rules]]
+id = "scheduled"
+kind = "interval"
+schedule_modes = ["scheduled"]
+seconds = 2
+start_immediately = true
+
+[[rules]]
+id = "nightly"
+kind = "window"
+schedule_modes = ["nightly"]
+timezone = "UTC"
+cron = { hour = 2, minute = 0 }
+window_minutes = 360
+poll_interval_seconds = 2
+

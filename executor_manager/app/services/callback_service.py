@@ -52,12 +52,13 @@ class CallbackService:
             # Forward callback to backend
             await backend_client.forward_callback(callback.model_dump(mode="json"))
 
-            # Update session status if task completed or failed
             if callback.status in ["completed", "failed"]:
-                logger.info(f"Task {callback.status}, updating session status")
-                await backend_client.update_session_status(
-                    callback.session_id, callback.status
+                from app.scheduler.task_dispatcher import TaskDispatcher
+
+                logger.info(
+                    f"Task {callback.status}, cleaning up container for session {callback.session_id}"
                 )
+                await TaskDispatcher.on_task_complete(callback.session_id)
 
             return CallbackReceiveResponse(
                 status="received",

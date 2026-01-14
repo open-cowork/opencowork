@@ -8,6 +8,7 @@ from app.models import Base, TimestampMixin
 
 if TYPE_CHECKING:
     from app.models.agent_message import AgentMessage
+    from app.models.agent_run import AgentRun
     from app.models.tool_execution import ToolExecution
     from app.models.usage_log import UsageLog
 
@@ -29,6 +30,9 @@ class AgentSession(Base, TimestampMixin):
         back_populates="session", cascade="all, delete-orphan"
     )
     tool_executions: Mapped[list["ToolExecution"]] = relationship(
+        back_populates="session", cascade="all, delete-orphan"
+    )
+    runs: Mapped[list["AgentRun"]] = relationship(
         back_populates="session", cascade="all, delete-orphan"
     )
     usage_logs: Mapped[list["UsageLog"]] = relationship(

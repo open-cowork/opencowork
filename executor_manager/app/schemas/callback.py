@@ -69,6 +69,7 @@ class AgentCallbackRequest(BaseModel):
     progress: int
     new_message: object | None = None
     state_patch: AgentCurrentState | None = None
+    sdk_session_id: str | None = None
 
 
 class CallbackReceiveResponse(BaseModel):

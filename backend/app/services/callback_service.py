@@ -5,6 +5,7 @@ from typing import Any
 
 from sqlalchemy.orm import Session
 
+from app.models.agent_run import AgentRun
 from app.repositories.message_repository import MessageRepository
 from app.repositories.tool_execution_repository import ToolExecutionRepository
 from app.repositories.usage_log_repository import UsageLogRepository
@@ -21,6 +22,28 @@ logger = logging.getLogger(__name__)
 
 class CallbackService:
     """Service layer for processing executor callbacks."""
+
+    def _extract_sdk_session_id_from_message(
+        self, message: dict[str, Any]
+    ) -> str | None:
+        message_type = message.get("_type", "")
+
+        if "ResultMessage" in message_type and isinstance(
+            message.get("session_id"), str
+        ):
+            return message["session_id"]
+
+        if "SystemMessage" in message_type and message.get("subtype") == "init":
+            data = message.get("data", {})
+            if not isinstance(data, dict):
+                return None
+            inner = data.get("data")
+            if isinstance(inner, dict) and isinstance(inner.get("session_id"), str):
+                return inner["session_id"]
+            if isinstance(data.get("session_id"), str):
+                return data["session_id"]
+
+        return None
 
     def _extract_role_from_message(self, message: dict[str, Any]) -> str:
         message_type = message.get("_type", "")
@@ -213,18 +236,28 @@ class CallbackService:
                 message="Session not found yet",
             )
 
+        derived_sdk_session_id = callback.sdk_session_id
+        if (
+            not derived_sdk_session_id
+            and callback.new_message
+            and isinstance(callback.new_message, dict)
+        ):
+            derived_sdk_session_id = self._extract_sdk_session_id_from_message(
+                callback.new_message
+            )
+
         # Save SDK session_id if present
         if (
-            callback.sdk_session_id
-            and callback.sdk_session_id != db_session.sdk_session_id
+            derived_sdk_session_id
+            and derived_sdk_session_id != db_session.sdk_session_id
         ):
             session_service.update_session(
                 db,
                 db_session.id,
-                SessionUpdateRequest(sdk_session_id=callback.sdk_session_id),
+                SessionUpdateRequest(sdk_session_id=derived_sdk_session_id),
             )
             logger.info(
-                f"Updated session {db_session.id} with sdk_session_id={callback.sdk_session_id}"
+                f"Updated session {db_session.id} with sdk_session_id={derived_sdk_session_id}"
             )
 
         if callback.status in [CallbackStatus.COMPLETED, CallbackStatus.FAILED]:
@@ -240,6 +273,30 @@ class CallbackService:
             self._persist_message_and_tools(db, db_session.id, callback.new_message)
             # Extract and persist usage data if this is a ResultMessage
             self._extract_and_persist_usage(db, db_session.id, callback.new_message)
+
+        db_run = (
+            db.query(AgentRun)
+            .filter(AgentRun.session_id == db_session.id)
+            .filter(AgentRun.status.in_(["claimed", "running"]))
+            .order_by(AgentRun.created_at.desc())
+            .first()
+        )
+
+        if db_run:
+            db_run.progress = int(callback.progress or 0)
+
+            if callback.status == CallbackStatus.RUNNING and db_run.status == "claimed":
+                db_run.status = "running"
+                if db_run.started_at is None:
+                    db_run.started_at = datetime.now(timezone.utc)
+
+            if callback.status in [CallbackStatus.COMPLETED, CallbackStatus.FAILED]:
+                db_run.status = callback.status.value
+                db_run.finished_at = datetime.now(timezone.utc)
+                if callback.status == CallbackStatus.COMPLETED:
+                    db_run.progress = 100
+
+            db.commit()
 
         # TODO: Persist state_patch
 

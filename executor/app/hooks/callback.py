@@ -1,5 +1,7 @@
 from typing import Any, Optional
 
+from claude_agent_sdk.types import ResultMessage, SystemMessage
+
 from app.core.callback import CallbackClient
 from app.hooks.base import AgentHook, ExecutionContext
 from app.schemas.callback import AgentCallbackRequest
@@ -36,13 +38,12 @@ class CallbackHook(AgentHook):
         return int((completed / len(todos)) * 100)
 
     async def on_agent_response(self, context: ExecutionContext, message: Any):
-        if message and isinstance(message, dict):
-            message_type = message.get("_type", "")
-            subtype = message.get("subtype", "")
-            if "SystemMessage" in message_type and subtype == "init":
-                data = message.get("data", {})
-                if "session_id" in data:
-                    self.sdk_session_id = data["session_id"]
+        if isinstance(message, SystemMessage) and message.subtype == "init":
+            data = message.data.get("data", {})
+            if isinstance(data, dict) and "session_id" in data:
+                self.sdk_session_id = data["session_id"]
+        elif isinstance(message, ResultMessage):
+            self.sdk_session_id = message.session_id
 
         await self.client.send(
             self._build_report(

@@ -2,9 +2,9 @@ import logging
 import sys
 
 from fastapi import FastAPI
+from fastapi.responses import JSONResponse
 
 from app.api import task_router
-
 
 logging.basicConfig(
     level=logging.INFO,
@@ -15,6 +15,13 @@ logging.basicConfig(
 app = FastAPI()
 
 app.include_router(task_router)
+
+
+@app.get("/health")
+async def health_check() -> JSONResponse:
+    """Health check endpoint."""
+    return JSONResponse({"status": "ok"})
+
 
 if __name__ == "__main__":
     import uvicorn

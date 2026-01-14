@@ -15,7 +15,7 @@ def configure_logging(*, debug: bool) -> None:
     if not _installed_record_factory:
         old_factory = logging.getLogRecordFactory()
 
-        def record_factory(*args, **kwargs):  # type: ignore[no-untyped-def]
+        def record_factory(*args, **kwargs):
             record = old_factory(*args, **kwargs)
             record.request_id = get_request_id() or "-"
             record.trace_id = get_trace_id() or "-"

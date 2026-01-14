@@ -42,7 +42,7 @@ class ExecutorClient:
                     "config": config,
                     "sdk_session_id": sdk_session_id,
                 },
-                timeout=300.0,
+                timeout=httpx.Timeout(30.0, connect=10.0),
             )
             response.raise_for_status()
             data = response.json()

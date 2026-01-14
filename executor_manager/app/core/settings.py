@@ -24,6 +24,49 @@ class Settings(BaseSettings):
     retry_attempts: int = Field(default=3)
     retry_delay_seconds: int = Field(default=60)
     callback_token: str = Field(default="change-this-token-in-production")
+    task_pull_enabled: bool = Field(default=True, alias="TASK_PULL_ENABLED")
+    # Backward compatible default pull interval (used when per-queue intervals are unset)
+    task_pull_interval_seconds: int = Field(
+        default=2, alias="TASK_PULL_INTERVAL_SECONDS"
+    )
+    task_claim_lease_seconds: int = Field(default=30, alias="TASK_CLAIM_LEASE_SECONDS")
+
+    # Optional schedule config file (TOML/JSON). When provided, it becomes the source of truth.
+    schedule_config_path: str | None = Field(default=None, alias="SCHEDULE_CONFIG_PATH")
+
+    # Queue-based scheduling (AgentRun.schedule_mode)
+    task_pull_immediate_enabled: bool = Field(
+        default=True, alias="TASK_PULL_IMMEDIATE_ENABLED"
+    )
+    task_pull_immediate_interval_seconds: int | None = Field(
+        default=None, alias="TASK_PULL_IMMEDIATE_INTERVAL_SECONDS"
+    )
+
+    task_pull_scheduled_enabled: bool = Field(
+        default=True, alias="TASK_PULL_SCHEDULED_ENABLED"
+    )
+    task_pull_scheduled_interval_seconds: int | None = Field(
+        default=None, alias="TASK_PULL_SCHEDULED_INTERVAL_SECONDS"
+    )
+
+    task_pull_nightly_enabled: bool = Field(
+        default=True, alias="TASK_PULL_NIGHTLY_ENABLED"
+    )
+    task_pull_nightly_poll_interval_seconds: int = Field(
+        default=2, alias="TASK_PULL_NIGHTLY_POLL_INTERVAL_SECONDS"
+    )
+    task_pull_nightly_timezone: str = Field(
+        default="UTC", alias="TASK_PULL_NIGHTLY_TIMEZONE"
+    )
+    task_pull_nightly_start_hour: int = Field(
+        default=2, alias="TASK_PULL_NIGHTLY_START_HOUR"
+    )
+    task_pull_nightly_start_minute: int = Field(
+        default=0, alias="TASK_PULL_NIGHTLY_START_MINUTE"
+    )
+    task_pull_nightly_window_minutes: int = Field(
+        default=360, alias="TASK_PULL_NIGHTLY_WINDOW_MINUTES"
+    )
 
     anthropic_token: str = Field(default="", alias="ANTHROPIC_AUTH_TOKEN")
     anthropic_base_url: str = Field(

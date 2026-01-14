@@ -20,6 +20,11 @@ class Settings(BaseSettings):
 
     secret_key: str = Field(default="change-this-secret-key-in-production")
 
+    # External services
+    executor_manager_url: str = Field(
+        default="http://localhost:8001", alias="EXECUTOR_MANAGER_URL"
+    )
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

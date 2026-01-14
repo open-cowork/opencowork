@@ -3,6 +3,8 @@ import time
 from typing import TYPE_CHECKING
 
 import docker
+import docker.errors
+import httpx
 
 from app.core.errors.error_codes import ErrorCode
 from app.core.errors.exceptions import AppException
@@ -57,6 +59,14 @@ class ContainerPool:
         container_id = f"exec-{session_id[:8]}"
         container_name = f"executor-{session_id[:8]}"
 
+        # 清理可能存在的同名容器
+        try:
+            old_container = self.docker_client.containers.get(container_name)
+            logger.warning(f"Removing stale container {container_name}")
+            old_container.remove(force=True)
+        except docker.errors.NotFound:
+            pass
+
         logger.info(f"Creating new container {container_id} (mode: {container_mode})")
 
         workspace_volume = self.workspace_manager.get_workspace_volume(
@@ -87,8 +97,8 @@ class ContainerPool:
             ports={"8000/tcp": None},
             detach=True,
             auto_remove=True,
-            network="host",
             labels=labels,
+            extra_hosts={"host.docker.internal": "host-gateway"},
         )
 
         self.containers[container_id] = container
@@ -96,20 +106,29 @@ class ContainerPool:
 
         self._wait_for_container_ready(container)
 
-        logger.info(f"Container {container_id} started for session {session_id}")
-        return "http://localhost:8000", container_id
+        container.reload()
+        port_info = container.ports.get("8000/tcp")
+        if not port_info:
+            raise AppException(
+                error_code=ErrorCode.CONTAINER_START_FAILED,
+                message=f"Container {container_name} has no port mapping",
+            )
+        host_port = port_info[0]["HostPort"]
+        executor_url = f"http://localhost:{host_port}"
+
+        self._wait_for_service_ready(executor_url)
+
+        logger.info(
+            f"Container {container_id} started for session {session_id} on port {host_port}"
+        )
+        return executor_url, container_id
 
     def _wait_for_container_ready(
         self,
         container: "Container",
         timeout: int = 30,
     ) -> None:
-        """Wait for container to start.
-
-        Args:
-            container: Container object
-            timeout: Timeout in seconds
-        """
+        """Wait for container to start."""
         start = time.time()
 
         while time.time() - start < timeout:
@@ -123,20 +142,37 @@ class ContainerPool:
             message=f"Container {container.name} failed to start within {timeout}s",
         )
 
+    def _wait_for_service_ready(
+        self,
+        executor_url: str,
+        timeout: int = 60,
+    ) -> None:
+        """Wait for executor HTTP service to be ready."""
+        start = time.time()
+        health_url = f"{executor_url}/health"
+
+        while time.time() - start < timeout:
+            try:
+                with httpx.Client(timeout=2.0) as client:
+                    response = client.get(health_url)
+                    if response.status_code == 200:
+                        logger.info(f"Executor service ready at {executor_url}")
+                        return
+            except httpx.RequestError:
+                pass
+            time.sleep(1)
+
+        raise AppException(
+            error_code=ErrorCode.CONTAINER_START_FAILED,
+            message=f"Executor service at {executor_url} not ready within {timeout}s",
+        )
+
     async def on_task_complete(self, session_id: str) -> None:
-        """Handle task completion.
+        """Handle task completion. Ephemeral containers are stopped."""
+        container_id = self.session_to_container.pop(session_id, None)
 
-        Args:
-            session_id: Session ID
-
-        ephemeral mode: delete container
-        persistent mode: keep container
-        """
-        if session_id not in self.session_to_container:
-            logger.warning(f"Session {session_id} has no container mapping")
+        if not container_id:
             return
-
-        container_id = self.session_to_container.pop(session_id)
 
         sessions_using_container = [
             sid for sid, cid in self.session_to_container.items() if cid == container_id
@@ -149,34 +185,23 @@ class ContainerPool:
             return
 
         if container_id in self.containers:
-            container = self.containers[container_id]
+            container = self.containers.pop(container_id)
             container_mode = container.labels.get("container_mode", "ephemeral")
 
             if container_mode == "ephemeral":
                 logger.info(f"Container {container_id} is ephemeral, stopping")
-                await self._delete_container(container_id)
-            else:
-                logger.info(f"Container {container_id} is persistent, keeping alive")
+                try:
+                    container.stop(timeout=10)
+                except Exception as e:
+                    logger.error(f"Failed to stop container {container_id}: {e}")
 
-    async def delete_container(self, container_id: str) -> None:
-        """Delete container explicitly.
+    async def cancel_task(self, session_id: str) -> None:
+        """Cancel task and stop container."""
+        logger.info(f"Cancelling task for session {session_id}")
 
-        Args:
-            container_id: Container ID
-        """
-        await self._delete_container(container_id)
-
-    async def _delete_container(self, container_id: str) -> None:
-        """Delete container.
-
-        Args:
-            container_id: Container ID
-        """
-        sessions_to_remove = [
-            sid for sid, cid in self.session_to_container.items() if cid == container_id
-        ]
-        for sid in sessions_to_remove:
-            self.session_to_container.pop(sid)
+        container_id = self.session_to_container.pop(session_id, None)
+        if not container_id:
+            return
 
         if container_id in self.containers:
             container = self.containers.pop(container_id)
@@ -186,27 +211,8 @@ class ContainerPool:
             except Exception as e:
                 logger.error(f"Failed to stop container {container_id}: {e}")
 
-    async def cancel_task(self, session_id: str) -> None:
-        """Cancel task and delete container.
-
-        Args:
-            session_id: Session ID
-        """
-        logger.info(f"Cancelling task for session {session_id}")
-
-        if session_id not in self.session_to_container:
-            logger.warning(f"Session {session_id} has no container")
-            return
-
-        container_id = self.session_to_container[session_id]
-        await self._delete_container(container_id)
-
     def get_container_stats(self) -> dict[str, int | list[dict]]:
-        """Get container statistics.
-
-        Returns:
-            Dict with total_active, persistent_containers, ephemeral_containers, containers list
-        """
+        """Get container statistics."""
         persistent = 0
         ephemeral = 0
 
@@ -227,7 +233,6 @@ class ContainerPool:
                     "name": c.name,
                     "status": c.status,
                     "mode": c.labels.get("container_mode", "ephemeral"),
-                    "labels": c.labels,
                 }
                 for c in self.containers.values()
             ],

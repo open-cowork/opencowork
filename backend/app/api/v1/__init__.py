@@ -1,12 +1,23 @@
 from fastapi import APIRouter
 
-from app.api.v1 import callback, messages, sessions, tool_executions
+from app.api.v1 import (
+    callback,
+    messages,
+    runs,
+    schedules,
+    sessions,
+    tasks,
+    tool_executions,
+)
 from app.core.settings import get_settings
 from app.schemas.response import Response
 
 api_v1_router = APIRouter()
 
 api_v1_router.include_router(sessions.router)
+api_v1_router.include_router(tasks.router)
+api_v1_router.include_router(runs.router)
+api_v1_router.include_router(schedules.router)
 api_v1_router.include_router(callback.router)
 api_v1_router.include_router(messages.router)
 api_v1_router.include_router(tool_executions.router)
