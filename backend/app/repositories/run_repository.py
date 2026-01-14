@@ -72,8 +72,8 @@ class RunRepository:
             .where(AgentRun.lease_expires_at < now)
             .values(status="queued", claimed_by=None, lease_expires_at=None)
         )
-        result = session_db.execute(stmt).all()
-        return len(result)
+        result = session_db.connection().execute(stmt)
+        return result.rowcount
 
     @staticmethod
     def claim_next(
