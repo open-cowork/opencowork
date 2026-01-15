@@ -1,7 +1,7 @@
 import uuid
 from typing import Any
 
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 
 from app.models.agent_session import AgentSession
 
@@ -83,3 +83,24 @@ class SessionRepository:
             .filter(AgentSession.user_id == user_id)
             .count()
         )
+
+    @staticmethod
+    def list_by_user_with_messages(
+        session_db: Session,
+        user_id: str,
+        limit: int | None = None,
+        offset: int = 0,
+    ) -> list[AgentSession]:
+        """Lists sessions for a user with messages loaded for title extraction.
+
+        @deprecated: Temporary method for frontend development.
+        """
+        query = (
+            session_db.query(AgentSession)
+            .options(joinedload(AgentSession.messages))
+            .filter(AgentSession.user_id == user_id)
+            .order_by(AgentSession.created_at.desc())
+        )
+        if limit is not None:
+            query = query.limit(limit).offset(offset)
+        return query.all()

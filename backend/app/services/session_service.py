@@ -88,3 +88,53 @@ class SessionService:
                 pass
 
         return db_session
+
+    @staticmethod
+    def _extract_title_from_session(session: AgentSession) -> str | None:
+        """Extracts title from the first user message in a session.
+
+        @deprecated: Temporary method for frontend development.
+        """
+        if not session.messages:
+            return None
+
+        # Find the first user message
+        for msg in session.messages:
+            if msg.role == "user":
+                # Try text_preview first, then extract from content
+                if msg.text_preview:
+                    return msg.text_preview
+                if msg.content:
+                    if "text" in msg.content:
+                        text = msg.content["text"]
+                        if isinstance(text, str):
+                            return text
+                    if "prompt" in msg.content:
+                        prompt = msg.content["prompt"]
+                        if isinstance(prompt, str):
+                            return prompt
+                break
+
+        return None
+
+    def list_sessions_with_titles(
+        self,
+        db: Session,
+        user_id: str,
+        limit: int | None = None,
+        offset: int = 0,
+    ) -> list[dict]:
+        """Lists sessions with titles extracted from first user message.
+
+        @deprecated: Temporary method for frontend development. Will be replaced.
+        """
+        sessions = SessionRepository.list_by_user_with_messages(
+            db, user_id, limit, offset
+        )
+
+        result = []
+        for session in sessions:
+            title = self._extract_title_from_session(session)
+            result.append({"session": session, "title": title})
+
+        return result

@@ -17,6 +17,7 @@ from app.schemas.response import Response, ResponseSchema
 from app.schemas.session import (
     SessionCreateRequest,
     SessionResponse,
+    SessionWithTitleResponse,
     SessionUpdateRequest,
 )
 from app.schemas.tool_execution import ToolExecutionResponse
@@ -102,6 +103,41 @@ async def list_sessions(
     return Response.success(
         data=[SessionResponse.model_validate(s) for s in sessions],
         message="Sessions retrieved successfully",
+    )
+
+
+@router.get(
+    "/list-with-titles",
+    response_model=ResponseSchema[list[SessionWithTitleResponse]],
+    deprecated=True,
+)
+async def list_sessions_with_titles(
+    user_id: str = Depends(get_current_user_id),
+    limit: int | None = Query(
+        default=None, description="Limit number of results (default: all)"
+    ),
+    offset: int = Query(default=0, description="Offset for pagination"),
+    db: Session = Depends(get_db),
+) -> JSONResponse:
+    """Lists sessions with titles from first user prompt.
+
+    @deprecated: Temporary API for frontend development. Will be replaced.
+    """
+    sessions_with_titles = session_service.list_sessions_with_titles(
+        db, user_id, limit, offset
+    )
+
+    result = []
+    for item in sessions_with_titles:
+        session_dict = SessionWithTitleResponse.model_validate(
+            item["session"]
+        ).model_dump()
+        session_dict["title"] = item["title"]
+        result.append(SessionWithTitleResponse(**session_dict))
+
+    return Response.success(
+        data=result,
+        message="Sessions with titles retrieved successfully",
     )
 
 
