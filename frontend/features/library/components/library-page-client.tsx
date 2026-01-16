@@ -12,24 +12,11 @@ import { useProjects } from "@/features/projects/hooks/use-projects";
 import { useTaskHistory } from "@/features/projects/hooks/use-task-history";
 
 import { SettingsDialog } from "@/features/settings/components/settings-dialog";
-import type { ProjectItem, TaskHistoryItem } from "@/features/projects/types";
 
-interface LibraryPageClientProps {
-  initialProjects: ProjectItem[];
-  initialTaskHistory: TaskHistoryItem[];
-}
-
-export function LibraryPageClient({
-  initialProjects,
-  initialTaskHistory,
-}: LibraryPageClientProps) {
+export function LibraryPageClient() {
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
-  const { projects, addProject } = useProjects({
-    initialProjects,
-  });
-  const { taskHistory, removeTask } = useTaskHistory({
-    initialTasks: initialTaskHistory,
-  });
+  const { projects, addProject } = useProjects({});
+  const { taskHistory, removeTask } = useTaskHistory({});
 
   return (
     <SidebarProvider defaultOpen={true}>

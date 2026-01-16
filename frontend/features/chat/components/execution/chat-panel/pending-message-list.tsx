@@ -17,8 +17,10 @@ import {
 } from "@/components/ui/collapsible";
 import { useT } from "@/lib/i18n/client";
 
+import type { PendingMessage } from "./hooks/use-pending-messages";
+
 interface PendingMessageListProps {
-  messages: string[];
+  messages: PendingMessage[];
   onSend: (index: number) => void;
   onModify: (index: number) => void;
   onDelete: (index: number) => void;
@@ -68,8 +70,13 @@ export function PendingMessageList({
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <span className="truncate text-foreground font-medium">
-                        {msg}
+                        {msg.content}
                       </span>
+                      {msg.attachments && msg.attachments.length > 0 && (
+                        <span className="text-xs text-muted-foreground">
+                          [+{msg.attachments.length} 文件]
+                        </span>
+                      )}
                     </div>
                   </div>
 

@@ -146,19 +146,16 @@ export function ToolChain({ blocks }: ToolChainProps) {
   const prevIsRunning = React.useRef(isRunning);
 
   // Auto-open the running step
-  React.useEffect(() => {
-    const runningStep = steps.find((s) => !s.result);
-    if (runningStep) {
-      setOpenStepId(runningStep.use.id);
-    }
-  }, [steps]);
+  // Auto-open the running step logic removed per user request
+  // React.useEffect(() => {
+  //   const runningStep = steps.find((s) => !s.result);
+  //   if (runningStep) {
+  //     setOpenStepId(runningStep.use.id);
+  //   }
+  // }, [steps]);
 
-  // Auto-collapse when finished or start expanded when running
+  // Auto-expand when new tool call starts (do NOT auto-collapse when finished)
   React.useEffect(() => {
-    // If we transitioned from running to not running, auto-collapse
-    if (prevIsRunning.current && !isRunning) {
-      setIsExpanded(false);
-    }
     // If we transitioned from not running to running (new tool call), auto-expand
     if (!prevIsRunning.current && isRunning) {
       setIsExpanded(true);

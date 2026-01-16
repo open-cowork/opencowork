@@ -200,7 +200,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
           <div className="w-64 bg-[#1e1e1e] border-r border-[#333] flex flex-col shrink-0">
             <div className="p-4 flex items-center gap-2 font-semibold text-lg">
               <Sparkles className="size-5 text-foreground" />
-              <span>OpenCoWork</span>
+              <span>Poco</span>
             </div>
             <div className="flex-1 overflow-y-auto py-2 px-2 space-y-0.5 min-h-0">
               {SIDEBAR_ITEMS.map((item) => (

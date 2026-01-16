@@ -1,17 +1,22 @@
 import { useEffect, useState, useRef, useCallback } from "react";
-import type { ExecutionSession } from "@/features/chat/types";
+import type { ExecutionSession, InputFile } from "@/features/chat/types";
 
 interface UsePendingMessagesOptions {
   session: ExecutionSession | null;
-  sendMessage: (content: string) => Promise<void>;
+  sendMessage: (content: string, attachments?: InputFile[]) => Promise<void>;
+}
+
+export interface PendingMessage {
+  content: string;
+  attachments?: InputFile[];
 }
 
 interface UsePendingMessagesReturn {
-  pendingMessages: string[];
+  pendingMessages: PendingMessage[];
   isSendingPending: boolean;
-  addPendingMessage: (content: string) => void;
+  addPendingMessage: (content: string, attachments?: InputFile[]) => void;
   sendPendingMessage: (index: number) => Promise<void>;
-  modifyPendingMessage: (index: number) => string;
+  modifyPendingMessage: (index: number) => PendingMessage;
   deletePendingMessage: (index: number) => void;
 }
 
@@ -28,7 +33,7 @@ export function usePendingMessages({
   session,
   sendMessage,
 }: UsePendingMessagesOptions): UsePendingMessagesReturn {
-  const [pendingMessages, setPendingMessages] = useState<string[]>([]);
+  const [pendingMessages, setPendingMessages] = useState<PendingMessage[]>([]);
   const [isSendingPending, setIsSendingPending] = useState(false);
   const isProcessingRef = useRef(false);
 
@@ -45,26 +50,29 @@ export function usePendingMessages({
   }, [isSessionActive]);
 
   // Add message to pending queue
-  const addPendingMessage = useCallback((content: string) => {
-    setPendingMessages((prev) => [...prev, content]);
-  }, []);
+  const addPendingMessage = useCallback(
+    (content: string, attachments?: InputFile[]) => {
+      setPendingMessages((prev) => [...prev, { content, attachments }]);
+    },
+    [],
+  );
 
   // Send a specific pending message by index
   const sendPendingMessage = useCallback(
     async (index: number) => {
-      const content = pendingMessages[index];
+      const msg = pendingMessages[index];
       setPendingMessages((prev) => prev.filter((_, i) => i !== index));
-      await sendMessage(content);
+      await sendMessage(msg.content, msg.attachments);
     },
     [pendingMessages, sendMessage],
   );
 
-  // Modify a pending message (returns content for editing)
+  // Modify a pending message (returns content/attachments for editing)
   const modifyPendingMessage = useCallback(
     (index: number) => {
-      const content = pendingMessages[index];
+      const msg = pendingMessages[index];
       setPendingMessages((prev) => prev.filter((_, i) => i !== index));
-      return content;
+      return msg;
     },
     [pendingMessages],
   );
@@ -89,7 +97,7 @@ export function usePendingMessages({
         setPendingMessages((prev) => prev.slice(1));
 
         try {
-          await sendMessage(msg);
+          await sendMessage(msg.content, msg.attachments);
         } catch (error) {
           console.error("Auto-send failed:", error);
         } finally {

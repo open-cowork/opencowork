@@ -10,7 +10,11 @@ import { ChatInput } from "./chat-input";
 import { PanelHeader } from "@/components/shared/panel-header";
 import { useChatMessages } from "./hooks/use-chat-messages";
 import { usePendingMessages } from "./hooks/use-pending-messages";
-import type { ExecutionSession, StatePatch } from "@/features/chat/types";
+import type {
+  ExecutionSession,
+  StatePatch,
+  InputFile,
+} from "@/features/chat/types";
 import { useT } from "@/lib/i18n/client";
 
 interface ChatPanelProps {
@@ -19,6 +23,7 @@ interface ChatPanelProps {
   progress?: number;
   currentStep?: string;
   updateSession: (newSession: Partial<ExecutionSession>) => void;
+  onIconClick?: () => void;
 }
 
 /**
@@ -42,6 +47,7 @@ export function ChatPanel({
   progress = 0,
   currentStep,
   updateSession,
+  onIconClick,
 }: ChatPanelProps) {
   const { t } = useT("translation");
 
@@ -67,18 +73,18 @@ export function ChatPanel({
     session?.status === "running" || session?.status === "accepted";
 
   // Handle send from input
-  const handleSend = async (content: string) => {
+  const handleSend = async (content: string, attachments?: InputFile[]) => {
     if (!session?.session_id) return;
 
     if (isSessionActive) {
       // Session is running, add to pending queue
-      addPendingMessage(content);
+      addPendingMessage(content, attachments);
     } else {
       // Session is idle, send immediately and mark as active
       if (session.status !== "running" && session.status !== "accepted") {
         updateSession({ status: "accepted" });
       }
-      await sendMessage(content);
+      await sendMessage(content, attachments);
     }
   };
 
@@ -99,6 +105,7 @@ export function ChatPanel({
           t("chat.executionTitle")
         }
         description={t("chat.emptyStateDesc")}
+        onIconClick={onIconClick}
       />
 
       {/* Top Section: Todo List (full width) */}

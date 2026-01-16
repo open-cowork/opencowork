@@ -1,5 +1,5 @@
 {
-  "welcome": "欢迎使用 OpenCoWork",
+  "welcome": "欢迎使用 Poco",
   "description": "多服务 AI 智能体执行平台",
   "home": "首页",
   "language": "语言",
@@ -18,14 +18,14 @@
     "rename": "重命名",
     "moveToProject": "移动到项目",
     "delete": "删除",
-    "shareTitle": "与好友分享 OpenCoWork",
+    "shareTitle": "与好友分享 Poco",
     "shareDesc": "各得 500 积分",
     "user": "用户",
     "removeFromProject": "移出项目",
     "plan": "专业版"
   },
   "header": {
-    "workspace": "OpenCoWork 1.0",
+    "workspace": "Poco 1.0",
     "switchWorkspace": "切换工作区",
     "notifications": "通知",
     "more": "更多"
@@ -37,7 +37,7 @@
     "voiceInput": "语音输入",
     "send": "发送",
     "placeholder": "分配一个任务或提出任何问题",
-    "tools": "将你的工具连接到 OpenCoWork"
+    "tools": "将你的工具连接到 Poco"
   },
   "prompts": {
     "createSlides": "制作幻灯片",
@@ -136,7 +136,12 @@
       "feature1": "丰富的技能库",
       "feature2": "一键安装",
       "feature3": "自定义配置",
-      "action": "浏览技能"
+      "action": "浏览技能",
+      "install": "安装",
+      "uninstall": "卸载",
+      "installed": "已安装",
+      "notInstalled": "未安装",
+      "hasConfig": "可配置"
     },
     "mcpInstall": {
       "title": "MCP 安装",
@@ -145,6 +150,48 @@
       "feature2": "可视化管理",
       "feature3": "实时监控",
       "action": "管理服务器"
+    },
+    "envVars": {
+      "title": "环境变量",
+      "description": "集中管理技能和 MCP 服务器使用的 API Key 与密钥。",
+      "copied": "已复制到剪贴板",
+      "copy": "复制",
+      "copyError": "复制失败",
+      "valuePlaceholder": "请输入值",
+      "required": "必填",
+      "secretLabel": "敏感",
+      "save": "保存",
+      "saving": "保存中...",
+      "otherTitle": "已有变量",
+      "empty": "暂未配置任何环境变量",
+      "addTitle": "新增环境变量",
+      "addDescription": "输入键值对，API Key 请勾选敏感显示。",
+      "keyLabel": "变量名",
+      "valueLabel": "变量值",
+      "descriptionLabel": "备注",
+      "descriptionPlaceholder": "可填写变量用途",
+      "secretToggle": "隐藏值（API Key）",
+      "addButton": "添加变量",
+      "refresh": "刷新",
+      "scope": {
+        "system": "系统",
+        "user": "个人"
+      },
+      "toasts": {
+        "created": "环境变量已创建",
+        "updated": "环境变量已更新",
+        "deleted": "环境变量已删除",
+        "error": "操作失败，请稍后重试",
+        "refreshed": "环境变量已刷新",
+        "keyRequired": "变量名不能为空"
+      }
+    },
+    "tags": {
+      "system": "系统预设",
+      "user": "我的技能"
+    },
+    "actions": {
+      "processing": "处理中..."
     },
     "scheduledTasks": {
       "title": "定时任务",
@@ -188,6 +235,42 @@
           "name": "Data Visualization 数据可视化",
           "description": "从数据集创建图表，以获得更好的洞察力。"
         }
+      }
+    },
+    "mcpLibrary": {
+      "header": {
+        "title": "MCP 服务器",
+        "subtitle": "管理所有 Model Context Protocol 集成",
+        "settings": "全局设置"
+      },
+      "status": {
+        "enabled": "已启用",
+        "disabled": "未启用"
+      },
+      "envRequired": "需配置密钥",
+      "descriptionFallback": "暂无描述",
+      "empty": "暂时没有 MCP 预设",
+      "actions": {
+        "enable": "启用",
+        "disable": "停用",
+        "settings": "设置"
+      },
+      "sections": {
+        "status": "运行状态",
+        "statusHint": "切换此 MCP 服务器的启用状态",
+        "envVars": "环境变量",
+        "envVarsHint": "填写此预设需要的 API Key 或密钥"
+      },
+      "fields": {
+        "transport": "传输协议",
+        "category": "分类",
+        "version": "版本",
+        "source": "来源"
+      },
+      "toasts": {
+        "enabled": "MCP 服务器已启用",
+        "disabled": "MCP 服务器已停用",
+        "error": "操作失败，请稍后重试"
       }
     }
   },

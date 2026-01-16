@@ -1,11 +1,10 @@
 "use client";
 
-import { ArrowLeft, Puzzle } from "lucide-react";
+import { ArrowLeft, Search } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 import { useT } from "@/lib/i18n/client";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator";
 
 export function SkillsHeader() {
   const { t } = useT("translation");
@@ -22,18 +21,17 @@ export function SkillsHeader() {
         >
           <ArrowLeft className="size-5" />
         </Button>
-        <div className="flex items-center justify-center p-2 rounded-lg bg-muted">
-          <Puzzle className="size-5 text-foreground" />
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-lg font-bold tracking-tight">
-            {t("library.skillsPage.header.title")}
-          </span>
-          <Separator orientation="vertical" className="h-4" />
-          <span className="text-sm text-muted-foreground">
-            {t("library.skillsPage.header.subtitle")}
-          </span>
-        </div>
+        <span className="text-lg font-bold tracking-tight">
+          {t("library.skillsPage.header.title", "Skills 管理")}
+        </span>
+      </div>
+
+      {/* Right: Action Buttons */}
+      <div className="flex items-center gap-2">
+        <Button variant="ghost" size="sm" className="gap-2">
+          <Search className="size-4" />
+          {t("library.skillsPage.header.discover", "发现技能")}
+        </Button>
       </div>
     </header>
   );

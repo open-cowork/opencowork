@@ -10,20 +10,11 @@ import {
 } from "@/components/ui/hover-card";
 import { Separator } from "@/components/ui/separator";
 
-import { useUserAccount } from "@/features/user/hooks/use-user-account";
-
 interface CreditsPopoverProps {
   trigger: React.ReactNode;
-  // Optional override or initial data
-  initialCredits?: number;
 }
 
-export function CreditsPopover({
-  trigger,
-  initialCredits,
-}: CreditsPopoverProps) {
-  const { profile, credits, isLoading } = useUserAccount();
-
+export function CreditsPopover({ trigger }: CreditsPopoverProps) {
   return (
     <HoverCard openDelay={200}>
       <HoverCardTrigger asChild>{trigger}</HoverCardTrigger>
@@ -35,9 +26,7 @@ export function CreditsPopover({
         <div className="flex flex-col">
           {/* Header Section */}
           <div className="flex items-center justify-between p-5 pb-4">
-            <h3 className="text-xl font-semibold tracking-tight">
-              {isLoading ? "..." : profile?.planName}
-            </h3>
+            <h3 className="text-xl font-semibold tracking-tight">专业版</h3>
           </div>
 
           <Separator className="bg-border/50 border-dashed" />
@@ -52,16 +41,12 @@ export function CreditsPopover({
                   <span className="text-sm font-medium">积分</span>
                 </div>
                 <span className="text-xl font-bold tracking-tight">
-                  {isLoading
-                    ? "..."
-                    : (credits?.total ?? initialCredits)?.toLocaleString()}
+                  余量无限
                 </span>
               </div>
               <div className="flex items-center justify-between text-xs text-muted-foreground/60 pl-6">
                 <span>免费积分</span>
-                <span>
-                  {isLoading ? "..." : credits?.free.toLocaleString()}
-                </span>
+                <span>9999</span>
               </div>
             </div>
 
@@ -72,13 +57,10 @@ export function CreditsPopover({
                   <RefreshCw className="size-4" />
                   <span className="text-sm font-medium">每日刷新积分</span>
                 </div>
-                <span className="text-xl font-bold tracking-tight">
-                  {isLoading ? "..." : credits?.dailyRefreshCurrent}
-                </span>
+                <span className="text-xl font-bold tracking-tight">9999</span>
               </div>
               <div className="text-xs text-muted-foreground/60 pl-6">
-                每天 {isLoading ? "..." : credits?.refreshTime} 刷新为{" "}
-                {isLoading ? "..." : credits?.dailyRefreshMax}
+                每天 00:00 刷新为 9999
               </div>
             </div>
           </div>

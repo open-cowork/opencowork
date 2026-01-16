@@ -65,12 +65,21 @@ export function ChatMessageList({ messages, isTyping }: ChatMessageListProps) {
     };
   }, [checkScrollPosition]);
 
+  const prevIsTypingRef = React.useRef(isTyping);
+
   // Auto-scroll to bottom when new messages arrive (only if user is not scrolling)
   React.useEffect(() => {
     const hasNewMessages = messages.length > lastMessageCountRef.current;
-    lastMessageCountRef.current = messages.length;
+    const isTypingStarted = isTyping && !prevIsTypingRef.current;
 
-    if (scrollRef.current && !isUserScrolling) {
+    lastMessageCountRef.current = messages.length;
+    prevIsTypingRef.current = isTyping;
+
+    if (
+      scrollRef.current &&
+      !isUserScrolling &&
+      (hasNewMessages || isTypingStarted)
+    ) {
       scrollRef.current.scrollIntoView({ behavior: "smooth" });
     }
 
@@ -99,7 +108,11 @@ export function ChatMessageList({ messages, isTyping }: ChatMessageListProps) {
         <div className="px-6 py-6 space-y-4 w-full min-w-0 max-w-full">
           {messages.map((message) =>
             message.role === "user" ? (
-              <UserMessage key={message.id} content={message.content} />
+              <UserMessage
+                key={message.id}
+                content={message.content}
+                attachments={message.attachments}
+              />
             ) : (
               <AssistantMessage key={message.id} message={message} />
             ),

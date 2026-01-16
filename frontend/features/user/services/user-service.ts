@@ -2,7 +2,7 @@ import type { UserProfile, UserCredits } from "@/features/user/types";
 
 const DEFAULT_USER_PROFILE: UserProfile = {
   id: "default-user",
-  email: "user@opencowork.com",
+  email: "user@poco.com",
   avatar: "",
   plan: "free",
   planName: "免费",

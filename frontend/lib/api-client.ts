@@ -60,7 +60,7 @@ export const API_ENDPOINTS = {
   // Other
   projects: "/projects",
   project: (projectId: string) => `/projects/${projectId}`,
-  skills: "/skills",
+  skills: "/skill-presets",
   health: "/health",
   root: "/",
 };
@@ -75,20 +75,20 @@ export function getApiBaseUrl() {
 }
 
 async function resolveAuthToken(): Promise<string | null> {
-  // TODO: 暂时跳过服务端的 cookie token 获取，后续实现认证时再启用
-  // if (typeof window === "undefined") {
-  //   try {
-  //     const { cookies } = await import("next/headers");
-  //     const cookieStore = await cookies();
-  //     return (
-  //       cookieStore.get("access_token")?.value ||
-  //       cookieStore.get("token")?.value ||
-  //       null
-  //     );
-  //   } catch {
-  //     return null;
-  //   }
-  // }
+  // TODO: add token support
+  if (typeof window === "undefined") {
+    try {
+      const { cookies } = await import("next/headers");
+      const cookieStore = await cookies();
+      return (
+        cookieStore.get("access_token")?.value ||
+        cookieStore.get("token")?.value ||
+        null
+      );
+    } catch {
+      return null;
+    }
+  }
 
   if (typeof window === "undefined") {
     return null;
@@ -122,10 +122,15 @@ export async function apiFetch<T>(
   endpoint: string,
   options: ApiFetchOptions = {},
 ): Promise<T> {
-  const url = `${getApiBaseUrl()}${API_PREFIX}${endpoint}`;
-  console.log("url", url);
+  const baseUrl = getApiBaseUrl();
+  const fullUrl = `${baseUrl}${API_PREFIX}${endpoint}`;
+
+  console.log(
+    `%c[API] ${options.method || "GET"} ${endpoint}`,
+    "color: #0ea5e9; font-weight: bold;",
+  );
+
   const headers = new Headers(options.headers);
-  console.log("headers", headers);
 
   if (!headers.has("Content-Type") && !(options.body instanceof FormData)) {
     headers.set("Content-Type", "application/json");
@@ -136,7 +141,7 @@ export async function apiFetch<T>(
     headers.set("Authorization", `Bearer ${token}`);
   }
 
-  const response = await fetch(url, {
+  const response = await fetch(fullUrl, {
     ...options,
     headers,
     body: normalizeBody(options.body),
@@ -151,12 +156,25 @@ export async function apiFetch<T>(
       typeof payload === "object" && payload && "message" in payload
         ? String((payload as { message?: string }).message)
         : response.statusText;
+
+    console.log(
+      `%c[API] Error ${endpoint}`,
+      "color: #ef4444; font-weight: bold;",
+      { status: response.status, message, payload },
+    );
+
     throw new ApiError(
       message || "API request failed",
       response.status,
       payload,
     );
   }
+
+  console.log(
+    `%c[API] Success ${endpoint}`,
+    "color: #22c55e; font-weight: bold;",
+    payload,
+  );
 
   if (typeof payload === "object" && payload && "data" in payload) {
     const wrapped = payload as ApiResponse<T>;

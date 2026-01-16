@@ -1,7 +1,11 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import { sendMessageAction } from "@/features/chat/actions/session-actions";
 import { getMessagesAction } from "@/features/chat/actions/query-actions";
-import type { ChatMessage, ExecutionSession } from "@/features/chat/types";
+import type {
+  ChatMessage,
+  ExecutionSession,
+  InputFile,
+} from "@/features/chat/types";
 
 interface UseChatMessagesOptions {
   session: ExecutionSession | null;
@@ -14,7 +18,7 @@ interface UseChatMessagesReturn {
   isLoadingHistory: boolean;
   isTyping: boolean;
   showTypingIndicator: boolean;
-  sendMessage: (content: string) => Promise<void>;
+  sendMessage: (content: string, attachments?: InputFile[]) => Promise<void>;
 }
 
 /**
@@ -85,7 +89,7 @@ export function useChatMessages({
 
   // Send message and immediately fetch updated messages
   const sendMessage = useCallback(
-    async (content: string) => {
+    async (content: string, attachments?: InputFile[]) => {
       if (!session?.session_id) return;
 
       const sessionId = session.session_id;
@@ -99,12 +103,13 @@ export function useChatMessages({
         content,
         status: "sent",
         timestamp: new Date().toISOString(),
+        attachments,
       };
 
       setMessages((prev) => [...prev, newMessage]);
 
       try {
-        await sendMessageAction({ sessionId, content });
+        await sendMessageAction({ sessionId, content, attachments });
         console.log("[Chat] Message sent successfully");
 
         // Fetch latest messages immediately to confirm sync
@@ -150,11 +155,19 @@ export function useChatMessages({
     fetchMessages();
 
     // Setup polling
-    // Poll always to ensure consistent state
     let interval: NodeJS.Timeout;
 
-    if (session.session_id) {
+    const isTerminal = ["completed", "failed", "stopped"].includes(
+      session.status,
+    );
+
+    if (session.session_id && !isTerminal) {
       interval = setInterval(fetchMessages, pollingInterval);
+    } else if (session.session_id && isTerminal) {
+      console.log(
+        `%c [Message Polling] Stopped for session ${session.session_id}`,
+        "color: #f59e0b; font-weight: bold;",
+      );
     }
 
     return () => {

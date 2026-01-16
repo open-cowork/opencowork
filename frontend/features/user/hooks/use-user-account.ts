@@ -1,14 +1,13 @@
-import { useState, useEffect } from "react";
-import {
-  getUserCreditsAction,
-  getUserProfileAction,
-} from "@/features/user/actions/user-actions";
+import { useState } from "react";
 import type { UserProfile, UserCredits } from "@/features/user/types";
 
 export function useUserAccount() {
-  const [profile, setProfile] = useState<UserProfile | null>(null);
-  const [credits, setCredits] = useState<UserCredits | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [profile, _setProfile] = useState<UserProfile | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [credits, _setCredits] = useState<UserCredits | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const [isLoading, _setIsLoading] = useState(true);
   // // TODO: User API temporarily disabled
   // useEffect(() => {
   //   const fetchUserData = async () => {

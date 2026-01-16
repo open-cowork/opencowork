@@ -41,23 +41,15 @@ export interface PanelHeaderProps {
    * @default "text-foreground"
    */
   iconClassName?: string;
+  /**
+   * Optional click handler for the icon
+   */
+  onIconClick?: () => void;
 }
 
 /**
  * PanelHeader Component
- *
- * A reusable panel header component with an icon, title, description, and optional action.
- * Used across chat, home, and library pages for consistent UI.
- *
- * @example
- * ```tsx
- * <PanelHeader
- *   icon={MessageSquare}
- *   title="Chat Session"
- *   description="3 messages"
- *   action={<Button variant="ghost" size="icon"><MoreVertical /></Button>}
- * />
- * ```
+ * ...
  */
 export function PanelHeader({
   icon: Icon,
@@ -68,6 +60,7 @@ export function PanelHeader({
   titleClassName,
   showIcon = true,
   iconClassName = "text-foreground",
+  onIconClick,
 }: PanelHeaderProps) {
   return (
     <div
@@ -79,9 +72,12 @@ export function PanelHeader({
       <div className="flex items-center gap-3">
         {Icon && showIcon && (
           <div
+            onClick={onIconClick}
             className={cn(
               "flex h-9 w-9 items-center justify-center rounded-lg bg-muted",
               iconClassName,
+              onIconClick &&
+                "cursor-pointer hover:bg-muted/80 active:bg-muted/90",
             )}
           >
             <Icon className="h-5 w-5" />

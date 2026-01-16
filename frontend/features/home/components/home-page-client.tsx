@@ -15,30 +15,18 @@ import { HomeHeader } from "./home-header";
 import { TaskComposer } from "./task-composer";
 import { ConnectorsBar } from "./connectors-bar";
 import { createSessionAction } from "@/features/chat/actions/session-actions";
+import type { InputFile } from "@/features/chat/types/api/session";
 
 import { SettingsDialog } from "@/features/settings/components/settings-dialog";
-import type { ProjectItem, TaskHistoryItem } from "@/features/projects/types";
 
-interface HomePageClientProps {
-  initialProjects: ProjectItem[];
-  initialTaskHistory: TaskHistoryItem[];
-}
-
-export function HomePageClient({
-  initialProjects,
-  initialTaskHistory,
-}: HomePageClientProps) {
+export function HomePageClient() {
   const { t } = useT("translation");
   const router = useRouter();
 
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
 
-  const { projects, addProject } = useProjects({
-    initialProjects,
-  });
-  const { taskHistory, addTask, removeTask, moveTask } = useTaskHistory({
-    initialTasks: initialTaskHistory,
-  });
+  const { projects, addProject } = useProjects({});
+  const { taskHistory, addTask, removeTask, moveTask } = useTaskHistory({});
 
   const [inputValue, setInputValue] = React.useState("");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -55,6 +43,8 @@ export function HomePageClient({
     setIsSettingsOpen(true);
   }, []);
 
+  const [attachments, setAttachments] = React.useState<InputFile[]>([]);
+
   const handleSendTask = React.useCallback(async () => {
     if (!inputValue.trim() || isSubmitting) return;
 
@@ -64,7 +54,12 @@ export function HomePageClient({
     try {
       // 1. Call create session API
       console.log(inputValue);
-      const session = await createSessionAction({ prompt: inputValue });
+      const session = await createSessionAction({
+        prompt: inputValue,
+        config: {
+          input_files: attachments.length > 0 ? attachments : undefined,
+        },
+      });
       console.log("session", session);
       const sessionId = session.sessionId;
       console.log("sessionId", sessionId);
@@ -81,6 +76,7 @@ export function HomePageClient({
 
       console.log("[Home] Navigating to chat session:", sessionId);
       setInputValue("");
+      setAttachments([]);
 
       // 4. Navigate to the chat page
       router.push(`/chat/${sessionId}`);
@@ -89,7 +85,7 @@ export function HomePageClient({
     } finally {
       setIsSubmitting(false);
     }
-  }, [addTask, inputValue, isSubmitting, router]);
+  }, [addTask, attachments, inputValue, isSubmitting, router]);
 
   const handleCreateProject = React.useCallback(
     (name: string) => {
@@ -145,6 +141,9 @@ export function HomePageClient({
                 onChange={setInputValue}
                 onSend={handleSendTask}
                 isSubmitting={isSubmitting}
+                onAttachmentsChange={(files: InputFile[]) =>
+                  setAttachments((prev) => [...prev, ...files])
+                }
               />
 
               <ConnectorsBar />

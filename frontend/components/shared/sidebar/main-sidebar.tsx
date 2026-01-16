@@ -307,7 +307,7 @@ export function MainSidebar({
                 onClick={() => router.push("/")}
                 className="text-sm font-semibold tracking-tight text-sidebar-foreground group-data-[collapsible=icon]:hidden cursor-pointer hover:opacity-80 transition-opacity"
               >
-                OpenCoWork
+                Poco
               </span>
             </div>
             <Button
@@ -355,9 +355,12 @@ export function MainSidebar({
                         }}
                         className={cn(
                           "h-[36px] min-w-0 max-w-[calc(var(--sidebar-width)-16px)] w-full justify-start gap-3 rounded-[10px] px-3 py-[7.5px] text-muted-foreground transition-colors hover:bg-sidebar-accent group-data-[collapsible=icon]:w-[var(--sidebar-width-icon)] group-data-[collapsible=icon]:max-w-[var(--sidebar-width-icon)] group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:px-0",
-                          isDisabled && "opacity-50 cursor-not-allowed hover:bg-transparent",
+                          isDisabled &&
+                            "opacity-50 cursor-not-allowed hover:bg-transparent",
                         )}
-                        tooltip={isDisabled ? `${t(labelKey)} (暂不可用)` : t(labelKey)}
+                        tooltip={
+                          isDisabled ? `${t(labelKey)} (暂不可用)` : t(labelKey)
+                        }
                       >
                         <Icon className="size-4 shrink-0" />
                         <span className="text-sm truncate group-data-[collapsible=icon]:hidden">

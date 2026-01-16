@@ -1,7 +1,7 @@
 /**
  * LocalStorage封装，带类型安全和错误处理
  */
-const PREFIX = "opencowork_";
+const PREFIX = "poco_";
 
 export type StorageKey =
   | "session_prompt"
@@ -54,7 +54,7 @@ export function removeLocalStorage(key: StorageKey): void {
 }
 
 /**
- * 清空所有OpenCoWork相关的localStorage数据
+ * 清空所有Poco相关的localStorage数据
  */
 export function clearLocalStorage(): void {
   if (typeof window === "undefined") return;

@@ -15,33 +15,22 @@ import { ProjectHeader } from "@/features/projects/components/project-header";
 import { KeyboardHints } from "@/features/home/components/keyboard-hints";
 import { QuickActions } from "@/features/home/components/quick-actions";
 import { TaskComposer } from "@/features/home/components/task-composer";
-import type { ProjectItem, TaskHistoryItem } from "@/features/projects/types";
 
 interface ProjectPageClientProps {
   projectId: string;
-  initialProjects: ProjectItem[];
-  initialTaskHistory: TaskHistoryItem[];
 }
 
-export function ProjectPageClient({
-  projectId,
-  initialProjects,
-  initialTaskHistory,
-}: ProjectPageClientProps) {
+export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
   const { t } = useT("translation");
   const router = useRouter();
 
-  const { projects, addProject } = useProjects({
-    initialProjects,
-  });
+  const { projects, addProject } = useProjects({});
   const currentProject = React.useMemo(
     () => projects.find((p) => p.id === projectId) || projects[0],
     [projects, projectId],
   );
 
-  const { taskHistory, addTask, removeTask, moveTask } = useTaskHistory({
-    initialTasks: initialTaskHistory,
-  });
+  const { taskHistory, addTask, removeTask, moveTask } = useTaskHistory({});
 
   const [inputValue, setInputValue] = React.useState("");
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);

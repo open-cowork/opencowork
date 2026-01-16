@@ -1,5 +1,5 @@
 {
-  "welcome": "Welcome to OpenCoWork",
+  "welcome": "Welcome to Poco",
   "description": "A multi-service AI agent execution platform",
   "home": "Home",
   "language": "Language",
@@ -18,14 +18,14 @@
     "rename": "Rename",
     "moveToProject": "Move to project",
     "delete": "Delete",
-    "shareTitle": "Share OpenCoWork with friends",
+    "shareTitle": "Share Poco with friends",
     "shareDesc": "Get 500 points each",
     "user": "User",
     "removeFromProject": "Remove from project",
     "plan": "Pro Plan"
   },
   "header": {
-    "workspace": "OpenCoWork 1.0",
+    "workspace": "Poco 1.0",
     "switchWorkspace": "Switch workspace",
     "notifications": "Notifications",
     "more": "More"
@@ -37,7 +37,7 @@
     "voiceInput": "Voice input",
     "send": "Send",
     "placeholder": "Assign a task or ask any question",
-    "tools": "Connect your tools to OpenCoWork"
+    "tools": "Connect your tools to Poco"
   },
   "prompts": {
     "createSlides": "Create slides",
@@ -136,7 +136,12 @@
       "feature1": "Rich skill library",
       "feature2": "One-click installation",
       "feature3": "Custom configuration",
-      "action": "Browse Skills"
+      "action": "Browse Skills",
+      "install": "Install",
+      "uninstall": "Uninstall",
+      "installed": "Installed",
+      "notInstalled": "Not installed",
+      "hasConfig": "Configurable"
     },
     "mcpInstall": {
       "title": "MCP Install",
@@ -145,6 +150,48 @@
       "feature2": "Visual management",
       "feature3": "Real-time monitoring",
       "action": "Manage Servers"
+    },
+    "envVars": {
+      "title": "Environment Variables",
+      "description": "Store API keys and secrets used by skills and MCP servers.",
+      "copied": "Copied to clipboard",
+      "copy": "Copy",
+      "copyError": "Copy failed",
+      "valuePlaceholder": "Enter value",
+      "required": "Required",
+      "secretLabel": "Secret",
+      "save": "Save",
+      "saving": "Saving…",
+      "otherTitle": "Existing variables",
+      "empty": "No environment variables yet",
+      "addTitle": "Add environment variable",
+      "addDescription": "Provide a key/value pair and mark it secret if it is an API key.",
+      "keyLabel": "Key",
+      "valueLabel": "Value",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Optional description",
+      "secretToggle": "Mask value (API key)",
+      "addButton": "Add Variable",
+      "refresh": "Refresh",
+      "scope": {
+        "system": "System",
+        "user": "User"
+      },
+      "toasts": {
+        "created": "Environment variable created",
+        "updated": "Environment variable updated",
+        "deleted": "Environment variable deleted",
+        "error": "Action failed, please retry",
+        "refreshed": "Environment variables refreshed",
+        "keyRequired": "Key cannot be empty"
+      }
+    },
+    "tags": {
+      "system": "Preset",
+      "user": "My Skill"
+    },
+    "actions": {
+      "processing": "Processing…"
     },
     "scheduledTasks": {
       "title": "Scheduled Tasks",
@@ -188,6 +235,42 @@
           "name": "Data Visualization",
           "description": "Create charts and graphs from data sets for better insights."
         }
+      }
+    },
+    "mcpLibrary": {
+      "header": {
+        "title": "MCP Servers",
+        "subtitle": "Manage Model Context Protocol integrations",
+        "settings": "Global Settings"
+      },
+      "status": {
+        "enabled": "Enabled",
+        "disabled": "Disabled"
+      },
+      "envRequired": "Needs env keys",
+      "descriptionFallback": "No description provided",
+      "empty": "No MCP presets available",
+      "actions": {
+        "enable": "Enable",
+        "disable": "Disable",
+        "settings": "Configure"
+      },
+      "sections": {
+        "status": "Server status",
+        "statusHint": "Toggle connection for this MCP server",
+        "envVars": "Environment variables",
+        "envVarsHint": "Provide API keys or secrets required by this preset"
+      },
+      "fields": {
+        "transport": "Transport",
+        "category": "Category",
+        "version": "Version",
+        "source": "Source"
+      },
+      "toasts": {
+        "enabled": "MCP server enabled",
+        "disabled": "MCP server disabled",
+        "error": "Operation failed, please try again"
       }
     }
   },

@@ -1,7 +1,7 @@
 /**
  * SessionStorage封装，带类型安全和错误处理
  */
-const PREFIX = "opencowork_";
+const PREFIX = "poco_";
 
 export type SessionStorageKey =
   | "temp_state"

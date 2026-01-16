@@ -12,6 +12,7 @@ import type {
   TaskEnqueueRequest,
   TaskEnqueueResponse,
   TaskConfig,
+  InputFile,
 } from "@/features/chat/types";
 
 interface MessageContentBlock {
@@ -108,7 +109,9 @@ export const chatService = {
     }
   },
 
-  enqueueTask: async (request: TaskEnqueueRequest): Promise<TaskEnqueueResponse> => {
+  enqueueTask: async (
+    request: TaskEnqueueRequest,
+  ): Promise<TaskEnqueueResponse> => {
     console.log("[enqueueTask] request:", JSON.stringify(request));
     try {
       const result = await apiClient.post<TaskEnqueueResponse>(
@@ -137,12 +140,18 @@ export const chatService = {
   sendMessage: async (
     sessionId: string,
     content: string,
+    attachments?: InputFile[],
   ): Promise<TaskEnqueueResponse> => {
     return chatService.enqueueTask({
       prompt: content,
       session_id: sessionId,
       schedule_mode: "immediate",
+      config: attachments?.length ? { input_files: attachments } : undefined,
     });
+  },
+
+  deleteSession: async (sessionId: string): Promise<void> => {
+    return apiClient.delete(API_ENDPOINTS.session(sessionId));
   },
 
   getMessages: async (sessionId: string): Promise<ChatMessage[]> => {
@@ -152,7 +161,6 @@ export const chatService = {
           id: number;
           role: string;
           content: Record<string, unknown>;
-          text_preview: string | null;
           created_at: string;
           updated_at: string;
         }[]
@@ -240,10 +248,6 @@ export const chatService = {
             (b) => b._type === "TextBlock",
           );
           if (textBlock) textContent = textBlock.text || "";
-        }
-
-        if (!textContent && msg.text_preview) {
-          textContent = msg.text_preview;
         }
 
         if (textContent) {

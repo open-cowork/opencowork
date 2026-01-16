@@ -126,8 +126,23 @@ export function useExecutionSession({
   }, [fetchSession]);
 
   // Adaptive polling while session is active
-  // Poll always to ensure late arriving updates are captured
-  const isSessionActive = !!sessionId;
+  // Poll only when session is active (or initial load)
+  const isSessionActive =
+    !!sessionId &&
+    (!session || ["accepted", "running"].includes(session.status));
+
+  // Log when polling stops
+  useEffect(() => {
+    if (
+      session &&
+      ["completed", "failed", "stopped"].includes(session.status)
+    ) {
+      console.log(
+        `%c[Polling] Stopped for session ${sessionId} (Status: ${session.status})`,
+        "color: #f59e0b; font-weight: bold;",
+      );
+    }
+  }, [session, sessionId]);
 
   const { currentInterval, errorCount, trigger } = useAdaptivePolling({
     callback: fetchSession,

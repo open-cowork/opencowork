@@ -11,6 +11,8 @@ import { Check, Copy } from "lucide-react";
 import type { MessageBlock } from "@/features/chat/types";
 import type { ToolUseBlock, ToolResultBlock } from "@/features/chat/types";
 import { ToolChain } from "./tool-chain";
+import remarkBreaks from "remark-breaks";
+import { cn } from "@/lib/utils";
 
 type CodeProps = {
   inline?: boolean;
@@ -21,10 +23,12 @@ type CodeProps = {
 type LinkProps = {
   children?: React.ReactNode;
   href?: string;
+  ref?: React.Ref<HTMLAnchorElement>;
 };
 
 const PreBlock = ({
   children,
+  className,
   ...props
 }: React.DetailedHTMLProps<
   React.HTMLAttributes<HTMLPreElement>,
@@ -61,7 +65,11 @@ const PreBlock = ({
           )}
         </Button>
       </div>
-      <pre ref={preRef} className="rounded-lg overflow-x-auto" {...props}>
+      <pre
+        ref={preRef}
+        className={cn("rounded-lg overflow-x-auto", className)}
+        {...props}
+      >
         {children}
       </pre>
     </div>
@@ -100,7 +108,7 @@ export function MessageContent({
     return (
       <div className="prose prose-sm dark:prose-invert max-w-none break-words w-full min-w-0 [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_code]:break-words [&_p]:break-words [&_*]:break-words">
         <ReactMarkdown
-          remarkPlugins={[remarkGfm]}
+          remarkPlugins={[remarkGfm, remarkBreaks]}
           rehypePlugins={[rehypeHighlight]}
           components={{
             pre: PreBlock,
@@ -113,15 +121,31 @@ export function MessageContent({
                 </code>
               );
             },
-            a: ({ children, href }: LinkProps) => (
+            a: ({ children, href, ...props }: LinkProps) => (
               <a
                 className="text-foreground underline underline-offset-4 decoration-muted-foreground/30 hover:decoration-foreground transition-colors"
                 target="_blank"
                 rel="noopener noreferrer"
                 href={href}
+                {...props}
               >
                 {children}
               </a>
+            ),
+            h1: ({ children }) => (
+              <h1 className="text-2xl font-bold mb-4 mt-6 text-foreground">
+                {children}
+              </h1>
+            ),
+            h2: ({ children }) => (
+              <h2 className="text-xl font-bold mb-3 mt-5 text-foreground">
+                {children}
+              </h2>
+            ),
+            h3: ({ children }) => (
+              <h3 className="text-lg font-bold mb-2 mt-4 text-foreground">
+                {children}
+              </h3>
             ),
           }}
         >
@@ -171,7 +195,7 @@ export function MessageContent({
               className="prose prose-sm dark:prose-invert max-w-none break-words w-full min-w-0 [&_pre]:whitespace-pre-wrap [&_pre]:break-words [&_code]:break-words [&_p]:break-words [&_*]:break-words"
             >
               <ReactMarkdown
-                remarkPlugins={[remarkGfm]}
+                remarkPlugins={[remarkGfm, remarkBreaks]}
                 rehypePlugins={[rehypeHighlight]}
                 components={{
                   pre: PreBlock,
@@ -184,15 +208,31 @@ export function MessageContent({
                       </code>
                     );
                   },
-                  a: ({ children, href }: LinkProps) => (
+                  a: ({ children, href, ...props }: LinkProps) => (
                     <a
                       className="text-foreground underline underline-offset-4 decoration-muted-foreground/30 hover:decoration-foreground transition-colors"
                       target="_blank"
                       rel="noopener noreferrer"
                       href={href}
+                      {...props}
                     >
                       {children}
                     </a>
+                  ),
+                  h1: ({ children }) => (
+                    <h1 className="text-2xl font-bold mb-4 mt-6 text-foreground">
+                      {children}
+                    </h1>
+                  ),
+                  h2: ({ children }) => (
+                    <h2 className="text-xl font-bold mb-3 mt-5 text-foreground">
+                      {children}
+                    </h2>
+                  ),
+                  h3: ({ children }) => (
+                    <h3 className="text-lg font-bold mb-2 mt-4 text-foreground">
+                      {children}
+                    </h3>
                   ),
                 }}
               >

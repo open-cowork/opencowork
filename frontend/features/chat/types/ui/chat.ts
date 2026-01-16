@@ -1,3 +1,5 @@
+import type { InputFile } from "../api/session";
+
 /**
  * Chat-related UI types (frontend-specific)
  */
@@ -53,6 +55,7 @@ export type ChatMessage = {
     toolCalls?: ToolCall[];
   };
   parentId?: string;
+  attachments?: InputFile[];
 };
 
 export type ChatSession = {

@@ -22,7 +22,7 @@ export function ConnectorsBar() {
       >
         <div className="flex items-center gap-3 text-muted-foreground group-hover:text-foreground transition-colors">
           <Plug className="size-5" />
-          <span className="text-sm">将您的工具连接到 OpenCoWork</span>
+          <span className="text-sm">将您的工具连接到 Poco</span>
         </div>
         <div className="flex items-center gap-2 overflow-x-auto no-scrollbar mask-gradient-right">
           {[

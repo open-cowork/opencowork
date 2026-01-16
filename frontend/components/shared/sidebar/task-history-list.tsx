@@ -4,7 +4,6 @@ import * as React from "react";
 import { useRouter } from "next/navigation";
 import {
   MoreHorizontal,
-  Pencil,
   FolderPlus,
   Trash2,
   GripVertical,
@@ -40,7 +39,6 @@ interface Project {
 interface DraggableTaskProps {
   task: TaskHistoryItem;
   onDeleteTask: (taskId: string) => void;
-  onRenameClick: (task: TaskHistoryItem) => void;
   onMoveClick: (task: TaskHistoryItem) => void;
   isSelectionMode?: boolean;
   isSelected?: boolean;
@@ -54,7 +52,6 @@ interface DraggableTaskProps {
 function DraggableTask({
   task,
   onDeleteTask,
-  onRenameClick,
   onMoveClick,
   isSelectionMode,
   isSelected,
@@ -153,7 +150,7 @@ function DraggableTask({
           <>
             {/* 拖拽手柄 */}
             <div
-              className="size-4 shrink-0 flex items-center justify-center cursor-grab active:cursor-grabbing text-muted-foreground opacity-0 group-hover/menu-item:opacity-50 transition-opacity group-data-[collapsible=icon]:hidden"
+              className="size-4 shrink-0 flex items-center justify-center cursor-grab active:cursor-grabbing text-muted-foreground transition-opacity group-data-[collapsible=icon]:hidden"
               {...listeners}
               onClick={(e) => e.stopPropagation()}
             >
@@ -212,15 +209,6 @@ function DraggableTask({
             <DropdownMenuItem
               onClick={(e) => {
                 e.stopPropagation();
-                onRenameClick(task);
-              }}
-            >
-              <Pencil className="size-4" />
-              <span>{t("sidebar.rename")}</span>
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={(e) => {
-                e.stopPropagation();
                 onMoveClick(task);
               }}
             >
@@ -228,7 +216,6 @@ function DraggableTask({
               <span>{t("sidebar.moveToProject")}</span>
             </DropdownMenuItem>
             <DropdownMenuItem
-              variant="destructive"
               onClick={(e) => {
                 e.stopPropagation();
                 onDeleteTask(task.id);
@@ -271,7 +258,8 @@ export function TaskHistoryList({
   const [selectedTask, setSelectedTask] =
     React.useState<TaskHistoryItem | null>(null);
 
-  const handleRenameClick = (task: TaskHistoryItem) => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _handleRenameClick = (task: TaskHistoryItem) => {
     setSelectedTask(task);
     setRenameDialogOpen(true);
   };
@@ -301,7 +289,6 @@ export function TaskHistoryList({
             key={task.id}
             task={task}
             onDeleteTask={onDeleteTask}
-            onRenameClick={handleRenameClick}
             onMoveClick={handleMoveClick}
             isSelectionMode={isSelectionMode}
             isSelected={selectedTaskIds.has(task.id)}

@@ -6,6 +6,16 @@ import { ArrowUp, Mic, Plus, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { useT } from "@/lib/i18n/client";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  AVAILABLE_CONNECTORS,
+  type ConnectorType,
+} from "@/features/home/model/connectors";
 
 interface ChatInputProps {
   value: string;
@@ -37,7 +47,11 @@ export function ChatInput({
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
-      if (e.nativeEvent.isComposing || isComposing.current) {
+      if (
+        e.nativeEvent.isComposing ||
+        isComposing.current ||
+        e.keyCode === 229
+      ) {
         return;
       }
       e.preventDefault();
@@ -60,9 +74,9 @@ export function ChatInput({
               onKeyDown={handleKeyDown}
               onCompositionStart={() => (isComposing.current = true)}
               onCompositionEnd={() => {
-                setTimeout(() => {
+                requestAnimationFrame(() => {
                   isComposing.current = false;
-                }, 0);
+                });
               }}
               placeholder={hasMessages ? "" : t("hero.placeholder")}
               disabled={disabled}
@@ -85,16 +99,53 @@ export function ChatInput({
               >
                 <Plus className="size-4" />
               </Button>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                className="size-9 rounded-xl hover:bg-accent"
-                title={t("hero.tools")}
-                disabled={disabled}
-              >
-                <SlidersHorizontal className="size-4" />
-              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    className="size-9 rounded-xl hover:bg-accent"
+                    title={t("hero.tools")}
+                    disabled={disabled}
+                  >
+                    <SlidersHorizontal className="size-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="start"
+                  className="w-56 max-h-64 overflow-y-auto"
+                >
+                  {(() => {
+                    const order: Record<ConnectorType, number> = {
+                      mcp: 0,
+                      skill: 1,
+                      app: 2,
+                      api: 3,
+                    };
+                    const sortedConnectors = [...AVAILABLE_CONNECTORS].sort(
+                      (a, b) => (order[a.type] ?? 99) - (order[b.type] ?? 99),
+                    );
+
+                    return sortedConnectors.map((connector) => (
+                      <DropdownMenuItem
+                        key={connector.id}
+                        disabled
+                        className="opacity-50 cursor-not-allowed"
+                      >
+                        <div className="flex items-center justify-between w-full">
+                          <div className="flex items-center gap-2">
+                            <connector.icon className="size-4" />
+                            <span>{connector.title}</span>
+                          </div>
+                          {/* TODO: Implement connection logic */}
+                          <span className="text-xs font-medium">连接</span>
+                        </div>
+                      </DropdownMenuItem>
+                    ));
+                  })()}
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
 
             {/* Right side buttons */}

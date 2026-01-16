@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "OpenCoWork",
+  title: "Poco",
   description: "A multi-service AI agent execution platform",
 };
 
