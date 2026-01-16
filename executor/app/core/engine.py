@@ -28,6 +28,10 @@ class AgentExecutor:
         try:
             await self.hooks.run_on_setup(ctx)
 
+            input_hint = self._build_input_hint(config)
+            if input_hint:
+                prompt = f"{input_hint}\n\n{prompt}"
+
             options = ClaudeAgentOptions(
                 cwd=ctx.cwd,
                 resume=self.sdk_session_id,
@@ -51,3 +55,20 @@ class AgentExecutor:
         finally:
             await self.hooks.run_on_teardown(ctx)
             await self.workspace.cleanup()
+
+    def _build_input_hint(self, config: TaskConfig) -> str | None:
+        inputs = config.input_files or []
+        if not inputs:
+            return None
+
+        lines = [
+            "User-uploaded inputs are available under inputs/ (or /workspace/inputs):",
+        ]
+        for item in inputs:
+            path = getattr(item, "path", None) or ""
+            name = getattr(item, "name", None) or ""
+            display = path.lstrip("/") if path else (f"inputs/{name}" if name else "")
+            if display:
+                lines.append(f"- {display}")
+        lines.append("Do not modify files under inputs/ unless the user asks.")
+        return "\n".join(lines)

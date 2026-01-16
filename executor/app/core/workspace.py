@@ -18,6 +18,7 @@ logger = logging.getLogger(__name__)
 DEFAULT_GIT_EXCLUDES = [
     ".claude_data/",
     ".claude/",
+    "inputs/",
 ]
 
 
@@ -26,6 +27,7 @@ class WorkspaceManager:
         self.root_path = Path(mount_path)
         self.work_path = self.root_path
         self.claude_config_path = self.root_path / ".claude"
+        self.inputs_root = self.root_path / "inputs"
 
         self.persistent_claude_data = self.root_path / ".claude_data"
         self.system_claude_home = Path.home() / ".claude"
@@ -36,6 +38,7 @@ class WorkspaceManager:
 
         await self._setup_session_persistence()
         self.work_path = self._prepare_repository(config)
+        self._ensure_inputs_dir(self.work_path)
         self._ensure_git_excludes(self.work_path)
 
     async def _setup_session_persistence(self):
@@ -164,3 +167,23 @@ class WorkspaceManager:
             exclude_path.write_text(content, encoding="utf-8")
         except Exception as exc:
             logger.warning(f"Failed to update git exclude file {exclude_path}: {exc}")
+
+    def _ensure_inputs_dir(self, repo_path: Path) -> None:
+        try:
+            self.inputs_root.mkdir(parents=True, exist_ok=True)
+        except Exception as exc:
+            logger.warning(
+                f"Failed to create inputs directory {self.inputs_root}: {exc}"
+            )
+            return
+
+        if repo_path == self.root_path:
+            return
+
+        link_path = repo_path / "inputs"
+        if link_path.exists():
+            return
+        try:
+            link_path.symlink_to(self.inputs_root)
+        except Exception as exc:
+            logger.warning(f"Failed to link inputs directory {link_path}: {exc}")
