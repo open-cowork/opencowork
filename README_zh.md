@@ -1,7 +1,7 @@
 <div align="center">
-  <img src="assets/logo.JPG" alt="OpenCoWork Logo" width="150" height="150" style="border-radius: 25px;">
+  <img src="assets/logo.JPG" alt="Poco Logo" width="150" height="150" style="border-radius: 25px;">
 
-# OpenCoWork
+# Poco
 
 **云端 AI 智能体执行平台**
 
@@ -18,7 +18,9 @@
 
 ## 简介
 
-OpenCoWork 是一个云端 AI 智能体执行平台，灵感来自 Anthropic 的 [Cowork](https://claude.ai/code)。它通过编排 Claude AI 智能体，在分布式云环境中自主执行各类任务——从代码编写到文件整理、文档撰写、数据分析等。
+Poco 是一个云端 AI 智能体执行平台，灵感来自 Anthropic 的 [Cowork](https://claude.ai/code)。它通过编排 Claude AI 智能体，在分布式云环境中自主执行各类任务——从代码编写到文件整理、文档撰写、数据分析等。
+
+![home](assets/home.png)
 
 ## 什么是 Cowork？
 
@@ -31,7 +33,7 @@ OpenCoWork 是一个云端 AI 智能体执行平台，灵感来自 Anthropic 的
 - **并行工作** — 可排队处理多个任务，无需等待完成
 - **保持控制权** — 执行重要操作前会先确认
 
-OpenCoWork 将这一强大的协作范式带入云端，让团队能够规模化部署 AI 智��体。
+Poco 将这一强大的协作范式带入云端，让团队能够规模化部署 AI 智能体。
 
 ## 核心特性
 
@@ -40,10 +42,17 @@ OpenCoWork 将这一强大的协作范式带入云端，让团队能够规模化
 - 🔄 **并行处理** — 同时排队和执行多个任务
 - 🎯 **进度追踪** — 实时状态更新和执行监控
 - 🔌 **可扩展架构** — 基于钩子的插件系统，支持自定义
+- 📱 **移动友好** — 响应式设计，适配移动设备
+
+![chat](assets/chat.png)
+
+![mcp](assets/mcp.png)
+
+![mobile](assets/mobile.png)
 
 ## 系统架构
 
-OpenCoWork 由四个核心服务协同工作：
+Poco 由四个核心服务协同工作：
 
 | 服务           | 技术                 | 用途                   |
 | -------------- | -------------------- | ---------------------- |
@@ -74,8 +83,8 @@ OpenCoWork 由四个核心服务协同工作：
 
 ```bash
 # 克隆仓库
-git clone https://github.com/yourusername/opencowork.git
-cd opencowork
+git clone https://github.com/yourusername/poco-agent.git
+cd poco-agent
 
 # 安装 Python 依赖（每个服务）
 cd backend && uv sync
@@ -110,5 +119,5 @@ cd frontend && pnpm dev
 ---
 
 <div align="center">
-  <p>Built with ❤️ by the OpenCoWork team</p>
+  <p>Built with ❤️ by the Poco team</p>
 </div>

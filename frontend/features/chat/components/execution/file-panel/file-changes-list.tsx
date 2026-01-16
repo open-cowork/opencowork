@@ -1,0 +1,124 @@
+"use client";
+
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { FileChangeCard } from "./file-change-card";
+import type { FileChange } from "@/features/chat/types";
+
+interface FileChangesListProps {
+  fileChanges?: FileChange[];
+  sessionStatus?: "running" | "accepted" | "completed" | "failed" | "cancelled";
+  onFileClick?: (filePath: string) => void;
+}
+
+/**
+ * Summary statistics for file changes
+ */
+interface FileChangesSummaryProps {
+  fileChanges: FileChange[];
+}
+
+function FileChangesSummary({ fileChanges }: FileChangesSummaryProps) {
+  const summary = fileChanges.reduce(
+    (acc, change) => {
+      switch (change.status) {
+        case "added":
+          acc.added++;
+          break;
+        case "modified":
+          acc.modified++;
+          break;
+        case "deleted":
+          acc.deleted++;
+          break;
+        case "renamed":
+          acc.renamed++;
+          break;
+      }
+      acc.totalLines += (change.added_lines || 0) + (change.deleted_lines || 0);
+      return acc;
+    },
+    { added: 0, modified: 0, deleted: 0, renamed: 0, totalLines: 0 },
+  );
+
+  return (
+    <div className="flex items-center gap-4 px-4 py-3 bg-muted/30 border-b border-border">
+      <div className="flex items-center gap-6 text-sm">
+        <div className="flex items-center gap-2">
+          <span className="text-muted-foreground">总计</span>
+          <span className="font-semibold">{fileChanges.length} 个文件</span>
+        </div>
+
+        {summary.added > 0 && (
+          <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400">
+            <div className="w-2 h-2 rounded-full bg-green-500" />
+            <span>+{summary.added} 新增</span>
+          </div>
+        )}
+
+        {summary.modified > 0 && (
+          <div className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400">
+            <div className="w-2 h-2 rounded-full bg-blue-500" />
+            <span>{summary.modified} 修改</span>
+          </div>
+        )}
+
+        {summary.deleted > 0 && (
+          <div className="flex items-center gap-1.5 text-red-600 dark:text-red-400">
+            <div className="w-2 h-2 rounded-full bg-red-500" />
+            <span>-{summary.deleted} 删除</span>
+          </div>
+        )}
+
+        {summary.renamed > 0 && (
+          <div className="flex items-center gap-1.5 text-purple-600 dark:text-purple-400">
+            <div className="w-2 h-2 rounded-full bg-purple-500" />
+            <span>{summary.renamed} 重命名</span>
+          </div>
+        )}
+
+        {summary.totalLines > 0 && (
+          <div className="ml-auto text-muted-foreground">
+            {summary.totalLines.toLocaleString()} 行变更
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/**
+ * Enhanced scrollable list of file changes with summary
+ */
+export function FileChangesList({
+  fileChanges = [],
+  sessionStatus,
+  onFileClick,
+}: FileChangesListProps) {
+  if (fileChanges.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center text-muted-foreground">
+          <p className="text-sm">暂无文件变更</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex flex-col h-full">
+      <FileChangesSummary fileChanges={fileChanges} />
+      <ScrollArea className="flex-1">
+        <div className="px-4 py-4 space-y-3">
+          {fileChanges.map((change, index) => (
+            <FileChangeCard
+              key={`${change.path}-${index}`}
+              change={change}
+              sessionStatus={sessionStatus}
+              onFileClick={() => onFileClick?.(change.path)}
+            />
+          ))}
+        </div>
+      </ScrollArea>
+    </div>
+  );
+}

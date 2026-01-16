@@ -1,7 +1,7 @@
 <div align="center">
-  <img src="assets/logo.JPG" alt="OpenCoWork Logo" width="150" height="150" style="border-radius: 25px;">
+  <img src="assets/logo.JPG" alt="Poco Logo" width="150" height="150" style="border-radius: 25px;">
 
-# OpenCoWork
+# Poco
 
 **A Cloud-Based AI Agent Execution Platform**
 
@@ -18,7 +18,9 @@
 
 ### Overview
 
-OpenCoWork is a cloud-based AI agent execution platform inspired by Anthropic's [Cowork](https://claude.ai/code). It orchestrates Claude AI agents to perform autonomous tasks beyond coding—organizing files, writing documents, analyzing data, and more—in a distributed cloud environment.
+Poco is a cloud-based AI agent execution platform inspired by Anthropic's [Cowork](https://claude.ai/code). It orchestrates Claude AI agents to perform autonomous tasks beyond coding—organizing files, writing documents, analyzing data, and more—in a distributed cloud environment.
+
+![home](assets/home.png)
 
 ### What is Cowork?
 
@@ -31,7 +33,7 @@ This insight led to **Cowork**, a product that extends Claude's capabilities fro
 - **Works in parallel** — Queue multiple tasks without waiting for completion
 - **Keeps you in control** — Confirms before any important operations
 
-OpenCoWork brings this powerful collaboration paradigm to the cloud, enabling teams to deploy AI agents at scale.
+Poco brings this powerful collaboration paradigm to the cloud, enabling teams to deploy AI agents at scale.
 
 ### Key Features
 
@@ -40,10 +42,17 @@ OpenCoWork brings this powerful collaboration paradigm to the cloud, enabling te
 - 🔄 **Parallel Processing** — Queue and execute multiple tasks concurrently
 - 🎯 **Progress Tracking** — Real-time status updates and execution monitoring
 - 🔌 **Extensible Architecture** — Hook-based plugin system for customization
+- 📱 **Mobile Friendly** — Responsive design for mobile devices
+
+![chat](assets/chat.png)
+
+![mcp](assets/mcp.png)
+
+![mobile](assets/mobile.png)
 
 ### Architecture
 
-OpenCoWork consists of four core services working in harmony:
+Poco consists of four core services working in harmony:
 
 | Service              | Technology           | Purpose                             |
 | -------------------- | -------------------- | ----------------------------------- |
@@ -74,8 +83,8 @@ OpenCoWork consists of four core services working in harmony:
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/opencowork.git
-cd opencowork
+git clone https://github.com/yourusername/poco.git
+cd poco
 
 # Install Python dependencies (for each service)
 cd backend && uv sync
@@ -110,5 +119,5 @@ Inspired by [Anthropic's Cowork](https://claude.ai/code), an AI-powered collabor
 ---
 
 <div align="center">
-  <p>Built with ❤️ by the OpenCoWork team</p>
+  <p>Built with ❤️ by the Poco team</p>
 </div>

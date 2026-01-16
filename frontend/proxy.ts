@@ -5,7 +5,7 @@ import {
   languages,
   cookieName,
   headerName,
-} from "./app/i18n/settings";
+} from "@/lib/i18n/settings";
 
 acceptLanguage.languages(languages);
 

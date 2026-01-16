@@ -1,298 +1,213 @@
-/**
- * API Client for backend communication
- * Unified API layer based on OpenAPI specification
- */
+import { ApiError } from "./errors";
+import type { ApiResponse } from "@/types";
 
-import type {
-  ApiResponse,
-  SessionResponse,
-  SessionCreateRequest,
-  SessionUpdateRequest,
-  MessageResponse,
-  ToolExecutionResponse,
-  UsageResponse,
-  TaskEnqueueRequest,
-  TaskEnqueueResponse,
-  RunResponse,
-  FileNode,
-} from "./api-types";
+export const API_PREFIX = "/api/v1";
 
-// API base URL from environment variable
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+export const API_ENDPOINTS = {
+  // Sessions
+  sessions: "/sessions",
+  sessionsWithTitles: "/sessions/list-with-titles",
+  session: (sessionId: string) => `/sessions/${sessionId}`,
+  sessionState: (sessionId: string) => `/sessions/${sessionId}/state`,
+  sessionMessages: (sessionId: string) => `/sessions/${sessionId}/messages`,
+  sessionToolExecutions: (sessionId: string) =>
+    `/sessions/${sessionId}/tool-executions`,
+  sessionUsage: (sessionId: string) => `/sessions/${sessionId}/usage`,
+  sessionWorkspaceFiles: (sessionId: string) =>
+    `/sessions/${sessionId}/workspace/files`,
+  sessionWorkspaceFile: (sessionId: string, filePath: string) =>
+    `/sessions/${sessionId}/workspace/file?path=${encodeURIComponent(filePath)}`,
 
-/**
- * Generic fetch wrapper with error handling and response unwrapping
- */
-export async function fetchApi<T>(
-  endpoint: string,
-  options?: RequestInit,
-): Promise<T> {
-  const url = `${API_BASE_URL}/api/v1${endpoint}`;
-  const method = options?.method || "GET";
+  // Tasks
+  tasks: "/tasks",
+
+  // Attachments
+  attachmentsUpload: "/attachments/upload",
+
+  // Environment Variables
+  envVars: "/env-vars",
+  envVar: (envVarId: number) => `/env-vars/${envVarId}`,
+
+  // MCP Presets
+  mcpPresets: "/mcp-presets",
+  mcpPreset: (presetId: number) => `/mcp-presets/${presetId}`,
+
+  // MCP Configs (User)
+  mcpConfigs: "/mcp-configs",
+  mcpConfig: (configId: number) => `/mcp-configs/${configId}`,
+
+  // Skill Presets
+  skillPresets: "/skill-presets",
+  skillPreset: (presetId: number) => `/skill-presets/${presetId}`,
+
+  // Skill Installs (User)
+  skillInstalls: "/skill-installs",
+  skillInstall: (installId: number) => `/skill-installs/${installId}`,
+
+  // Callback
+  callback: "/callback",
+  callbackHealth: "/callback/health",
+
+  // Schedules
+  schedules: "/schedules",
+
+  // Messages
+  message: (messageId: number) => `/messages/${messageId}`,
+
+  // Tool Executions
+  toolExecution: (executionId: string) => `/tool-executions/${executionId}`,
+
+  // Other
+  projects: "/projects",
+  project: (projectId: string) => `/projects/${projectId}`,
+  skills: "/skill-presets",
+  health: "/health",
+  root: "/",
+};
+
+export const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
+export function getApiBaseUrl() {
+  if (!API_BASE_URL) {
+    throw new ApiError("API base URL is not configured", 500);
+  }
+  return API_BASE_URL;
+}
+
+async function resolveAuthToken(): Promise<string | null> {
+  // TODO: add token support
+  if (typeof window === "undefined") {
+    try {
+      const { cookies } = await import("next/headers");
+      const cookieStore = await cookies();
+      return (
+        cookieStore.get("access_token")?.value ||
+        cookieStore.get("token")?.value ||
+        null
+      );
+    } catch {
+      return null;
+    }
+  }
+
+  if (typeof window === "undefined") {
+    return null;
+  }
 
   try {
-    const response = await fetch(url, {
-      ...options,
-      headers: {
-        "Content-Type": "application/json",
-        ...options?.headers,
-      },
-    });
-
-    // console.log(`[API] Response: ${response.status} ${response.statusText}`);
-
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status} ${response.statusText}`);
-    }
-
-    const result: ApiResponse<T> = await response.json();
-
-    if (result.data) {
-      // 使用彩色日志增强可读性
-      // 方法名和 endpoint 用蓝色，数据用绿色
-      console.log(
-        `%c[API]%c ${method} ${endpoint}`,
-        "color: #1976d2; font-weight: bold;",
-        "color: inherit;",
-      );
-      console.log(
-        "%c[API] Response Data:",
-        "color: #43a047; font-weight: bold;",
-        result.data,
-      );
-    }
-
-    if (result.code !== 200 && result.code !== 0) {
-      throw new Error(result.message || "API request failed");
-    }
-
-    return result.data as T;
-  } catch (error) {
-    console.error(`[API] Call failed: ${endpoint}`, error);
-    throw error;
+    return (
+      window.localStorage.getItem("access_token") ||
+      window.localStorage.getItem("token") ||
+      null
+    );
+  } catch {
+    return null;
   }
 }
 
-// ============ Session API ============
+function normalizeBody(body: unknown): BodyInit | undefined {
+  if (body === undefined || body === null) return undefined;
+  if (typeof body === "string" || body instanceof FormData) return body;
+  return JSON.stringify(body);
+}
 
-export const sessionApi = {
-  /**
-   * List all sessions
-   * GET /api/v1/sessions
-   */
-  list: async (params?: {
-    user_id?: string;
-    limit?: number;
-    offset?: number;
-  }): Promise<SessionResponse[]> => {
-    const searchParams = new URLSearchParams();
-    if (params?.user_id) searchParams.append("user_id", params.user_id);
-    if (params?.limit) searchParams.append("limit", params.limit.toString());
-    if (params?.offset) searchParams.append("offset", params.offset.toString());
+export type ApiFetchOptions = RequestInit & {
+  next?: {
+    revalidate?: number;
+    tags?: string[];
+  };
+};
 
-    const query = searchParams.toString();
-    return fetchApi<SessionResponse[]>(`/sessions${query ? `?${query}` : ""}`);
-  },
+export async function apiFetch<T>(
+  endpoint: string,
+  options: ApiFetchOptions = {},
+): Promise<T> {
+  const baseUrl = getApiBaseUrl();
+  const fullUrl = `${baseUrl}${API_PREFIX}${endpoint}`;
 
-  /**
-   * Get a single session by ID
-   * GET /api/v1/sessions/{session_id}
-   */
-  get: async (sessionId: string): Promise<SessionResponse> => {
-    return fetchApi<SessionResponse>(`/sessions/${sessionId}`);
-  },
+  console.log(
+    `%c[API] ${options.method || "GET"} ${endpoint}`,
+    "color: #0ea5e9; font-weight: bold;",
+  );
 
-  /**
-   * Create a new session
-   * POST /api/v1/sessions
-   */
-  create: async (request: SessionCreateRequest): Promise<SessionResponse> => {
-    return fetchApi<SessionResponse>("/sessions", {
-      method: "POST",
-      body: JSON.stringify(request),
-    });
-  },
+  const headers = new Headers(options.headers);
 
-  /**
-   * Update a session
-   * PATCH /api/v1/sessions/{session_id}
-   */
-  update: async (
-    sessionId: string,
-    request: SessionUpdateRequest,
-  ): Promise<SessionResponse> => {
-    return fetchApi<SessionResponse>(`/sessions/${sessionId}`, {
-      method: "PATCH",
-      body: JSON.stringify(request),
-    });
-  },
+  if (!headers.has("Content-Type") && !(options.body instanceof FormData)) {
+    headers.set("Content-Type", "application/json");
+  }
 
-  /**
-   * Get messages for a session
-   * GET /api/v1/sessions/{session_id}/messages
-   */
-  getMessages: async (sessionId: string): Promise<MessageResponse[]> => {
-    return fetchApi<MessageResponse[]>(`/sessions/${sessionId}/messages`);
-  },
+  const token = await resolveAuthToken();
+  if (token && !headers.has("Authorization")) {
+    headers.set("Authorization", `Bearer ${token}`);
+  }
 
-  /**
-   * Get tool executions for a session
-   * GET /api/v1/sessions/{session_id}/tool-executions
-   */
-  getToolExecutions: async (
-    sessionId: string,
-  ): Promise<ToolExecutionResponse[]> => {
-    return fetchApi<ToolExecutionResponse[]>(
-      `/sessions/${sessionId}/tool-executions`,
+  const response = await fetch(fullUrl, {
+    ...options,
+    headers,
+    body: normalizeBody(options.body),
+  });
+
+  const contentType = response.headers.get("content-type") || "";
+  const isJson = contentType.includes("application/json");
+  const payload = isJson ? await response.json() : await response.text();
+
+  if (!response.ok) {
+    const message =
+      typeof payload === "object" && payload && "message" in payload
+        ? String((payload as { message?: string }).message)
+        : response.statusText;
+
+    console.log(
+      `%c[API] Error ${endpoint}`,
+      "color: #ef4444; font-weight: bold;",
+      { status: response.status, message, payload },
     );
-  },
 
-  /**
-   * Get usage statistics for a session
-   * GET /api/v1/sessions/{session_id}/usage
-   */
-  getUsage: async (sessionId: string): Promise<UsageResponse> => {
-    return fetchApi<UsageResponse>(`/sessions/${sessionId}/usage`);
-  },
+    throw new ApiError(
+      message || "API request failed",
+      response.status,
+      payload,
+    );
+  }
 
-  /**
-   * Get workspace files for a session
-   * GET /api/v1/sessions/{session_id}/workspace/files
-   */
-  getWorkspaceFiles: async (sessionId: string): Promise<FileNode[]> => {
-    return fetchApi<FileNode[]>(`/sessions/${sessionId}/workspace/files`);
-  },
+  console.log(
+    `%c[API] Success ${endpoint}`,
+    "color: #22c55e; font-weight: bold;",
+    payload,
+  );
 
-  /**
-   * Get workspace files from session state_patch
-   * Alternative method that extracts file_changes from session data
-   */
-  getWorkspaceFilesFromSession: async (
-    sessionId: string,
-  ): Promise<FileNode[]> => {
-    try {
-      const session = await sessionApi.get(sessionId);
-      const fileChanges =
-        session.state_patch?.workspace_state?.file_changes || [];
-
-      // Convert FileChange[] to FileNode[]
-      return fileChanges.map((change) => ({
-        id: change.path,
-        name: change.path.split("/").pop() || change.path,
-        path: change.path,
-        type: "file", // All items in file_changes are files
-        url: sessionApi.getWorkspaceFileUrl(sessionId, change.path),
-      }));
-    } catch (error) {
-      console.error(
-        "[Session API] Failed to get workspace files from session:",
-        error,
-      );
-      return [];
+  if (typeof payload === "object" && payload && "data" in payload) {
+    const wrapped = payload as ApiResponse<T>;
+    if (wrapped.code !== 200 && wrapped.code !== 0) {
+      throw new ApiError(wrapped.message || "API request failed", wrapped.code);
     }
-  },
+    return wrapped.data as T;
+  }
 
-  /**
-   * Get workspace file URL for preview/download
-   * GET /api/v1/sessions/{session_id}/workspace/file?path={path}
-   * Returns redirect URL
-   */
-  getWorkspaceFileUrl: (sessionId: string, filePath: string): string => {
-    return `${API_BASE_URL}/api/v1/sessions/${sessionId}/workspace/file?path=${encodeURIComponent(filePath)}`;
-  },
-};
+  return payload as T;
+}
 
-// ============ Task API ============
-
-export const taskApi = {
-  /**
-   * Enqueue a new task (agent run)
-   * POST /api/v1/tasks
-   */
-  enqueue: async (
-    request: TaskEnqueueRequest,
-  ): Promise<TaskEnqueueResponse> => {
-    return fetchApi<TaskEnqueueResponse>("/tasks", {
+export const apiClient = {
+  get: <T>(endpoint: string, options?: ApiFetchOptions) =>
+    apiFetch<T>(endpoint, { ...options, method: "GET" }),
+  post: <T>(endpoint: string, body?: unknown, options?: ApiFetchOptions) =>
+    apiFetch<T>(endpoint, {
+      ...options,
       method: "POST",
-      body: JSON.stringify(request),
-    });
-  },
-};
-
-// ============ Run API ============
-
-export const runApi = {
-  /**
-   * Get run details
-   * GET /api/v1/runs/{run_id}
-   */
-  get: async (runId: string): Promise<RunResponse> => {
-    return fetchApi<RunResponse>(`/runs/${runId}`);
-  },
-
-  /**
-   * List runs for a session
-   * GET /api/v1/runs/session/{session_id}
-   */
-  listBySession: async (
-    sessionId: string,
-    params?: { limit?: number; offset?: number },
-  ): Promise<RunResponse[]> => {
-    const searchParams = new URLSearchParams();
-    if (params?.limit) searchParams.append("limit", params.limit.toString());
-    if (params?.offset) searchParams.append("offset", params.offset.toString());
-
-    const query = searchParams.toString();
-    return fetchApi<RunResponse[]>(
-      `/runs/session/${sessionId}${query ? `?${query}` : ""}`,
-    );
-  },
-};
-
-// ============ Message API ============
-
-export const messageApi = {
-  /**
-   * Get a message by ID
-   * GET /api/v1/messages/{message_id}
-   */
-  get: async (messageId: number): Promise<MessageResponse> => {
-    return fetchApi<MessageResponse>(`/messages/${messageId}`);
-  },
-};
-
-// ============ Tool Execution API ============
-
-export const toolExecutionApi = {
-  /**
-   * Get a tool execution by ID
-   * GET /api/v1/tool-executions/{execution_id}
-   */
-  get: async (executionId: string): Promise<ToolExecutionResponse> => {
-    return fetchApi<ToolExecutionResponse>(`/tool-executions/${executionId}`);
-  },
-};
-
-// ============ Schedule API ============
-
-export const scheduleApi = {
-  /**
-   * Get schedules (proxy from Executor Manager)
-   * GET /api/v1/schedules
-   */
-  list: async (): Promise<Record<string, unknown>> => {
-    return fetchApi<Record<string, unknown>>("/schedules");
-  },
-};
-
-// ============ Health API ============
-
-export const healthApi = {
-  /**
-   * Check API health
-   * GET /api/v1/health
-   */
-  check: async (): Promise<unknown> => {
-    return fetchApi<unknown>("/health");
-  },
+      body: body as BodyInit | null | undefined,
+    }),
+  patch: <T>(endpoint: string, body?: unknown, options?: ApiFetchOptions) =>
+    apiFetch<T>(endpoint, {
+      ...options,
+      method: "PATCH",
+      body: body as BodyInit | null | undefined,
+    }),
+  put: <T>(endpoint: string, body?: unknown, options?: ApiFetchOptions) =>
+    apiFetch<T>(endpoint, {
+      ...options,
+      method: "PUT",
+      body: body as BodyInit | null | undefined,
+    }),
+  delete: <T>(endpoint: string, options?: ApiFetchOptions) =>
+    apiFetch<T>(endpoint, { ...options, method: "DELETE" }),
 };

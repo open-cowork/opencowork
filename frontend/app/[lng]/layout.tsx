@@ -1,5 +1,5 @@
-import { languages } from "../i18n/settings";
-import { LanguageProvider } from "./language-provider";
+import { languages } from "@/lib/i18n/settings";
+import { LanguageProvider } from "@/components/shared/language-provider";
 
 export function generateStaticParams() {
   return languages.map((lng) => ({ lng }));

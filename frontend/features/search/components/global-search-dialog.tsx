@@ -1,0 +1,159 @@
+"use client";
+
+import * as React from "react";
+import { useRouter } from "next/navigation";
+import {
+  CommandDialog,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import { FileText, Folder, MessageSquare, Loader2 } from "lucide-react";
+import { useT } from "@/lib/i18n/client";
+import { useSearchData } from "@/features/search/hooks/use-search-data";
+
+interface GlobalSearchDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+/**
+ * Global search dialog (Spotlight-like)
+ * Search across tasks, projects, and messages
+ */
+export function GlobalSearchDialog({
+  open,
+  onOpenChange,
+}: GlobalSearchDialogProps) {
+  const { t } = useT("translation");
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = React.useState("");
+  const { tasks, projects, messages, isLoading } = useSearchData();
+
+  const handleSelect = (type: string, id: string) => {
+    onOpenChange(false);
+
+    switch (type) {
+      case "task":
+        router.push(`/chat/${id}`);
+        break;
+      case "project":
+        // TODO: Navigate to project page when implemented
+        router.push(`/chat/new`);
+        break;
+      case "message":
+        // Navigate to chat page and scroll to message
+        router.push(`/chat/${id}`);
+        break;
+    }
+  };
+
+  // Filter tasks by search query
+  const filteredTasks = React.useMemo(
+    () =>
+      tasks.filter(
+        (task) =>
+          searchQuery === "" ||
+          task.title.toLowerCase().includes(searchQuery.toLowerCase()),
+      ),
+    [tasks, searchQuery],
+  );
+
+  // Filter projects by search query
+  const filteredProjects = React.useMemo(
+    () =>
+      projects.filter(
+        (project) =>
+          searchQuery === "" ||
+          project.name.toLowerCase().includes(searchQuery.toLowerCase()),
+      ),
+    [projects, searchQuery],
+  );
+
+  // Filter messages by search query
+  const filteredMessages = React.useMemo(
+    () =>
+      messages.filter(
+        (message) =>
+          searchQuery === "" ||
+          message.content.toLowerCase().includes(searchQuery.toLowerCase()),
+      ),
+    [messages, searchQuery],
+  );
+
+  const hasResults =
+    filteredTasks.length > 0 ||
+    filteredProjects.length > 0 ||
+    filteredMessages.length > 0;
+
+  return (
+    <CommandDialog open={open} onOpenChange={onOpenChange}>
+      <CommandInput
+        placeholder={t("search.placeholder")}
+        value={searchQuery}
+        onValueChange={setSearchQuery}
+      />
+      <CommandList>
+        {isLoading ? (
+          <div className="flex items-center justify-center py-6">
+            <Loader2 className="size-4 animate-spin text-muted-foreground" />
+          </div>
+        ) : !hasResults && searchQuery !== "" ? (
+          <CommandEmpty>{t("search.noResults")}</CommandEmpty>
+        ) : null}
+
+        {filteredTasks.length > 0 && (
+          <CommandGroup heading={t("search.tasks")}>
+            {filteredTasks.map((task) => (
+              <CommandItem
+                key={task.id}
+                onSelect={() => handleSelect("task", task.id)}
+              >
+                <FileText className="size-4 text-muted-foreground" />
+                <span className="flex-1">{task.title}</span>
+                <span className="text-xs text-muted-foreground">
+                  {new Date(task.timestamp).toLocaleDateString()}
+                </span>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        )}
+
+        {filteredProjects.length > 0 && (
+          <CommandGroup heading={t("search.projects")}>
+            {filteredProjects.map((project) => (
+              <CommandItem
+                key={project.id}
+                onSelect={() => handleSelect("project", project.id)}
+              >
+                <Folder className="size-4 text-muted-foreground" />
+                <span className="flex-1">{project.name}</span>
+                {project.taskCount !== undefined && (
+                  <span className="text-xs text-muted-foreground">
+                    {project.taskCount} tasks
+                  </span>
+                )}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        )}
+
+        {filteredMessages.length > 0 && (
+          <CommandGroup heading={t("search.messages")}>
+            {filteredMessages.slice(0, 5).map((message) => (
+              <CommandItem
+                key={message.id}
+                onSelect={() => handleSelect("message", message.chatId)}
+              >
+                <MessageSquare className="size-4 text-muted-foreground" />
+                <span className="line-clamp-1 flex-1">{message.content}</span>
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        )}
+      </CommandList>
+    </CommandDialog>
+  );
+}
