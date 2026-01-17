@@ -1,5 +1,5 @@
 import uuid
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, Optional
 
 from sqlalchemy import ForeignKey, JSON, Boolean, String, Text, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -43,7 +43,7 @@ class AgentSession(Base, TimestampMixin):
         Boolean, default=False, server_default=text("false"), nullable=False
     )
 
-    project: Mapped["Project" | None] = relationship(back_populates="sessions")
+    project: Mapped[Optional["Project"]] = relationship(back_populates="sessions")
     messages: Mapped[list["AgentMessage"]] = relationship(
         back_populates="session", cascade="all, delete-orphan"
     )
