@@ -10,10 +10,15 @@ import {
   Loader2,
   Check,
   Copy,
+  ChevronLeft,
 } from "lucide-react";
 import { useT } from "@/lib/i18n/client";
 import { Button } from "@/components/ui/button";
 import type { DocViewerProps } from "react-doc-viewer";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
+import remarkBreaks from "remark-breaks";
+import rehypeHighlight from "rehype-highlight";
 import { PrismLight as SyntaxHighlighter } from "react-syntax-highlighter";
 import oneDark from "react-syntax-highlighter/dist/esm/styles/prism/one-dark";
 import javascript from "react-syntax-highlighter/dist/esm/languages/prism/javascript";
@@ -46,7 +51,8 @@ import ini from "react-syntax-highlighter/dist/esm/languages/prism/ini";
 import rust from "react-syntax-highlighter/dist/esm/languages/prism/rust";
 import { cn } from "@/lib/utils";
 
-/** Register Prism languages exactly once per bundle */
+import "highlight.js/styles/github-dark.css";
+
 const registerSyntaxLanguages = (() => {
   let registered = false;
   return () => {
@@ -89,7 +95,11 @@ const registerSyntaxLanguages = (() => {
 
 registerSyntaxLanguages();
 
-/** Dynamic import prevents SSR issues and keeps bundle small */
+const dispatchCloseViewer = () => {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new CustomEvent("close-document-viewer"));
+};
+
 const DocViewer = dynamic<DocViewerProps>(
   () => import("./doc-viewer-client").then((m) => m.DocViewerClient),
   {
@@ -107,31 +117,24 @@ const DocViewer = dynamic<DocViewerProps>(
 );
 
 const DOC_VIEWER_TYPE_MAP: Record<string, string> = {
-  pdf: "pdf",
+  bmp: "bmp",
   doc: "doc",
   docx: "docx",
-  xls: "xls",
-  xlsx: "xlsx",
-  ppt: "ppt",
-  pptx: "pptx",
-  txt: "txt",
-  ts: "txt",
-  tsx: "txt",
-  js: "txt",
-  jsx: "txt",
-  py: "txt",
-  json: "txt",
-  htm: "html",
-  html: "html",
   jpg: "jpg",
   jpeg: "jpg",
+  pdf: "pdf",
   png: "png",
-  bmp: "bmp",
+  ppt: "ppt",
+  pptx: "pptx",
+  tiff: "tiff",
+  xls: "xls",
+  xlsx: "xlsx",
 };
 
 const TEXT_LANGUAGE_MAP: Record<string, string> = {
   txt: "text",
   log: "text",
+  csv: "text",
   md: "markdown",
   markdown: "markdown",
   mdown: "markdown",
@@ -144,6 +147,9 @@ const TEXT_LANGUAGE_MAP: Record<string, string> = {
   tsx: "tsx",
   json: "json",
   jsonc: "json",
+  html: "markup",
+  htm: "markup",
+  xml: "markup",
   yml: "yaml",
   yaml: "yaml",
   sh: "bash",
@@ -152,8 +158,6 @@ const TEXT_LANGUAGE_MAP: Record<string, string> = {
   css: "css",
   scss: "scss",
   less: "less",
-  html: "markup",
-  htm: "markup",
   go: "go",
   java: "java",
   rb: "ruby",
@@ -170,14 +174,17 @@ const TEXT_LANGUAGE_MAP: Record<string, string> = {
   hpp: "cpp",
   mm: "objectivec",
   m: "objectivec",
-  sql: "sql",
   ps1: "powershell",
   dockerfile: "docker",
   env: "ini",
   ini: "ini",
   cfg: "ini",
   conf: "ini",
+  toml: "ini",
+  properties: "ini",
   rs: "rust",
+  cjs: "javascript",
+  mjs: "javascript",
 };
 
 const MIME_LANGUAGE_RULES: Array<{ test: RegExp; language: string }> = [
@@ -186,7 +193,7 @@ const MIME_LANGUAGE_RULES: Array<{ test: RegExp; language: string }> = [
   { test: /typescript/i, language: "typescript" },
   { test: /python/i, language: "python" },
   { test: /markdown/i, language: "markdown" },
-  { test: /^text\/plain/i, language: "text" },
+  { test: /^text\/(plain|csv)/i, language: "text" },
   { test: /(shell|bash|zsh)/i, language: "bash" },
   { test: /(yaml|yml)/i, language: "yaml" },
   { test: /(html|xml)/i, language: "markup" },
@@ -200,7 +207,7 @@ const MIME_LANGUAGE_RULES: Array<{ test: RegExp; language: string }> = [
 ];
 
 const VIEW_CLASSNAME =
-  "h-full w-full animate-in fade-in duration-300 [--tw-enter-opacity:1] [--tw-enter-scale:1] [--tw-enter-translate-x:0] [--tw-enter-translate-y:0] overflow-hidden";
+  "h-full w-full max-h-full animate-in fade-in duration-300 [--tw-enter-opacity:1] [--tw-enter-scale:1] [--tw-enter-translate-x:0] [--tw-enter-translate-y:0] overflow-hidden flex flex-col min-h-0";
 
 const DEFAULT_TEXT_LANGUAGE = "text";
 const NO_SOURCE_ERROR = "NO_SOURCE";
@@ -212,13 +219,11 @@ type FileContentState =
 
 interface UseFileTextContentParams {
   file?: FileNode;
-  sessionId?: string;
   fallbackUrl?: string;
 }
 
 const useFileTextContent = ({
   file,
-  sessionId,
   fallbackUrl,
 }: UseFileTextContentParams) => {
   const [state, setState] = React.useState<FileContentState>({
@@ -243,12 +248,16 @@ const useFileTextContent = ({
       setState({ status: "loading" });
       try {
         let text: string | undefined;
-        const urlToFetch = fallbackUrl || file?.url;
 
-        if (urlToFetch) {
-          const response = await fetch(urlToFetch, {
+        if (fallbackUrl) {
+          const isSameOrigin =
+            typeof window !== "undefined" &&
+            new URL(fallbackUrl, window.location.origin).origin ===
+              window.location.origin;
+
+          const response = await fetch(fallbackUrl, {
             signal: controller.signal,
-            credentials: "include",
+            credentials: isSameOrigin ? "include" : "omit",
           });
           if (!response.ok) {
             throw new Error(`HTTP ${response.status}`);
@@ -285,7 +294,7 @@ const useFileTextContent = ({
       isMounted = false;
       controller.abort();
     };
-  }, [file, sessionId, fallbackUrl, refreshKey]);
+  }, [file, fallbackUrl, refreshKey]);
 
   return { state, refetch } as const;
 };
@@ -334,6 +343,130 @@ const getTextLanguage = (ext: string, mime?: string | null) => {
   return undefined;
 };
 
+interface ViewerToolbarProps {
+  file: FileNode;
+  subtitle?: string;
+  resolvedUrl?: string;
+  onCopy?: () => void;
+  copyDisabled?: boolean;
+  copyState?: "idle" | "copied";
+}
+
+const DocumentViewerToolbar = ({
+  file,
+  subtitle,
+  resolvedUrl,
+  onCopy,
+  copyDisabled,
+  copyState = "idle",
+}: ViewerToolbarProps) => (
+  <div className="w-full border-b px-3 py-2 text-xs text-muted-foreground sm:px-4 overflow-hidden">
+    <div className="flex items-center gap-3 min-w-0 overflow-hidden">
+      <Button
+        size="icon"
+        variant="ghost"
+        className="h-8 w-8 shrink-0"
+        onClick={dispatchCloseViewer}
+      >
+        <ChevronLeft className="size-4" />
+      </Button>
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <span
+          className="text-sm font-medium text-foreground min-w-0 max-w-full truncate overflow-hidden"
+          title={file.name || file.path}
+        >
+          {file.name || file.path}
+        </span>
+        {subtitle && (
+          <span className="text-[11px] uppercase tracking-wide text-muted-foreground">
+            {subtitle}
+          </span>
+        )}
+      </div>
+      <div className="ml-auto flex shrink-0 items-center gap-2">
+        {onCopy && (
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-8 w-8"
+            onClick={onCopy}
+            disabled={copyDisabled}
+          >
+            {copyState === "copied" ? (
+              <Check className="size-4" />
+            ) : (
+              <Copy className="size-4" />
+            )}
+          </Button>
+        )}
+        {resolvedUrl && (
+          <Button
+            size="icon"
+            variant="ghost"
+            className="h-8 w-8"
+            onClick={() => {
+              const link = document.createElement("a");
+              link.href = resolvedUrl;
+              link.download = file.name || file.path || "document";
+              link.click();
+            }}
+          >
+            <Download className="size-4" />
+          </Button>
+        )}
+      </div>
+    </div>
+  </div>
+);
+
+const MarkdownPreBlock = ({
+  children,
+  className,
+  ...props
+}: React.DetailedHTMLProps<
+  React.HTMLAttributes<HTMLPreElement>,
+  HTMLPreElement
+> & { node?: unknown }) => {
+  const preRef = React.useRef<HTMLPreElement>(null);
+  const [copied, setCopied] = React.useState(false);
+
+  const onCopy = async () => {
+    if (!preRef.current) return;
+    try {
+      await navigator.clipboard.writeText(preRef.current.textContent ?? "");
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch (error) {
+      console.error("[DocumentViewer] Copy block failed", error);
+    }
+  };
+
+  return (
+    <div className="relative group my-4 overflow-hidden rounded-xl border bg-muted/40">
+      <div className="absolute right-2 top-2 z-10 opacity-0 transition-opacity group-hover:opacity-100">
+        <Button
+          size="icon"
+          variant="ghost"
+          className="h-8 w-8"
+          onClick={onCopy}
+        >
+          {copied ? <Check className="size-4" /> : <Copy className="size-4" />}
+        </Button>
+      </div>
+      <pre
+        ref={preRef}
+        className={cn(
+          "overflow-x-auto whitespace-pre bg-background/80 p-4 text-sm leading-relaxed",
+          className,
+        )}
+        {...props}
+      >
+        {children}
+      </pre>
+    </div>
+  );
+};
+
 interface TextDocumentViewerProps {
   file: FileNode;
   language?: string;
@@ -350,12 +483,12 @@ const TextDocumentViewer = ({
   const { t } = useT("translation");
   const { state, refetch } = useFileTextContent({
     file,
-    sessionId,
     fallbackUrl: resolvedUrl,
   });
   const [copyState, setCopyState] = React.useState<"idle" | "copied">("idle");
   const syntaxLanguage =
-    language === DEFAULT_TEXT_LANGUAGE ? undefined : language;
+    language && language !== DEFAULT_TEXT_LANGUAGE ? language : undefined;
+  const subtitle = (language || DEFAULT_TEXT_LANGUAGE).toUpperCase();
 
   const handleCopy = React.useCallback(async () => {
     if (state.status !== "success") return;
@@ -368,27 +501,15 @@ const TextDocumentViewer = ({
     }
   }, [state]);
 
-  const handleOpen = React.useCallback(() => {
-    if (resolvedUrl) window.open(resolvedUrl, "_blank", "noopener,noreferrer");
-  }, [resolvedUrl]);
-
-  const handleDownload = React.useCallback(() => {
-    if (!resolvedUrl) return;
-    const link = document.createElement("a");
-    link.href = resolvedUrl;
-    link.download = file.name || "document";
-    link.click();
-  }, [file.name, resolvedUrl]);
-
   if (state.status === "idle" || state.status === "loading") {
     return (
       <div
         className={cn(
           VIEW_CLASSNAME,
-          "flex items-center justify-center text-sm text-muted-foreground",
+          "flex min-w-0 items-center justify-center text-sm text-muted-foreground",
         )}
       >
-        <Loader2 className="size-4 mr-2 animate-spin" />
+        <Loader2 className="mr-2 size-4 animate-spin" />
         {t("artifacts.viewer.loadingDoc")}
       </div>
     );
@@ -427,69 +548,209 @@ const TextDocumentViewer = ({
     <div
       className={cn(
         VIEW_CLASSNAME,
-        "bg-card border rounded-xl shadow-sm flex flex-col",
+        "flex min-w-0 flex-col rounded-xl border bg-card shadow-sm",
       )}
     >
-      <div className="border-b px-4 py-2 flex items-center gap-3 text-xs text-muted-foreground">
-        <div className="flex flex-col">
-          <span className="text-sm font-medium text-foreground truncate">
-            {file.name || file.path}
-          </span>
-          <span className="tracking-wide uppercase text-[11px]">
-            {language}
-          </span>
-        </div>
-        <div className="ml-auto flex items-center gap-2">
-          <Button
-            size="icon"
-            variant="ghost"
-            className="h-8 w-8"
-            onClick={handleCopy}
-            disabled={state.status !== "success"}
-          >
-            {copyState === "copied" ? (
-              <Check className="size-4" />
-            ) : (
-              <Copy className="size-4" />
-            )}
-          </Button>
-          {resolvedUrl && (
-            <>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-8 w-8"
-                onClick={handleOpen}
-              >
-                <ExternalLink className="size-4" />
-              </Button>
-              <Button
-                size="icon"
-                variant="ghost"
-                className="h-8 w-8"
-                onClick={handleDownload}
-              >
-                <Download className="size-4" />
-              </Button>
-            </>
-          )}
-        </div>
-      </div>
-      <div className="flex-1 overflow-auto bg-muted/20">
+      <DocumentViewerToolbar
+        file={file}
+        subtitle={subtitle}
+        resolvedUrl={resolvedUrl}
+        onCopy={handleCopy}
+        copyDisabled={state.status !== "success"}
+        copyState={copyState}
+      />
+      <div className="flex-1 overflow-auto min-h-0 p-4">
         <SyntaxHighlighter
           language={syntaxLanguage}
           style={oneDark}
-          wrapLines
+          wrapLines={false}
           showLineNumbers
+          lineNumberStyle={{
+            userSelect: "none",
+            WebkitUserSelect: "none",
+            minWidth: "2.5em",
+            paddingRight: "1em",
+            textAlign: "right",
+            opacity: 0.5,
+          }}
           customStyle={{
             background: "transparent",
             margin: 0,
-            padding: "1.5rem",
+            padding: 0,
             fontSize: "0.85rem",
+            overflow: "visible",
           }}
+          codeTagProps={{
+            style: {
+              background: "transparent",
+            },
+          }}
+          PreTag={({ children, ...props }) => (
+            <pre
+              {...props}
+              style={{
+                background: "transparent",
+                margin: 0,
+                overflow: "visible",
+              }}
+            >
+              {children}
+            </pre>
+          )}
         >
-          {state.status === "success" ? state.content : ""}
+          {state.content}
         </SyntaxHighlighter>
+      </div>
+    </div>
+  );
+};
+
+const MarkdownDocumentViewer = ({
+  file,
+  sessionId,
+  resolvedUrl,
+}: {
+  file: FileNode;
+  sessionId?: string;
+  resolvedUrl?: string;
+}) => {
+  const { t } = useT("translation");
+  const { state, refetch } = useFileTextContent({
+    file,
+    fallbackUrl: resolvedUrl,
+  });
+  const [copyState, setCopyState] = React.useState<"idle" | "copied">("idle");
+
+  const handleCopy = React.useCallback(async () => {
+    if (state.status !== "success") return;
+    try {
+      await navigator.clipboard.writeText(state.content);
+      setCopyState("copied");
+      setTimeout(() => setCopyState("idle"), 1500);
+    } catch (error) {
+      console.error("[DocumentViewer] Copy markdown failed", error);
+    }
+  }, [state]);
+
+  if (state.status === "idle" || state.status === "loading") {
+    return (
+      <div
+        className={cn(
+          VIEW_CLASSNAME,
+          "flex min-w-0 items-center justify-center text-sm text-muted-foreground",
+        )}
+      >
+        <Loader2 className="mr-2 size-4 animate-spin" />
+        {t("artifacts.viewer.loadingDoc")}
+      </div>
+    );
+  }
+
+  if (state.status === "error") {
+    const isSourceError = state.code === "NO_SOURCE";
+    return (
+      <div className={VIEW_CLASSNAME}>
+        <StatusLayout
+          icon={File}
+          title={
+            isSourceError
+              ? t("artifacts.viewer.notSupported")
+              : t("artifacts.viewer.fetchError")
+          }
+          desc={isSourceError ? file.name : state.message}
+          action={
+            !isSourceError && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-4"
+                onClick={refetch}
+              >
+                {t("artifacts.viewer.retry")}
+              </Button>
+            )
+          }
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={cn(
+        VIEW_CLASSNAME,
+        "flex min-w-0 flex-col rounded-xl border bg-card shadow-sm",
+      )}
+    >
+      <DocumentViewerToolbar
+        file={file}
+        subtitle="MARKDOWN"
+        resolvedUrl={resolvedUrl}
+        onCopy={handleCopy}
+        copyDisabled={state.status !== "success"}
+        copyState={copyState}
+      />
+      <div className="flex-1 overflow-auto bg-background min-h-0">
+        <div className="mx-auto w-full max-w-4xl px-4 py-6">
+          <div className="prose prose-sm dark:prose-invert max-w-none break-words [&_*]:break-words">
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm, remarkBreaks]}
+              rehypePlugins={[rehypeHighlight]}
+              components={{
+                pre: MarkdownPreBlock,
+                code: ({ inline, className, children }) =>
+                  inline ? (
+                    <code className="px-1.5 py-0.5 rounded bg-muted text-muted-foreground text-[0.85rem]">
+                      {children}
+                    </code>
+                  ) : (
+                    <code className={className}>{children}</code>
+                  ),
+                a: ({ children, href, ...props }) => (
+                  <a
+                    className="text-primary underline underline-offset-4 decoration-primary/30 hover:decoration-primary"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    href={href}
+                    {...props}
+                  >
+                    {children}
+                  </a>
+                ),
+                h1: ({ children }) => (
+                  <h1 className="text-3xl font-bold mb-6 pb-2 border-b border-border">
+                    {children}
+                  </h1>
+                ),
+                h2: ({ children }) => (
+                  <h2 className="text-2xl font-semibold mb-4 mt-8">
+                    {children}
+                  </h2>
+                ),
+                h3: ({ children }) => (
+                  <h3 className="text-xl font-semibold mb-3 mt-6">
+                    {children}
+                  </h3>
+                ),
+                table: ({ children }) => (
+                  <div className="overflow-x-auto my-6 border rounded-lg">
+                    <table className="w-full border-collapse text-sm">
+                      {children}
+                    </table>
+                  </div>
+                ),
+                blockquote: ({ children }) => (
+                  <blockquote className="border-l-4 border-primary/20 bg-primary/5 pl-4 py-1 italic my-6 rounded-r-sm">
+                    {children}
+                  </blockquote>
+                ),
+                hr: () => <hr className="my-8 border-t border-border/60" />,
+              }}
+            >
+              {state.content}
+            </ReactMarkdown>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -504,12 +765,6 @@ const DocumentViewerComponent = ({
 }) => {
   const { t } = useT("translation");
 
-  const resolvedUrl = React.useMemo(
-    () => ensureAbsoluteUrl(file?.url),
-    [file?.url],
-  );
-  const extension = React.useMemo(() => extractExtension(file), [file]);
-
   if (!file)
     return (
       <div className="h-full flex flex-col items-center justify-center rounded-xl bg-muted/5 p-12 text-center text-muted-foreground">
@@ -523,7 +778,56 @@ const DocumentViewerComponent = ({
       </div>
     );
 
+  if (!file.url)
+    return (
+      <StatusLayout
+        icon={File}
+        title={t("artifacts.viewer.processing")}
+        desc={file.name}
+      />
+    );
+
+  const resolvedUrl = ensureAbsoluteUrl(file.url);
+  const extension = extractExtension(file);
+  const docType = DOC_VIEWER_TYPE_MAP[extension];
   const textLanguage = getTextLanguage(extension, file.mimeType);
+
+  if (docType) {
+    const subtitle = (extension || docType).toUpperCase();
+    const documentUri = resolvedUrl || file.url!;
+    return (
+      <div
+        className={cn(
+          VIEW_CLASSNAME,
+          "flex min-w-0 flex-col rounded-xl border bg-card shadow-sm",
+        )}
+      >
+        <DocumentViewerToolbar
+          file={file}
+          subtitle={subtitle}
+          resolvedUrl={documentUri}
+        />
+        <div className="flex-1 overflow-hidden bg-black/5">
+          <DocViewer
+            key={documentUri}
+            documents={[{ uri: documentUri, fileType: docType }]}
+            config={{ header: { disableHeader: true } }}
+            className="h-full"
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (textLanguage === "markdown") {
+    return (
+      <MarkdownDocumentViewer
+        file={file}
+        sessionId={sessionId}
+        resolvedUrl={resolvedUrl}
+      />
+    );
+  }
 
   if (textLanguage) {
     return (
@@ -536,30 +840,21 @@ const DocumentViewerComponent = ({
     );
   }
 
-  if (!file.url)
-    return (
-      <StatusLayout
-        icon={File}
-        title={t("artifacts.viewer.processing")}
-        desc={file.name}
-      />
-    );
-
-  const docType = DOC_VIEWER_TYPE_MAP[extension];
-
-  if (!docType)
-    return (
-      <StatusLayout
-        icon={File}
-        title={t("artifacts.viewer.notSupported")}
-        desc={file.name}
-        action={
+  return (
+    <StatusLayout
+      icon={File}
+      title={t("artifacts.viewer.notSupported")}
+      desc={file.name}
+      action={
+        resolvedUrl && (
           <div className="flex gap-2 mt-6">
             <Button
               variant="outline"
               size="sm"
               className="gap-2"
-              onClick={() => resolvedUrl && window.open(resolvedUrl, "_blank")}
+              onClick={() =>
+                window.open(resolvedUrl, "_blank", "noopener,noreferrer")
+              }
             >
               <ExternalLink className="size-4" />
               {t("artifacts.viewer.openInNewWindow")}
@@ -569,30 +864,19 @@ const DocumentViewerComponent = ({
               size="sm"
               className="gap-2"
               onClick={() => {
-                if (!resolvedUrl) return;
-                const a = document.createElement("a");
-                a.href = resolvedUrl;
-                a.download = file.name;
-                a.click();
+                const link = document.createElement("a");
+                link.href = resolvedUrl;
+                link.download = file.name || file.path;
+                link.click();
               }}
             >
               <Download className="size-4" />
               {t("artifacts.viewer.downloadOriginal")}
             </Button>
           </div>
-        }
-      />
-    );
-
-  return (
-    <div className={VIEW_CLASSNAME}>
-      <DocViewer
-        key={resolvedUrl ?? file.url}
-        documents={[{ uri: resolvedUrl || file.url!, fileType: docType }]}
-        config={{ header: { disableHeader: true } }}
-        className="h-full"
-      />
-    </div>
+        )
+      }
+    />
   );
 };
 
@@ -617,7 +901,11 @@ const StatusLayout = ({
       <Icon className="size-10 text-muted-foreground" />
     </div>
     <h3 className="font-semibold text-base">{title}</h3>
-    <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{desc}</p>
+    {desc && (
+      <p className="text-xs text-muted-foreground mt-2 leading-relaxed break-words break-all">
+        {desc}
+      </p>
+    )}
     {action}
   </div>
 );

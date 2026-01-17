@@ -99,24 +99,33 @@ export function FileChangeCard({
   };
 
   return (
-    <div className="rounded-lg border border-border bg-card overflow-hidden">
+    <div className="rounded-lg border border-border bg-card overflow-hidden w-full max-w-full">
       {/* Header with path and status */}
-      <div className="flex items-center gap-3 px-4 py-3">
+      <div className="flex items-center gap-3 px-4 py-3 min-w-0 overflow-hidden w-full max-w-full">
         <StatusIcon className={`size-5 shrink-0 ${statusConfig.color}`} />
 
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 overflow-hidden w-full max-w-full">
           {change.status === "renamed" && change.old_path ? (
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium truncate flex-1 text-muted-foreground line-through">
+            <div className="flex items-center gap-2 min-w-0 overflow-hidden w-full max-w-full">
+              <span
+                className="text-sm font-medium flex-1 min-w-0 max-w-full truncate text-muted-foreground line-through"
+                title={change.old_path}
+              >
                 {truncatePath(change.old_path)}
               </span>
               <ArrowRight className="size-3.5 text-muted-foreground shrink-0" />
-              <span className="text-sm font-medium truncate flex-1">
+              <span
+                className="text-sm font-medium flex-1 min-w-0 max-w-full truncate"
+                title={change.path}
+              >
                 {truncatePath(change.path)}
               </span>
             </div>
           ) : (
-            <p className="text-sm font-medium truncate">
+            <p
+              className="text-sm font-medium min-w-0 max-w-full truncate"
+              title={change.path}
+            >
               {truncatePath(change.path)}
             </p>
           )}
@@ -145,22 +154,22 @@ export function FileChangeCard({
 
       {/* Line changes statistics */}
       {hasLineChanges && (
-        <div className="flex items-center gap-4 px-4 py-2 bg-muted/30 text-xs">
+        <div className="flex items-center gap-4 px-4 py-2 bg-muted/30 text-xs min-w-0 overflow-hidden w-full max-w-full">
           {addedLines > 0 && (
-            <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400">
-              <Plus className="size-3" />
-              <span className="font-medium">{addedLines}</span>
-              <span className="text-muted-foreground">行新增</span>
+            <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400 shrink-0">
+              <Plus className="size-3 shrink-0" />
+              <span className="font-medium shrink-0">{addedLines}</span>
+              <span className="text-muted-foreground shrink-0">行新增</span>
             </div>
           )}
           {deletedLines > 0 && (
-            <div className="flex items-center gap-1.5 text-red-600 dark:text-red-400">
-              <Minus className="size-3" />
-              <span className="font-medium">{deletedLines}</span>
-              <span className="text-muted-foreground">行删除</span>
+            <div className="flex items-center gap-1.5 text-red-600 dark:text-red-400 shrink-0">
+              <Minus className="size-3 shrink-0" />
+              <span className="font-medium shrink-0">{deletedLines}</span>
+              <span className="text-muted-foreground shrink-0">行删除</span>
             </div>
           )}
-          <div className="ml-auto text-muted-foreground">
+          <div className="ml-auto text-muted-foreground shrink-0">
             共 {totalChanges} 行变更
           </div>
         </div>
@@ -168,13 +177,15 @@ export function FileChangeCard({
 
       {/* Diff preview (if available) */}
       {change.diff && (
-        <div className="px-4 py-3 border-t border-border">
-          <details className="group">
-            <summary className="cursor-pointer text-xs font-medium text-muted-foreground hover:text-foreground transition-colors">
+        <div className="px-4 py-3 border-t border-border min-w-0 overflow-hidden w-full max-w-full">
+          <details className="group min-w-0 overflow-hidden w-full max-w-full">
+            <summary className="cursor-pointer text-xs font-medium text-muted-foreground hover:text-foreground transition-colors truncate">
               查看差异
             </summary>
-            <pre className="mt-2 text-xs font-mono bg-muted/50 rounded p-2 overflow-x-auto whitespace-pre-wrap break-all max-h-40 overflow-y-auto">
-              <code>{change.diff}</code>
+            <pre className="mt-2 text-xs font-mono bg-muted/50 rounded p-2 overflow-x-auto whitespace-pre max-h-40 overflow-y-auto min-w-0 w-full max-w-full">
+              <code className="block min-w-0 overflow-hidden">
+                {change.diff}
+              </code>
             </pre>
           </details>
         </div>

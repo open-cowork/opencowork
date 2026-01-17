@@ -395,8 +395,8 @@ export const chatService = {
                   ? {
                       url: originalNode.url,
                       mimeType: originalNode.mimeType,
-                      oss_status: (originalNode as any).oss_status,
-                      oss_meta: (originalNode as any).oss_meta,
+                      oss_status: originalNode.oss_status,
+                      oss_meta: originalNode.oss_meta,
                     }
                   : {}),
               };

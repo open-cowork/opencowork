@@ -18,7 +18,6 @@ interface FileSidebarProps {
   files: FileNode[];
   onFileSelect: (file: FileNode) => void;
   selectedFile?: FileNode;
-  isOpen: boolean;
 }
 
 function FileTreeItem({
@@ -112,7 +111,7 @@ function FileTreeItem({
     INDENT_CLASSES[Math.min(level, INDENT_CLASSES.length - 1)];
 
   return (
-    <div className="w-full min-w-0 max-w-full">
+    <div className="w-full min-w-0 max-w-full overflow-hidden">
       <div
         className={cn(
           "flex items-center gap-2 px-2 py-1.5 rounded-md cursor-pointer transition-colors overflow-hidden min-w-0 w-full max-w-full group/item",
@@ -140,7 +139,10 @@ function FileTreeItem({
               : "text-sidebar-foreground/70",
           )}
         </span>
-        <span className="text-sm truncate flex-1 min-w-0" title={node.name}>
+        <span
+          className="text-sm flex-1 min-w-0 max-w-full truncate"
+          title={node.name}
+        >
           {node.name}
         </span>
       </div>
@@ -165,26 +167,30 @@ export function FileSidebar({
   files,
   onFileSelect,
   selectedFile,
-  isOpen,
 }: FileSidebarProps) {
-  if (!isOpen) {
-    return null;
-  }
-
   return (
-    <div className="w-64 border-l border-sidebar-border bg-sidebar flex flex-col">
-      <ScrollArea className="flex-1">
-        <div className="px-2 py-2">
-          {files.map((file) => (
-            <FileTreeItem
-              key={file.id}
-              node={file}
-              onSelect={onFileSelect}
-              selectedId={selectedFile?.id}
-            />
-          ))}
+    <aside className="flex h-full min-h-0 min-w-0 flex-col border-l border-border/60 bg-sidebar/60 text-sidebar-foreground">
+      <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-sidebar-foreground/70">
+        文件列表
+      </div>
+      <ScrollArea className="flex-1 min-h-0">
+        <div className="px-2 py-2 space-y-1 min-w-0 overflow-hidden">
+          {files.length === 0 ? (
+            <p className="text-xs text-sidebar-foreground/60 px-2 py-1">
+              暂无文件
+            </p>
+          ) : (
+            files.map((file) => (
+              <FileTreeItem
+                key={file.id}
+                node={file}
+                onSelect={onFileSelect}
+                selectedId={selectedFile?.id}
+              />
+            ))
+          )}
         </div>
       </ScrollArea>
-    </div>
+    </aside>
   );
 }

@@ -73,6 +73,8 @@ function DraggableTask({
 
   const statusMeta = TASK_STATUS_META[task.status];
 
+  const longPressTriggeredRef = React.useRef(false);
+
   // Handle long press interactions
   const handlePointerDown = (e: React.PointerEvent) => {
     if (isSelectionMode) return;
@@ -80,7 +82,10 @@ function DraggableTask({
     // Only left click
     if (e.button !== 0) return;
 
+    longPressTriggeredRef.current = false;
+
     longPressTimerRef.current = setTimeout(() => {
+      longPressTriggeredRef.current = true;
       onEnableSelectionMode?.(task.id);
     }, 500); // 500ms threshold
   };
@@ -98,6 +103,13 @@ function DraggableTask({
   };
 
   const handleClick = (e: React.MouseEvent) => {
+    if (longPressTriggeredRef.current) {
+      e.preventDefault();
+      e.stopPropagation();
+      longPressTriggeredRef.current = false;
+      return;
+    }
+
     if (isSelectionMode) {
       e.preventDefault();
       onToggleSelection?.(task.id);

@@ -261,6 +261,18 @@ export function MainSidebar({
     setSelectedProjectIds(new Set());
   }, []);
 
+  // Handle Esc key to exit selection mode
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isSelectionMode) {
+        handleCancelSelectionMode();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [isSelectionMode, handleCancelSelectionMode]);
+
   const handleDeleteSelectedItems = React.useCallback(async () => {
     await Promise.all(
       Array.from(selectedTaskIds).map((taskId) =>

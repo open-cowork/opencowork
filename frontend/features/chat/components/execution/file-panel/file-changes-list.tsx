@@ -49,17 +49,17 @@ function FileChangesSummary({ fileChanges }: FileChangesSummaryProps) {
   );
 
   return (
-    <div className="flex items-center gap-4 px-4 py-3 bg-muted/30 border-b border-border">
-      <div className="flex items-center gap-6 text-sm">
-        <div className="flex items-center gap-2">
-          <span className="text-muted-foreground">
-            {t("artifacts.summary.total")}
-          </span>
-          <span className="font-semibold">
-            {fileChanges.length} {t("artifacts.summary.totalFiles", "个文件")}
-          </span>
-        </div>
+    <div className="flex flex-wrap items-center gap-3 px-4 py-3 bg-muted/30 border-b border-border text-sm">
+      <div className="flex items-center gap-2 min-w-0">
+        <span className="text-muted-foreground">
+          {t("artifacts.summary.total")}
+        </span>
+        <span className="font-semibold">
+          {fileChanges.length} {t("artifacts.summary.totalFiles", "个文件")}
+        </span>
+      </div>
 
+      <div className="flex flex-wrap items-center gap-3">
         {summary.added > 0 && (
           <div className="flex items-center gap-1.5 text-green-600 dark:text-green-400">
             <div className="w-2 h-2 rounded-full bg-green-500" />
@@ -95,14 +95,14 @@ function FileChangesSummary({ fileChanges }: FileChangesSummaryProps) {
             </span>
           </div>
         )}
-
-        {summary.totalLines > 0 && (
-          <div className="ml-auto text-muted-foreground">
-            {summary.totalLines.toLocaleString()}{" "}
-            {t("artifacts.summary.lineChanges")}
-          </div>
-        )}
       </div>
+
+      {summary.totalLines > 0 && (
+        <div className="ml-auto text-xs text-muted-foreground">
+          {summary.totalLines.toLocaleString()}{" "}
+          {t("artifacts.summary.lineChanges")}
+        </div>
+      )}
     </div>
   );
 }

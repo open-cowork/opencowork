@@ -1,5 +1,6 @@
 "use client";
 
+import * as React from "react";
 import { FileSidebar } from "./file-sidebar";
 import { DocumentViewer } from "./document-viewer";
 import { ArtifactsHeader } from "./artifacts-header";
@@ -7,6 +8,7 @@ import { FileChangesList } from "./file-changes-list";
 import { ArtifactsEmpty } from "./artifacts-empty";
 import { useArtifacts } from "./hooks/use-artifacts";
 import type { FileChange, FileNode } from "@/features/chat/types";
+import { cn } from "@/lib/utils";
 
 interface ArtifactsPanelProps {
   fileChanges?: FileChange[];
@@ -44,137 +46,111 @@ export function ArtifactsPanel({
   sessionId,
   sessionStatus,
 }: ArtifactsPanelProps) {
-  const {
-    files,
-    selectedFile,
-    viewMode,
-    isSidebarOpen,
-    selectFile,
-    toggleSidebar,
-  } = useArtifacts({ sessionId, sessionStatus });
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(false);
+  const { files, selectedFile, viewMode, selectFile, closeViewer } =
+    useArtifacts({ sessionId, sessionStatus });
+  const mainContent = (() => {
+    if (viewMode === "document") {
+      return <DocumentViewer file={selectedFile} sessionId={sessionId} />;
+    }
 
-  // Document viewer mode
-  if (viewMode === "document") {
+    if (fileChanges.length === 0) {
+      return <ArtifactsEmpty sessionStatus={sessionStatus} />;
+    }
+
     return (
-      <div className="flex flex-col h-full">
-        <ArtifactsHeader
-          selectedFile={selectedFile}
-          isSidebarOpen={isSidebarOpen}
-          onToggleSidebar={toggleSidebar}
-          sessionStatus={sessionStatus}
-          hasFiles={files.length > 0}
-        />
-        <div className="flex-1 min-h-0 flex overflow-hidden">
-          <div className="flex-1 min-w-0 p-4">
-            <DocumentViewer file={selectedFile} sessionId={sessionId} />
-          </div>
-          {isSidebarOpen && (
-            <div className="shrink-0 relative z-10 animate-in slide-in-from-right duration-300 shadow-lg">
-              <FileSidebar
-                files={files}
-                onFileSelect={selectFile}
-                selectedFile={selectedFile}
-                isOpen={isSidebarOpen}
-              />
-            </div>
-          )}
-        </div>
+      <FileChangesList
+        fileChanges={fileChanges}
+        sessionStatus={sessionStatus}
+        onFileClick={(filePath) => {
+          const findFileByPath = (
+            nodes: FileNode[],
+            path: string,
+          ): FileNode | undefined => {
+            for (const node of nodes) {
+              if (node.path === path) return node;
+              if (node.children) {
+                const found = findFileByPath(node.children, path);
+                if (found) return found;
+              }
+            }
+            return undefined;
+          };
+
+          let file = findFileByPath(files, filePath);
+
+          if (!file) {
+            const name = filePath.split("/").pop() || filePath;
+            file = {
+              id: filePath,
+              name,
+              path: filePath,
+              type: "file",
+            };
+          }
+
+          if (file) {
+            selectFile(file);
+          }
+        }}
+      />
+    );
+  })();
+
+  const contentNode =
+    viewMode === "document" ? (
+      <div className="h-full min-h-0 max-h-full overflow-hidden">
+        {mainContent}
+      </div>
+    ) : (
+      <div className="h-full min-h-0 max-h-full overflow-hidden rounded-xl border bg-card">
+        {mainContent}
       </div>
     );
-  }
 
-  // Empty state
-  if (fileChanges.length === 0) {
-    return (
-      <div className="flex flex-col h-full">
-        <ArtifactsHeader
-          title="文件变更"
-          isSidebarOpen={isSidebarOpen}
-          onToggleSidebar={toggleSidebar}
-          sessionStatus={sessionStatus}
-          hasFiles={files.length > 0}
-        />
-        <div className="flex-1 min-h-0 flex overflow-hidden">
-          <div className="flex-1 min-w-0">
-            <ArtifactsEmpty sessionStatus={sessionStatus} />
-          </div>
-          {isSidebarOpen && (
-            <div className="shrink-0 relative z-10 animate-in slide-in-from-right duration-300 shadow-lg">
-              <FileSidebar
-                files={files}
-                onFileSelect={selectFile}
-                selectedFile={selectedFile}
-                isOpen={isSidebarOpen}
-              />
-            </div>
-          )}
-        </div>
-      </div>
-    );
-  }
+  const handleToggleSidebar = React.useCallback(() => {
+    const willCollapse = !isSidebarCollapsed;
+    setIsSidebarCollapsed(willCollapse);
 
-  // File changes list view
+    // If collapsing sidebar and currently in document view, switch to artifacts view
+    if (willCollapse && viewMode === "document") {
+      closeViewer();
+    }
+  }, [isSidebarCollapsed, viewMode, closeViewer]);
+
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex h-full min-h-0 flex-col min-w-0 overflow-hidden">
       <ArtifactsHeader
         title="文件变更"
-        isSidebarOpen={isSidebarOpen}
-        onToggleSidebar={toggleSidebar}
-        sessionStatus={sessionStatus}
-        hasFiles={files.length > 0}
+        selectedFile={selectedFile}
+        isSidebarCollapsed={isSidebarCollapsed}
+        onToggleSidebar={handleToggleSidebar}
       />
-      <div className="flex-1 min-h-0 flex overflow-hidden">
-        <div className="flex-1 min-w-0">
-          <FileChangesList
-            fileChanges={fileChanges}
-            sessionStatus={sessionStatus}
-            onFileClick={(filePath) => {
-              // Find the file node from the file list
-              const findFileByPath = (
-                nodes: FileNode[],
-                path: string,
-              ): FileNode | undefined => {
-                for (const node of nodes) {
-                  if (node.path === path) return node;
-                  if (node.children) {
-                    const found = findFileByPath(node.children, path);
-                    if (found) return found;
-                  }
-                }
-                return undefined;
-              };
-
-              let file = findFileByPath(files, filePath);
-
-              // If file not found in tree (e.g. list not refreshed yet), construct from path
-              if (!file && sessionId) {
-                const name = filePath.split("/").pop() || filePath;
-                // const baseUrl = getApiBaseUrl();
-                // const url = `${baseUrl}${API_PREFIX}${API_ENDPOINTS.sessionWorkspaceFile(sessionId, filePath)}`;
-                file = {
-                  id: filePath,
-                  name,
-                  path: filePath,
-                  type: "file",
-                  // url: undefined, // URL cannot be constructed client-side anymore
-                };
-              }
-
-              if (file) {
-                selectFile(file);
-                // Force open sidebar when previewing file
-                toggleSidebar(true);
-              }
-            }}
-          />
+      <div
+        className={cn(
+          "flex-1 min-h-0 grid grid-cols-1 gap-0 transition-all duration-200 overflow-hidden",
+          isSidebarCollapsed ? "md:grid-cols-1" : "md:grid-cols-[3fr_1fr]",
+        )}
+      >
+        <div className="min-w-0 border-b border-border/60 bg-background md:border-b-0 overflow-hidden">
+          <div className="flex h-full flex-col overflow-hidden">
+            <div className="flex-1 min-h-0 overflow-hidden p-3 sm:p-4">
+              {contentNode}
+            </div>
+          </div>
         </div>
-        {isSidebarOpen && (
-          <div className="shrink-0 relative z-10 animate-in slide-in-from-right duration-300 shadow-lg">
+        {!isSidebarCollapsed && (
+          <div className="min-w-0 border-t border-border/60 bg-muted/30 md:border-t-0">
             <FileSidebar
               files={files}
-              onFileSelect={selectFile}
+              onFileSelect={(file) => {
+                if (viewMode === "document" && file.id === selectedFile?.id) {
+                  closeViewer();
+                  return;
+                }
+                selectFile(file);
+              }}
               selectedFile={selectedFile}
-              isOpen={isSidebarOpen}
             />
           </div>
         )}

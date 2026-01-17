@@ -93,6 +93,8 @@ export function CollapsibleProjectItem({
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false);
   const longPressTimerRef = React.useRef<NodeJS.Timeout | null>(null);
 
+  const longPressTriggeredRef = React.useRef(false);
+
   const isSelected = selectedProjectIds?.has(project.id);
 
   const handleRename = (newName: string) => {
@@ -113,7 +115,11 @@ export function CollapsibleProjectItem({
   const handlePointerDown = (e: React.PointerEvent) => {
     if (isSelectionMode) return;
     if (e.button !== 0) return;
+
+    longPressTriggeredRef.current = false;
+
     longPressTimerRef.current = setTimeout(() => {
+      longPressTriggeredRef.current = true;
       onEnableProjectSelectionMode?.(project.id);
     }, 500);
   };
@@ -173,6 +179,12 @@ export function CollapsibleProjectItem({
           <div
             className="flex flex-1 items-center gap-3 min-w-0"
             onClick={(e) => {
+              if (longPressTriggeredRef.current) {
+                e.preventDefault();
+                e.stopPropagation();
+                longPressTriggeredRef.current = false;
+                return;
+              }
               e.stopPropagation();
               if (isSelectionMode) {
                 onToggleProjectSelection?.(project.id);

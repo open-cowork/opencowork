@@ -19,11 +19,9 @@ interface UseArtifactsReturn {
   files: FileNode[];
   selectedFile: FileNode | undefined;
   viewMode: ViewMode;
-  isSidebarOpen: boolean;
   isRefreshing: boolean;
   selectFile: (file: FileNode) => void;
-  toggleSidebar: (forceOpen?: boolean) => void;
-  setViewMode: (mode: ViewMode) => void;
+  closeViewer: () => void;
   refreshFiles: () => Promise<void>;
 }
 
@@ -45,7 +43,6 @@ export function useArtifacts({
   const [files, setFiles] = useState<FileNode[]>([]);
   const [selectedFile, setSelectedFile] = useState<FileNode | undefined>();
   const [viewMode, setViewMode] = useState<ViewMode>("artifacts");
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   // Track previous session status to detect when session finishes
   const prevStatusRef = useRef<typeof sessionStatus>(undefined);
@@ -118,43 +115,30 @@ export function useArtifacts({
     setViewMode("document");
   }, []);
 
-  // Toggle sidebar and sync view mode
-  const toggleSidebar = useCallback((forceOpen?: boolean) => {
-    if (forceOpen === true) {
-      // Force open sidebar and switch to document mode
-      setViewMode("document");
-      setIsSidebarOpen(true);
-    } else if (forceOpen === false) {
-      // Force close sidebar and switch to artifacts mode
-      setViewMode("artifacts");
-      setIsSidebarOpen(false);
-      setSelectedFile(undefined);
-    } else {
-      // Toggle based on current mode
-      setViewMode((currentMode) => {
-        if (currentMode === "document") {
-          // If in document mode, close sidebar and switch to artifacts
-          setIsSidebarOpen(false);
-          setSelectedFile(undefined);
-          return "artifacts";
-        } else {
-          // If in artifacts mode, open sidebar and switch to document
-          setIsSidebarOpen(true);
-          return "document";
-        }
-      });
-    }
+  const closeViewer = useCallback(() => {
+    setViewMode("artifacts");
+    setSelectedFile(undefined);
   }, []);
+
+  // Listen for close-document-viewer event
+  useEffect(() => {
+    const handleCloseViewer = () => {
+      closeViewer();
+    };
+
+    window.addEventListener("close-document-viewer", handleCloseViewer);
+    return () => {
+      window.removeEventListener("close-document-viewer", handleCloseViewer);
+    };
+  }, [closeViewer]);
 
   return {
     files,
     selectedFile,
     viewMode,
-    isSidebarOpen,
     isRefreshing,
     selectFile,
-    toggleSidebar,
-    setViewMode,
+    closeViewer,
     refreshFiles,
   };
 }
