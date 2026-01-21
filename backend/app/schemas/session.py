@@ -12,6 +12,8 @@ class TaskConfig(BaseModel):
 
     repo_url: str | None = None
     git_branch: str = "main"
+    # MCP server enable/disable toggles (true=enabled, false=disabled).
+    # Servers not in this dict use their default enabled state from user installations.
     mcp_config: dict = Field(default_factory=dict)
     skill_files: dict = Field(default_factory=dict)
     input_files: list[InputFile] = Field(default_factory=list)

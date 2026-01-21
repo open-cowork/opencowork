@@ -12,6 +12,7 @@ import { TaskComposer } from "./task-composer";
 import { ConnectorsBar } from "./connectors-bar";
 import { createSessionAction } from "@/features/chat/actions/session-actions";
 import type { InputFile } from "@/features/chat/types/api/session";
+import type { TaskSendOptions } from "./task-composer";
 
 import { useAppShell } from "@/components/shared/app-shell-context";
 
@@ -27,8 +28,9 @@ export function HomePageClient() {
   useAutosizeTextarea(textareaRef, inputValue);
 
   const handleSendTask = React.useCallback(
-    async (files?: InputFile[]) => {
-      const inputFiles = files ?? [];
+    async (options?: TaskSendOptions) => {
+      const inputFiles = options?.attachments ?? [];
+      const mcpConfig = options?.mcp_config;
       if (
         (inputValue.trim() === "" && inputFiles.length === 0) ||
         isSubmitting
@@ -37,14 +39,22 @@ export function HomePageClient() {
       }
 
       setIsSubmitting(true);
-      console.log("[Home] Sending task:", inputValue);
+      console.log("[Home] Sending task:", inputValue, "MCP config:", mcpConfig);
 
       try {
+        // Build config object
+        const config: Record<string, unknown> = {};
+        if (inputFiles.length > 0) {
+          config.input_files = inputFiles;
+        }
+        if (mcpConfig && Object.keys(mcpConfig).length > 0) {
+          config.mcp_config = mcpConfig;
+        }
+
         // 1. Call create session API
         const session = await createSessionAction({
           prompt: inputValue,
-          config:
-            inputFiles.length > 0 ? { input_files: inputFiles } : undefined,
+          config: Object.keys(config).length > 0 ? config : undefined,
         });
         console.log("session", session);
         const sessionId = session.sessionId;

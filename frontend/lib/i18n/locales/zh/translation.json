@@ -37,7 +37,26 @@
     "voiceInput": "语音输入",
     "send": "发送",
     "placeholder": "分配一个任务或提出任何问题",
-    "tools": "将你的工具连接到 Poco"
+    "tools": "将你的工具连接到 Poco",
+    "importLocal": "从本地文件导入",
+    "importFigma": "从 Figma 导入 (即将推出)",
+    "connect": "连接",
+    "configure": "配置",
+    "comingSoon": "即将推出",
+    "toasts": {
+      "uploadSuccess": "文件上传成功",
+      "uploadFailed": "文件上传失败",
+      "fileTooLarge": "文件过大，最大支持 100MB"
+    },
+    "mcpSelector": {
+      "title": "选择 MCP 服务器",
+      "description": "选择此任务要启用的 MCP 服务器。未安装的服务器不会显示。",
+      "loading": "加载中...",
+      "noServers": "没有已安装的 MCP 服务器。请先在 MCP 页面安装服务器。",
+      "selected": "已选择 {{count}}/{{total}} 个服务器",
+      "cancel": "取消",
+      "confirm": "确认"
+    }
   },
   "prompts": {
     "createSlides": "制作幻灯片",

@@ -8,6 +8,9 @@ import {
   SlidersHorizontal,
   FileText,
   Figma,
+  Database,
+  Zap,
+  ChevronRight,
 } from "lucide-react";
 import { toast } from "sonner";
 import * as React from "react";
@@ -19,14 +22,22 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { FileCard } from "@/components/shared/file-card";
-import {
-  AVAILABLE_CONNECTORS,
-  type ConnectorType,
-} from "@/features/home/model/connectors";
+import { mcpService } from "@/features/mcp/services/mcp-service";
+import type { McpServer, UserMcpInstall } from "@/features/mcp/types";
+import { skillsService } from "@/features/skills/services/skills-service";
+import type { SkillPreset, UserSkillInstall } from "@/features/skills/types";
+import { McpSelectorDialog } from "./mcp-selector-dialog";
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
+
+export interface TaskSendOptions {
+  attachments?: InputFile[];
+  mcp_config?: Record<string, boolean>;
+}
 
 export function TaskComposer({
   textareaRef,
@@ -38,7 +49,7 @@ export function TaskComposer({
   textareaRef: React.RefObject<HTMLTextAreaElement | null>;
   value: string;
   onChange: (value: string) => void;
-  onSend: (attachments?: InputFile[]) => void | Promise<void>;
+  onSend: (options?: TaskSendOptions) => void | Promise<void>;
   isSubmitting?: boolean;
 }) {
   const { t } = useT("translation");
@@ -46,16 +57,58 @@ export function TaskComposer({
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = React.useState(false);
   const [attachments, setAttachments] = React.useState<InputFile[]>([]);
+  const [mcpConfig, setMcpConfig] = React.useState<Record<string, boolean>>({});
+  const [isMcpDialogOpen, setIsMcpDialogOpen] = React.useState(false);
 
-  // Sync internal state with parent if needed, or manage fully here
-  // For this component we'll manage local display state and notify parent
+  // Load real MCP and Skill data
+  const [mcps, setMcps] = React.useState<
+    Array<{ server: McpServer; install: UserMcpInstall | undefined }>
+  >([]);
+  const [skills, setSkills] = React.useState<
+    Array<{ preset: SkillPreset; install: UserSkillInstall | undefined }>
+  >([]);
+  const [isLoadingTools, setIsLoadingTools] = React.useState(false);
+
+  // Load tools on mount
+  React.useEffect(() => {
+    const loadTools = async () => {
+      setIsLoadingTools(true);
+      try {
+        const [serversData, installsData, presetsData, skillsInstallsData] =
+          await Promise.all([
+            mcpService.listServers(),
+            mcpService.listInstalls(),
+            skillsService.listPresets(),
+            skillsService.listInstalls(),
+          ]);
+
+        const mcpList = serversData.map((server) => ({
+          server,
+          install: installsData.find((i) => i.server_id === server.id),
+        }));
+        setMcps(mcpList);
+
+        const skillList = presetsData.map((preset) => ({
+          preset,
+          install: skillsInstallsData.find((i) => i.preset_id === preset.id),
+        }));
+        setSkills(skillList);
+      } catch (error) {
+        console.error("Failed to load tools:", error);
+      } finally {
+        setIsLoadingTools(false);
+      }
+    };
+
+    loadTools();
+  }, []);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     if (file.size > MAX_FILE_SIZE) {
-      toast.error(`文件过大，最大支持 100MB`);
+      toast.error(t("hero.toasts.fileTooLarge"));
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
       }
@@ -67,10 +120,10 @@ export function TaskComposer({
       const uploadedFile = await uploadAttachment(file);
       const newAttachments = [...attachments, uploadedFile];
       setAttachments(newAttachments);
-      toast.success(t("hero.toasts.uploadSuccess", "文件上传成功"));
+      toast.success(t("hero.toasts.uploadSuccess"));
     } catch (error) {
       console.error("Upload failed:", error);
-      toast.error(t("hero.toasts.uploadFailed", "文件上传失败"));
+      toast.error(t("hero.toasts.uploadFailed"));
     } finally {
       setIsUploading(false);
       if (fileInputRef.current) {
@@ -95,7 +148,7 @@ export function TaskComposer({
     if (!file) return;
 
     if (file.size > MAX_FILE_SIZE) {
-      toast.error(t("hero.toasts.fileTooLarge", "文件过大，最大支持 100MB"));
+      toast.error(t("hero.toasts.fileTooLarge"));
       return;
     }
 
@@ -104,10 +157,10 @@ export function TaskComposer({
       const uploadedFile = await uploadAttachment(file);
       const newAttachments = [...attachments, uploadedFile];
       setAttachments(newAttachments);
-      toast.success(t("hero.toasts.uploadSuccess", "文件上传成功"));
+      toast.success(t("hero.toasts.uploadSuccess"));
     } catch (error) {
       console.error("Upload failed:", error);
-      toast.error(t("hero.toasts.uploadFailed", "文件上传失败"));
+      toast.error(t("hero.toasts.uploadFailed"));
     } finally {
       setIsUploading(false);
     }
@@ -117,21 +170,17 @@ export function TaskComposer({
     if (isSubmitting || isUploading) return;
     if (!value.trim() && attachments.length === 0) return;
 
-    onSend(attachments);
+    onSend({ attachments, mcp_config: mcpConfig });
     setAttachments([]);
-  }, [attachments, isSubmitting, isUploading, onSend, value]);
+    // Reset MCP config after sending (back to default all enabled)
+    setMcpConfig({});
+  }, [attachments, isSubmitting, isUploading, onSend, value, mcpConfig]);
 
-  const sortedConnectors = React.useMemo(() => {
-    const order: Record<ConnectorType, number> = {
-      mcp: 0,
-      skill: 1,
-      app: 2,
-      api: 3,
-    };
-    return [...AVAILABLE_CONNECTORS].sort((a, b) => {
-      return (order[a.type] ?? 99) - (order[b.type] ?? 99);
-    });
-  }, []);
+  // Count enabled items
+  const enabledMcpCount = mcps.filter(
+    (m) => m.install?.enabled && (mcpConfig[m.server.name] ?? true),
+  ).length;
+  const enabledSkillCount = skills.filter((s) => s.install?.enabled).length;
 
   return (
     <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
@@ -237,35 +286,88 @@ export function TaskComposer({
                 type="button"
                 variant="ghost"
                 size="icon"
-                disabled={isSubmitting}
+                disabled={isLoadingTools}
                 className="size-9 rounded-xl hover:bg-accent"
                 title={t("hero.tools")}
               >
-                <SlidersHorizontal className="size-4" />
+                {isLoadingTools ? (
+                  <Loader2 className="size-4 animate-spin" />
+                ) : (
+                  <SlidersHorizontal className="size-4" />
+                )}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="start"
-              className="w-56 max-h-64 overflow-y-auto"
-            >
-              {sortedConnectors.map((connector) => (
-                <DropdownMenuItem
-                  key={connector.id}
-                  disabled
-                  className="opacity-50 cursor-not-allowed"
-                >
-                  <div className="flex items-center justify-between w-full">
-                    <div className="flex items-center gap-2">
-                      <connector.icon className="size-4" />
-                      <span>{connector.title}</span>
-                    </div>
-                    {/* TODO: Implement connection logic */}
-                    <span className="text-xs font-medium">
-                      {t("hero.connect", "连接")}
-                    </span>
-                  </div>
+            <DropdownMenuContent align="start" className="w-56">
+              {/* MCP Group */}
+              <DropdownMenuLabel>
+                <div className="flex items-center justify-between">
+                  <span>MCP</span>
+                  <span className="text-xs text-muted-foreground">
+                    {enabledMcpCount}/{mcps.filter((m) => m.install).length}
+                  </span>
+                </div>
+              </DropdownMenuLabel>
+              {mcps.filter((m) => m.install).length > 0 ? (
+                mcps
+                  .filter((m) => m.install)
+                  .map((m) => (
+                    <DropdownMenuItem
+                      key={m.server.id}
+                      onClick={() => setIsMcpDialogOpen(true)}
+                      className="cursor-pointer"
+                    >
+                      <Database className="mr-2 size-4" />
+                      <span className="flex-1">
+                        {m.server.display_name || m.server.name}
+                      </span>
+                      <ChevronRight className="size-3 text-muted-foreground" />
+                    </DropdownMenuItem>
+                  ))
+              ) : (
+                <DropdownMenuItem disabled className="opacity-50">
+                  <span className="text-sm text-muted-foreground">
+                    {t(
+                      "hero.mcpSelector.noServers",
+                      "No MCP servers installed",
+                    )}
+                  </span>
                 </DropdownMenuItem>
-              ))}
+              )}
+
+              <DropdownMenuSeparator />
+
+              {/* Skills Group */}
+              <DropdownMenuLabel>
+                <div className="flex items-center justify-between">
+                  <span>Skills</span>
+                  <span className="text-xs text-muted-foreground">
+                    {enabledSkillCount}/{skills.filter((s) => s.install).length}
+                  </span>
+                </div>
+              </DropdownMenuLabel>
+              {skills.filter((s) => s.install).length > 0 ? (
+                skills
+                  .filter((s) => s.install)
+                  .map((s) => (
+                    <DropdownMenuItem
+                      key={s.preset.id}
+                      disabled
+                      className="opacity-50 cursor-not-allowed"
+                    >
+                      <Zap className="mr-2 size-4" />
+                      <span className="flex-1">{s.preset.display_name}</span>
+                      <span className="text-xs text-muted-foreground">
+                        {t("hero.comingSoon")}
+                      </span>
+                    </DropdownMenuItem>
+                  ))
+              ) : (
+                <DropdownMenuItem disabled className="opacity-50">
+                  <span className="text-sm text-muted-foreground">
+                    No skills installed
+                  </span>
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -284,7 +386,11 @@ export function TaskComposer({
           </Button>
           <Button
             onClick={handleSubmit}
-            disabled={(!value.trim() && attachments.length === 0) || isSubmitting || isUploading}
+            disabled={
+              (!value.trim() && attachments.length === 0) ||
+              isSubmitting ||
+              isUploading
+            }
             size="icon"
             className="size-9 rounded-xl bg-primary text-primary-foreground hover:bg-primary/90 disabled:bg-muted disabled:text-muted-foreground"
             title={t("hero.send")}
@@ -293,6 +399,14 @@ export function TaskComposer({
           </Button>
         </div>
       </div>
+
+      {/* MCP Selector Dialog */}
+      <McpSelectorDialog
+        open={isMcpDialogOpen}
+        onOpenChange={setIsMcpDialogOpen}
+        mcpConfig={mcpConfig}
+        onMcpConfigChange={setMcpConfig}
+      />
     </div>
   );
 }

@@ -86,7 +86,10 @@ export interface InputFile {
 export interface TaskConfig {
   repo_url?: string | null;
   git_branch?: string; // defaults to "main"
-  mcp_config?: Record<string, unknown>;
+  /** MCP server enable/disable toggles (true=enabled, false=disabled).
+   *  Servers not in this object use their default enabled state from user installations.
+   */
+  mcp_config?: Record<string, boolean>;
   skill_files?: Record<string, unknown>;
   input_files?: InputFile[];
 }

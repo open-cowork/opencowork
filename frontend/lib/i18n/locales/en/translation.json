@@ -37,7 +37,26 @@
     "voiceInput": "Voice input",
     "send": "Send",
     "placeholder": "Assign a task or ask any question",
-    "tools": "Connect your tools to Poco"
+    "tools": "Connect your tools to Poco",
+    "importLocal": "Import from local file",
+    "importFigma": "Import from Figma (coming soon)",
+    "connect": "Connect",
+    "configure": "Configure",
+    "comingSoon": "Coming soon",
+    "toasts": {
+      "uploadSuccess": "File uploaded successfully",
+      "uploadFailed": "File upload failed",
+      "fileTooLarge": "File too large, max 100MB supported"
+    },
+    "mcpSelector": {
+      "title": "Select MCP Servers",
+      "description": "Choose which MCP servers to enable for this task. Uninstalled servers will not be shown.",
+      "loading": "Loading...",
+      "noServers": "No installed MCP servers. Please install servers from the MCP page first.",
+      "selected": "{{count}}/{{total}} servers selected",
+      "cancel": "Cancel",
+      "confirm": "Confirm"
+    }
   },
   "prompts": {
     "createSlides": "Create slides",
