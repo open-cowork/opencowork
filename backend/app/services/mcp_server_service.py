@@ -30,19 +30,18 @@ class McpServerService:
     def create_server(
         self, db: Session, user_id: str, request: McpServerCreateRequest
     ) -> McpServerResponse:
-        if McpServerRepository.get_by_name(db, request.name):
+        scope = request.scope or "user"
+
+        if McpServerRepository.get_by_name(db, request.name, user_id):
             raise AppException(
                 error_code=ErrorCode.MCP_SERVER_ALREADY_EXISTS,
                 message=f"MCP server already exists: {request.name}",
             )
 
-        scope = request.scope or "user"
-        owner_user_id = user_id if scope != "system" else None
-
         server = McpServer(
             name=request.name,
             scope=scope,
-            owner_user_id=owner_user_id,
+            owner_user_id=user_id,
             server_config=request.server_config,
         )
 
@@ -66,7 +65,7 @@ class McpServerService:
             )
 
         if request.name is not None and request.name != server.name:
-            if McpServerRepository.get_by_name(db, request.name):
+            if McpServerRepository.get_by_name(db, request.name, user_id):
                 raise AppException(
                     error_code=ErrorCode.MCP_SERVER_ALREADY_EXISTS,
                     message=f"MCP server already exists: {request.name}",
@@ -75,10 +74,6 @@ class McpServerService:
 
         if request.scope is not None:
             server.scope = request.scope
-            if server.scope == "system":
-                server.owner_user_id = None
-            elif server.owner_user_id is None:
-                server.owner_user_id = user_id
         if request.server_config is not None:
             server.server_config = request.server_config
 

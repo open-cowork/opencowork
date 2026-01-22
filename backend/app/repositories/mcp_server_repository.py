@@ -15,8 +15,22 @@ class McpServerRepository:
         return session_db.query(McpServer).filter(McpServer.id == server_id).first()
 
     @staticmethod
-    def get_by_name(session_db: Session, name: str) -> McpServer | None:
-        return session_db.query(McpServer).filter(McpServer.name == name).first()
+    def get_by_name(session_db: Session, name: str, user_id: str) -> McpServer | None:
+        """Get MCP server by name within a user's scope.
+
+        Args:
+            session_db: Database session
+            name: Server name
+            user_id: User ID to scope the search
+
+        Returns:
+            McpServer if found, None otherwise.
+        """
+        return (
+            session_db.query(McpServer)
+            .filter(McpServer.name == name, McpServer.owner_user_id == user_id)
+            .first()
+        )
 
     @staticmethod
     def list_visible(session_db: Session, user_id: str) -> list[McpServer]:

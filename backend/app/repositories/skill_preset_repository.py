@@ -15,8 +15,22 @@ class SkillPresetRepository:
         return session_db.query(SkillPreset).filter(SkillPreset.id == preset_id).first()
 
     @staticmethod
-    def get_by_name(session_db: Session, name: str) -> SkillPreset | None:
-        return session_db.query(SkillPreset).filter(SkillPreset.name == name).first()
+    def get_by_name(session_db: Session, name: str, user_id: str) -> SkillPreset | None:
+        """Get skill preset by name within a user's scope.
+
+        Args:
+            session_db: Database session
+            name: Preset name
+            user_id: User ID to scope search
+
+        Returns:
+            SkillPreset if found, None otherwise.
+        """
+        return (
+            session_db.query(SkillPreset)
+            .filter(SkillPreset.name == name, SkillPreset.owner_user_id == user_id)
+            .first()
+        )
 
     @staticmethod
     def list_all(

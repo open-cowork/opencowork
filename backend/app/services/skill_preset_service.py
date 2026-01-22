@@ -36,7 +36,7 @@ class SkillPresetService:
     def create_preset(
         self, db: Session, user_id: str, request: SkillPresetCreateRequest
     ) -> SkillPresetResponse:
-        if SkillPresetRepository.get_by_name(db, request.name):
+        if SkillPresetRepository.get_by_name(db, request.name, user_id):
             raise AppException(
                 error_code=ErrorCode.BAD_REQUEST,
                 message=f"Skill preset already exists: {request.name}",
