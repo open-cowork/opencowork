@@ -16,6 +16,7 @@ const POLLING_INTERVAL = 1500;
 
 export function useUserInputRequests(
   sessionId?: string,
+  enabled: boolean = true,
 ): UseUserInputRequestsReturn {
   const [requests, setRequests] = useState<UserInputRequest[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -42,15 +43,24 @@ export function useUserInputRequests(
       return;
     }
 
+    if (!enabled) {
+      if (timerRef.current) {
+        window.clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      return;
+    }
+
     fetchRequests();
     timerRef.current = window.setInterval(fetchRequests, POLLING_INTERVAL);
 
     return () => {
       if (timerRef.current) {
         window.clearInterval(timerRef.current);
+        timerRef.current = null;
       }
     };
-  }, [fetchRequests, sessionId]);
+  }, [fetchRequests, sessionId, enabled]);
 
   const submitAnswer = useCallback(
     async (requestId: string, answers: Record<string, string>) => {

@@ -70,17 +70,17 @@ export function ChatPanel({
     deletePendingMessage,
   } = usePendingMessages({ session, sendMessage });
 
+  // Determine if session is running/active
+  const isSessionActive =
+    session?.status === "running" || session?.status === "accepted";
+
   const {
     requests: userInputRequests,
     isLoading: isSubmittingUserInput,
     submitAnswer: submitUserInputAnswer,
-  } = useUserInputRequests(session?.session_id);
+  } = useUserInputRequests(session?.session_id, isSessionActive);
 
   const activeUserInput = userInputRequests[0];
-
-  // Determine if session is running/active
-  const isSessionActive =
-    session?.status === "running" || session?.status === "accepted";
 
   // Handle send from input
   const handleSend = async (content: string, attachments?: InputFile[]) => {
