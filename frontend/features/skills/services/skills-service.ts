@@ -2,52 +2,45 @@ import { apiClient, API_ENDPOINTS } from "@/lib/api-client";
 import type {
   SkillInstallCreateInput,
   SkillInstallUpdateInput,
-  SkillPreset,
-  SkillPresetCreateInput,
-  SkillPresetUpdateInput,
+  Skill,
+  SkillCreateInput,
+  SkillUpdateInput,
   UserSkillInstall,
+  SkillImportDiscoverResponse,
+  SkillImportCommitInput,
+  SkillImportCommitResponse,
 } from "@/features/skills/types";
 
 export const skillsService = {
-  listPresets: async (options?: {
-    includeInactive?: boolean;
-    revalidate?: number;
-  }): Promise<SkillPreset[]> => {
-    const query = options?.includeInactive ? "?include_inactive=true" : "";
-    return apiClient.get<SkillPreset[]>(
-      `${API_ENDPOINTS.skillPresets}${query}`,
-      {
-        next: { revalidate: options?.revalidate },
-      },
-    );
-  },
-
-  getPreset: async (
-    presetId: number,
-    options?: { revalidate?: number },
-  ): Promise<SkillPreset> => {
-    return apiClient.get<SkillPreset>(API_ENDPOINTS.skillPreset(presetId), {
+  listSkills: async (options?: { revalidate?: number }): Promise<Skill[]> => {
+    return apiClient.get<Skill[]>(API_ENDPOINTS.skills, {
       next: { revalidate: options?.revalidate },
     });
   },
 
-  createPreset: async (input: SkillPresetCreateInput): Promise<SkillPreset> => {
-    return apiClient.post<SkillPreset>(API_ENDPOINTS.skillPresets, input);
+  getSkill: async (
+    skillId: number,
+    options?: { revalidate?: number },
+  ): Promise<Skill> => {
+    return apiClient.get<Skill>(API_ENDPOINTS.skill(skillId), {
+      next: { revalidate: options?.revalidate },
+    });
   },
 
-  updatePreset: async (
-    presetId: number,
-    input: SkillPresetUpdateInput,
-  ): Promise<SkillPreset> => {
-    return apiClient.patch<SkillPreset>(
-      API_ENDPOINTS.skillPreset(presetId),
-      input,
-    );
+  createSkill: async (input: SkillCreateInput): Promise<Skill> => {
+    return apiClient.post<Skill>(API_ENDPOINTS.skills, input);
   },
 
-  deletePreset: async (presetId: number): Promise<Record<string, unknown>> => {
+  updateSkill: async (
+    skillId: number,
+    input: SkillUpdateInput,
+  ): Promise<Skill> => {
+    return apiClient.patch<Skill>(API_ENDPOINTS.skill(skillId), input);
+  },
+
+  deleteSkill: async (skillId: number): Promise<Record<string, unknown>> => {
     return apiClient.delete<Record<string, unknown>>(
-      API_ENDPOINTS.skillPreset(presetId),
+      API_ENDPOINTS.skill(skillId),
     );
   },
 
@@ -83,7 +76,25 @@ export const skillsService = {
     );
   },
 
+  importDiscover: async (
+    formData: FormData,
+  ): Promise<SkillImportDiscoverResponse> => {
+    return apiClient.post<SkillImportDiscoverResponse>(
+      API_ENDPOINTS.skillImportDiscover,
+      formData,
+    );
+  },
+
+  importCommit: async (
+    input: SkillImportCommitInput,
+  ): Promise<SkillImportCommitResponse> => {
+    return apiClient.post<SkillImportCommitResponse>(
+      API_ENDPOINTS.skillImportCommit,
+      input,
+    );
+  },
+
   // Backward-compatible alias used by server components
-  list: async (options?: { includeInactive?: boolean; revalidate?: number }) =>
-    skillsService.listPresets(options),
+  list: async (options?: { revalidate?: number }) =>
+    skillsService.listSkills(options),
 };

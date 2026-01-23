@@ -42,9 +42,11 @@ export const API_ENDPOINTS = {
   mcpInstalls: "/mcp-installs",
   mcpInstall: (installId: number) => `/mcp-installs/${installId}`,
 
-  // Skill Presets
-  skillPresets: "/skill-presets",
-  skillPreset: (presetId: number) => `/skill-presets/${presetId}`,
+  // Skills
+  skills: "/skills",
+  skill: (skillId: number) => `/skills/${skillId}`,
+  skillImportDiscover: "/skills/import/discover",
+  skillImportCommit: "/skills/import/commit",
 
   // Skill Installs (User)
   skillInstalls: "/skill-installs",
@@ -66,7 +68,6 @@ export const API_ENDPOINTS = {
   // Other
   projects: "/projects",
   project: (projectId: string) => `/projects/${projectId}`,
-  skills: "/skill-presets",
   health: "/health",
   root: "/",
 };

@@ -4,16 +4,16 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { skillsService } from "@/features/skills/services/skills-service";
-import type { SkillPreset, UserSkillInstall } from "@/features/skills/types";
+import type { Skill, UserSkillInstall } from "@/features/skills/types";
 
-export interface SkillListItem extends SkillPreset {
+export interface SkillListItem extends Skill {
   isInstalled: boolean;
   installId?: number;
-  isUserPreset: boolean;
+  isUserSkill: boolean;
 }
 
 export function useSkillStore() {
-  const [skills, setSkills] = useState<SkillPreset[]>([]);
+  const [skills, setSkills] = useState<Skill[]>([]);
   const [installs, setInstalls] = useState<UserSkillInstall[]>([]);
   const [loadingSkillId, setLoadingSkillId] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -23,11 +23,11 @@ export function useSkillStore() {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const [presetsData, installsData] = await Promise.all([
-          skillsService.listPresets(),
+        const [skillsData, installsData] = await Promise.all([
+          skillsService.listSkills(),
           skillsService.listInstalls(),
         ]);
-        setSkills(presetsData);
+        setSkills(skillsData);
         setInstalls(installsData);
       } catch (error) {
         console.error("[SkillStore] Failed to fetch skills:", error);
@@ -41,7 +41,7 @@ export function useSkillStore() {
 
   const toggleInstall = useCallback(
     async (skillId: number) => {
-      const current = installs.find((install) => install.preset_id === skillId);
+      const current = installs.find((install) => install.skill_id === skillId);
       setLoadingSkillId(skillId);
 
       try {
@@ -53,7 +53,7 @@ export function useSkillStore() {
           toast.success("技能已卸载");
         } else {
           const created = await skillsService.createInstall({
-            preset_id: skillId,
+            skill_id: skillId,
             enabled: true,
           });
           setInstalls((prev) => [...prev, created]);
@@ -71,12 +71,12 @@ export function useSkillStore() {
 
   const items: SkillListItem[] = useMemo(() => {
     return skills.map((skill) => {
-      const install = installs.find((entry) => entry.preset_id === skill.id);
+      const install = installs.find((entry) => entry.skill_id === skill.id);
       return {
         ...skill,
         isInstalled: !!install?.enabled,
         installId: install?.id,
-        isUserPreset: Boolean(skill.owner_user_id),
+        isUserSkill: skill.scope === "user",
       };
     });
   }, [skills, installs]);

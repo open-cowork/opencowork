@@ -7,7 +7,11 @@ import { useT } from "@/lib/i18n/client";
 import { Button } from "@/components/ui/button";
 import { useAppShell } from "@/components/shared/app-shell-context";
 
-export function SkillsHeader() {
+interface SkillsHeaderProps {
+  onImport?: () => void;
+}
+
+export function SkillsHeader({ onImport }: SkillsHeaderProps) {
   const { t } = useT("translation");
   const router = useRouter();
   const { lng } = useAppShell();
@@ -30,9 +34,9 @@ export function SkillsHeader() {
 
       {/* Right: Action Buttons */}
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="sm" className="gap-2">
+        <Button variant="ghost" size="sm" className="gap-2" onClick={onImport}>
           <Search className="size-4" />
-          {t("library.skillsPage.header.discover", "发现技能")}
+          {t("library.skillsImport.title", "导入技能")}
         </Button>
       </div>
     </header>

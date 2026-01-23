@@ -320,6 +320,93 @@
         }
       }
     },
+    "skillsManager": {
+      "stats": {
+        "available": "Available",
+        "installed": "Installed",
+        "enabled": "Enabled"
+      },
+      "section": {
+        "title": "Skills"
+      },
+      "scope": {
+        "system": "System",
+        "user": "User"
+      },
+      "fields": {
+        "id": "id"
+      },
+      "actions": {
+        "install": "Install",
+        "uninstall": "Uninstall"
+      },
+      "toasts": {
+        "loadError": "Failed to load skills",
+        "actionError": "Operation failed, please try again later",
+        "installed": "Skill installed",
+        "uninstalled": "Skill uninstalled",
+        "enabled": "Skill enabled",
+        "disabled": "Skill disabled"
+      },
+      "empty": "No skills yet"
+    },
+    "skillsImport": {
+      "title": "Import Skills",
+      "tabs": {
+        "zip": "Upload Zip",
+        "github": "GitHub URL"
+      },
+      "fields": {
+        "zip": "Zip file",
+        "githubUrl": "GitHub public repo URL",
+        "nameOverride": "Skill name"
+      },
+      "placeholders": {
+        "githubUrl": "https://github.com/owner/repo",
+        "name": "e.g. my-skill"
+      },
+      "hints": {
+        "github": "Defaults to main/master (public github.com repos only)",
+        "nameRequired": "SKILL.md is at archive root; a name is required"
+      },
+      "actions": {
+        "back": "Back",
+        "discover": "Discover",
+        "discovering": "Discovering...",
+        "commit": "Import & Install",
+        "committing": "Importing..."
+      },
+      "preview": {
+        "found": "Found",
+        "items": "skill definitions",
+        "overwrite": "will overwrite",
+        "overwriteItems": "existing skills",
+        "willOverwrite": "Overwrite",
+        "root": "Root",
+        "path": "Path",
+        "unnamed": "Unnamed",
+        "pagination": {
+          "range": "Showing {{from}}-{{to}} of {{total}}",
+          "page": "Page {{page}} / {{pages}}",
+          "prev": "Previous",
+          "next": "Next"
+        }
+      },
+      "result": {
+        "title": "Import result",
+        "success": "Success",
+        "failed": "Failed"
+      },
+      "toasts": {
+        "missingZip": "Please choose a zip file",
+        "missingGithubUrl": "Please enter a GitHub URL",
+        "discovered": "Discovered. Please confirm what to import.",
+        "discoverError": "Discover failed, please try again later",
+        "committed": "Import succeeded",
+        "commitError": "Import failed, please try again later",
+        "partialFailed": "Some skills failed to import. Please review the details."
+      }
+    },
     "mcpLibrary": {
       "header": {
         "title": "MCP Servers",

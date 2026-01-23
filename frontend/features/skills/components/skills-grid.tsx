@@ -1,383 +1,140 @@
 "use client";
 
 import * as React from "react";
-import {
-  Trash2,
-  Upload,
-  Package,
-  User,
-  RefreshCw,
-  Download,
-  Zap,
-  Code,
-  FileText,
-  Beaker,
-} from "lucide-react";
+import { Package, Trash2 } from "lucide-react";
 
-import { Switch } from "@/components/ui/switch";
-import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import type { SkillPreset, UserSkillInstall } from "@/features/skills/types";
-
-// Mock data for presets
-export const MOCK_PRESETS: SkillPreset[] = [
-  {
-    id: 1,
-    name: "planning-with-files",
-    display_name: "Planning with Files",
-    description: "帮助 AI 使用文件进行规划和任务管理",
-    category: "productivity",
-    entry: null,
-    default_config: null,
-    config_schema: null,
-    source: "official",
-    owner_user_id: null,
-    version: "1.0.0",
-    is_active: true,
-    created_at: "2024-01-01",
-    updated_at: "2024-01-01",
-  },
-  {
-    id: 2,
-    name: "code-review",
-    display_name: "代码审查助手",
-    description: "自动审查和改进代码质量，支持多种编程语言",
-    category: "development",
-    entry: null,
-    default_config: null,
-    config_schema: null,
-    source: "official",
-    owner_user_id: null,
-    version: "2.1.0",
-    is_active: true,
-    created_at: "2024-01-01",
-    updated_at: "2024-01-15",
-  },
-  {
-    id: 3,
-    name: "document-generator",
-    display_name: "文档生成器",
-    description: "自动生成项目文档和 API 说明",
-    category: "documentation",
-    entry: null,
-    default_config: null,
-    config_schema: null,
-    source: "community",
-    owner_user_id: "user123",
-    version: "1.2.0",
-    is_active: true,
-    created_at: "2024-01-01",
-    updated_at: "2024-01-10",
-  },
-  {
-    id: 4,
-    name: "test-generator",
-    display_name: "测试用例生成",
-    description: "基于代码自动生成单元测试和集成测试",
-    category: "testing",
-    entry: null,
-    default_config: null,
-    config_schema: null,
-    source: "official",
-    owner_user_id: null,
-    version: "1.0.0",
-    is_active: true,
-    created_at: "2024-01-01",
-    updated_at: "2024-01-01",
-  },
-];
-
-// Mock data for installs
-// Mock data for installs
-export const MOCK_INSTALLS: UserSkillInstall[] = [
-  {
-    id: 1,
-    user_id: "user1",
-    preset_id: 1,
-    enabled: true,
-    overrides: null,
-    created_at: "2024-01-02",
-    updated_at: "2024-01-02",
-  },
-  {
-    id: 2,
-    user_id: "user1",
-    preset_id: 2,
-    enabled: true,
-    overrides: { autoFix: true },
-    created_at: "2024-01-03",
-    updated_at: "2024-01-16",
-  },
-  // Custom install (mocking preset_id as 0 for now since it's required in type)
-  {
-    id: 3,
-    user_id: "user1",
-    preset_id: 0,
-    enabled: true,
-    overrides: {
-      name: "my-custom-skill",
-      display_name: "我的自定义技能",
-      description: "用户自己创建的技能",
-    },
-    created_at: "2024-01-05",
-    updated_at: "2024-01-05",
-  },
-];
+import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import type { Skill, UserSkillInstall } from "@/features/skills/types";
+import { useT } from "@/lib/i18n/client";
 
 interface SkillsGridProps {
-  presets?: SkillPreset[];
-  installs?: UserSkillInstall[];
+  skills: Skill[];
+  installs: UserSkillInstall[];
   loadingId?: number | null;
-  onInstall?: (presetId: number) => void;
+  isLoading?: boolean;
+  onInstall?: (skillId: number) => void;
   onUninstall?: (installId: number) => void;
-  onUpdate?: (installId: number) => void;
-  onUploadToPreset?: (installId: number) => void;
   onToggleEnabled?: (installId: number, enabled: boolean) => void;
 }
 
 export function SkillsGrid({
-  presets: propPresets,
-  installs: propInstalls,
+  skills,
+  installs,
   loadingId,
+  isLoading = false,
   onInstall,
   onUninstall,
-  onUpdate,
-  onUploadToPreset,
   onToggleEnabled,
 }: SkillsGridProps) {
-  const presets = propPresets && propPresets.length > 0 ? propPresets : MOCK_PRESETS;
-  const installs = propInstalls && propInstalls.length > 0 ? propInstalls : MOCK_INSTALLS;
+  const { t } = useT("translation");
 
-  const installByPresetId = React.useMemo(() => {
+  const installBySkillId = React.useMemo(() => {
     const map = new Map<number, UserSkillInstall>();
     for (const install of installs) {
-      if (install.preset_id) {
-        map.set(install.preset_id, install);
-      }
+      map.set(install.skill_id, install);
     }
     return map;
-  }, [installs]);
-
-  const customInstalls = React.useMemo(() => {
-    return installs.filter((i) => !i.preset_id);
   }, [installs]);
 
   const installedCount = installs.length;
   const enabledCount = installs.filter((i) => i.enabled).length;
 
-  const CategoryIcon = ({ category }: { category: string }) => {
-    switch (category.toLowerCase()) {
-      case "productivity":
-        return (
-          <span title="Productivity">
-            <Zap className="size-3.5 text-muted-foreground" />
-          </span>
-        );
-      case "development":
-        return (
-          <span title="Development">
-            <Code className="size-3.5 text-muted-foreground" />
-          </span>
-        );
-      case "documentation":
-        return (
-          <span title="Documentation">
-            <FileText className="size-3.5 text-muted-foreground" />
-          </span>
-        );
-      case "testing":
-        return (
-          <span title="Testing">
-            <Beaker className="size-3.5 text-muted-foreground" />
-          </span>
-        );
-      default:
-        return null;
-    }
-  };
-
   return (
     <div className="space-y-6">
-      {/* Statistics Bar */}
       <div className="rounded-xl bg-muted/50 px-5 py-3">
         <span className="text-sm text-muted-foreground">
-          可用预设: {presets.length} · 已安装: {installedCount} · 已启用:{" "}
-          {enabledCount}
+          {t("library.skillsManager.stats.available", "可用技能")}:{" "}
+          {skills.length} ·{" "}
+          {t("library.skillsManager.stats.installed", "已安装")}:{" "}
+          {installedCount} ·{" "}
+          {t("library.skillsManager.stats.enabled", "已启用")}: {enabledCount}
         </span>
       </div>
 
-      {/* Presets Section */}
       <div className="space-y-3">
         <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
           <Package className="size-4" />
-          <span>预设技能</span>
+          <span>{t("library.skillsManager.section.title", "Skills")}</span>
         </div>
 
         <div className="space-y-2">
-          {presets.map((preset) => {
-            const install = installByPresetId.get(preset.id);
+          {!isLoading && skills.length === 0 && (
+            <div className="rounded-xl border border-border/50 bg-muted/10 px-4 py-6 text-sm text-muted-foreground text-center">
+              {t("library.skillsManager.empty", "暂无技能")}
+            </div>
+          )}
+
+          {skills.map((skill) => {
+            const install = installBySkillId.get(skill.id);
             const isInstalled = Boolean(install);
-            const isLoading = loadingId === preset.id;
+            const isRowLoading =
+              isLoading || loadingId === skill.id || loadingId === install?.id;
 
             return (
               <div
-                key={preset.id}
-                className={`flex items-center gap-4 rounded-xl border px-4 py-3 ${isInstalled
-                  ? "border-border/70 bg-card"
-                  : "border-border/40 bg-muted/20"
-                  }`}
+                key={skill.id}
+                className={`flex items-center gap-4 rounded-xl border px-4 py-3 ${
+                  isInstalled
+                    ? "border-border/70 bg-card"
+                    : "border-border/40 bg-muted/20"
+                }`}
               >
-                {/* Left: Info */}
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-medium">
-                      {preset.display_name || preset.name}
-                    </span>
+                    <span className="font-medium truncate">{skill.name}</span>
                     <Badge
                       variant="outline"
                       className="text-xs text-muted-foreground"
                     >
-                      {preset.source === "official" ? "官方" : "个人"}
+                      {skill.scope === "system"
+                        ? t("library.skillsManager.scope.system", "系统")
+                        : t("library.skillsManager.scope.user", "个人")}
                     </Badge>
-                    {preset.category && (
-                      <CategoryIcon category={preset.category} />
-                    )}
                   </div>
-                  {/* Row 2: Description */}
-                  {preset.description && (
-                    <p className="text-xs text-muted-foreground mt-1 truncate">
-                      {preset.description}
-                    </p>
-                  )}
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {t("library.skillsManager.fields.id", "id")}: {skill.id}
+                  </p>
                 </div>
 
-                {/* Right: Actions + Switch */}
-                <div className="flex items-center gap-4 flex-shrink-0">
-                  {isInstalled ? (
-                    <div className="flex items-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="size-8"
-                        onClick={() => onUpdate?.(install!.id)}
-                        title="更新"
-                      >
-                        <RefreshCw className="size-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="size-8"
-                        onClick={() => onUninstall?.(install!.id)}
-                        title="卸载"
-                      >
-                        <Trash2 className="size-4" />
-                      </Button>
-                    </div>
-                  ) : (
+                {isInstalled && install ? (
+                  <div className="flex items-center gap-2">
+                    <Switch
+                      checked={install.enabled}
+                      disabled={isRowLoading}
+                      onCheckedChange={(enabled) =>
+                        onToggleEnabled?.(install.id, enabled)
+                      }
+                    />
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="size-8"
-                      onClick={() => onInstall?.(preset.id)}
-                      title="安装"
+                      disabled={isRowLoading}
+                      onClick={() => onUninstall?.(install.id)}
+                      className="rounded-lg"
+                      title={t(
+                        "library.skillsManager.actions.uninstall",
+                        "卸载",
+                      )}
                     >
-                      <Download className="size-4" />
+                      <Trash2 className="size-4" />
                     </Button>
-                  )}
-
-                  {/* Switch always on the far right for installed items */}
-                  {isInstalled && (
-                    <Switch
-                      checked={install?.enabled ?? false}
-                      onCheckedChange={(checked) => {
-                        if (install) onToggleEnabled?.(install.id, checked);
-                      }}
-                      disabled={isLoading}
-                    />
-                  )}
-                </div>
+                  </div>
+                ) : (
+                  <Button
+                    size="sm"
+                    disabled={isRowLoading}
+                    onClick={() => onInstall?.(skill.id)}
+                  >
+                    {t("library.skillsManager.actions.install", "安装")}
+                  </Button>
+                )}
               </div>
             );
           })}
         </div>
       </div>
-
-      {/* Custom Installs Section */}
-      {customInstalls.length > 0 && (
-        <div className="space-y-3">
-          <div className="flex items-center gap-2 text-sm font-medium text-muted-foreground">
-            <User className="size-4" />
-            <span>自定义技能</span>
-          </div>
-
-          <div className="space-y-2">
-            {customInstalls.map((install) => {
-              const isLoading = loadingId === install.id;
-              const config = install.overrides as Record<
-                string,
-                unknown
-              > | null;
-
-              return (
-                <div
-                  key={install.id}
-                  className="flex items-center gap-4 rounded-xl border border-dashed border-border/60 bg-card px-4 py-3"
-                >
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-medium">
-                        {(config?.display_name as string) ||
-                          (config?.name as string) ||
-                          `自定义 #${install.id}`}
-                      </span>
-                      <Badge
-                        variant="outline"
-                        className="text-xs text-muted-foreground"
-                      >
-                        个人
-                      </Badge>
-                    </div>
-                    {typeof config?.description === "string" && (
-                      <p className="text-xs text-muted-foreground mt-1 truncate">
-                        {config.description}
-                      </p>
-                    )}
-                  </div>
-
-                  <div className="flex items-center gap-2 flex-shrink-0">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-8"
-                      onClick={() => onUploadToPreset?.(install.id)}
-                      title="上传为预设"
-                    >
-                      <Upload className="size-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-8"
-                      onClick={() => onUninstall?.(install.id)}
-                      title="删除"
-                    >
-                      <Trash2 className="size-4" />
-                    </Button>
-                    <Switch
-                      checked={install.enabled}
-                      onCheckedChange={(checked) => {
-                        onToggleEnabled?.(install.id, checked);
-                      }}
-                      disabled={isLoading}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

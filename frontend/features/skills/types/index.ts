@@ -1,59 +1,74 @@
-export interface SkillPreset {
+export interface Skill {
   id: number;
   name: string;
-  display_name: string;
-  description: string | null;
-  category: string | null;
-  entry: Record<string, unknown> | null;
-  default_config: Record<string, unknown> | null;
-  config_schema: Record<string, unknown> | null;
-  source: string;
+  entry: Record<string, unknown>;
+  scope: string;
   owner_user_id: string | null;
-  version: string | null;
-  is_active: boolean;
   created_at: string;
   updated_at: string;
 }
 
-export interface SkillPresetCreateInput {
+export interface SkillCreateInput {
   name: string;
-  display_name: string;
-  description?: string | null;
-  category?: string | null;
-  entry?: Record<string, unknown> | null;
-  default_config?: Record<string, unknown> | null;
-  config_schema?: Record<string, unknown> | null;
-  version?: string | null;
+  entry: Record<string, unknown>;
+  scope?: string | null;
 }
 
-export interface SkillPresetUpdateInput {
-  display_name?: string | null;
-  description?: string | null;
-  category?: string | null;
+export interface SkillUpdateInput {
+  name?: string | null;
   entry?: Record<string, unknown> | null;
-  default_config?: Record<string, unknown> | null;
-  config_schema?: Record<string, unknown> | null;
-  version?: string | null;
-  is_active?: boolean | null;
+  scope?: string | null;
 }
 
 export interface UserSkillInstall {
   id: number;
   user_id: string;
-  preset_id: number;
+  skill_id: number;
   enabled: boolean;
-  overrides: Record<string, unknown> | null;
   created_at: string;
   updated_at: string;
 }
 
 export interface SkillInstallCreateInput {
-  preset_id: number;
+  skill_id: number;
   enabled?: boolean;
-  overrides?: Record<string, unknown> | null;
 }
 
 export interface SkillInstallUpdateInput {
   enabled?: boolean | null;
-  overrides?: Record<string, unknown> | null;
+}
+
+export interface SkillImportCandidate {
+  relative_path: string;
+  skill_name: string | null;
+  requires_name: boolean;
+  will_overwrite: boolean;
+}
+
+export interface SkillImportDiscoverResponse {
+  archive_key: string;
+  candidates: SkillImportCandidate[];
+}
+
+export interface SkillImportSelection {
+  relative_path: string;
+  name_override?: string | null;
+}
+
+export interface SkillImportCommitInput {
+  archive_key: string;
+  selections: SkillImportSelection[];
+}
+
+export interface SkillImportResultItem {
+  relative_path: string;
+  skill_name: string | null;
+  skill_id: number | null;
+  overwritten: boolean;
+  status: string;
+  error: string | null;
+}
+
+export interface SkillImportCommitResponse {
+  items: SkillImportResultItem[];
 }

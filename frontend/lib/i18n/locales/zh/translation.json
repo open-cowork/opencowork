@@ -320,6 +320,93 @@
         }
       }
     },
+    "skillsManager": {
+      "stats": {
+        "available": "可用技能",
+        "installed": "已安装",
+        "enabled": "已启用"
+      },
+      "section": {
+        "title": "Skills"
+      },
+      "scope": {
+        "system": "系统",
+        "user": "个人"
+      },
+      "fields": {
+        "id": "id"
+      },
+      "actions": {
+        "install": "安装",
+        "uninstall": "卸载"
+      },
+      "toasts": {
+        "loadError": "加载技能列表失败",
+        "actionError": "操作失败，请稍后再试",
+        "installed": "技能已安装",
+        "uninstalled": "技能已卸载",
+        "enabled": "技能已启用",
+        "disabled": "技能已停用"
+      },
+      "empty": "暂无技能"
+    },
+    "skillsImport": {
+      "title": "导入技能",
+      "tabs": {
+        "zip": "上传压缩包",
+        "github": "GitHub 地址"
+      },
+      "fields": {
+        "zip": "Zip 文件",
+        "githubUrl": "GitHub 公共仓库地址",
+        "nameOverride": "技能名称"
+      },
+      "placeholders": {
+        "githubUrl": "https://github.com/owner/repo",
+        "name": "例如：my-skill"
+      },
+      "hints": {
+        "github": "默认尝试 main/master 分支（仅支持 github.com 公共仓库）",
+        "nameRequired": "检测到 SKILL.md 位于根目录，必须手动填写技能名称"
+      },
+      "actions": {
+        "back": "返回",
+        "discover": "解析",
+        "discovering": "解析中...",
+        "commit": "导入并安装",
+        "committing": "导入中..."
+      },
+      "preview": {
+        "found": "发现",
+        "items": "个技能定义",
+        "overwrite": "将覆盖",
+        "overwriteItems": "个同名技能",
+        "willOverwrite": "将覆盖",
+        "root": "根目录",
+        "path": "路径",
+        "unnamed": "未命名",
+        "pagination": {
+          "range": "显示 {{from}}-{{to}} / {{total}}",
+          "page": "第 {{page}} / {{pages}} 页",
+          "prev": "上一页",
+          "next": "下一页"
+        }
+      },
+      "result": {
+        "title": "导入结果",
+        "success": "成功",
+        "failed": "失败"
+      },
+      "toasts": {
+        "missingZip": "请选择一个 zip 文件",
+        "missingGithubUrl": "请输入 GitHub 地址",
+        "discovered": "解析成功，请确认要导入的技能",
+        "discoverError": "解析失败，请稍后重试",
+        "committed": "技能导入成功",
+        "commitError": "导入失败，请稍后重试",
+        "partialFailed": "部分技能导入失败，请查看详情"
+      }
+    },
     "mcpLibrary": {
       "header": {
         "title": "MCP 服务器",
