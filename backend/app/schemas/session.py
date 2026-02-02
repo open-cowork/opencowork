@@ -12,6 +12,8 @@ class TaskConfig(BaseModel):
 
     repo_url: str | None = None
     git_branch: str = "main"
+    # Built-in browser capability toggle (Playwright MCP is injected internally by the executor).
+    browser_enabled: bool = False
     # MCP server enable/disable toggles (true=enabled, false=disabled).
     # Servers not in this dict use their default enabled state from user installations.
     mcp_config: dict[str, bool] = Field(default_factory=dict)

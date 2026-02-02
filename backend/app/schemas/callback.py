@@ -52,11 +52,18 @@ class WorkspaceState(BaseModel):
     last_change: datetime
 
 
+class BrowserState(BaseModel):
+    """Browser/desktop capability state exposed to the UI."""
+
+    enabled: bool = False
+
+
 class AgentCurrentState(BaseModel):
     """Agent current state."""
 
     todos: list[TodoItem] = Field(default_factory=list)
     mcp_status: list[McpStatus] = Field(default_factory=list)
+    browser: BrowserState | None = None
     workspace_state: WorkspaceState | None = None
     current_step: str | None = None
 
