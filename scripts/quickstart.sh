@@ -191,7 +191,7 @@ read_env_key() {
       value="${value#\"}"
       value="${value%\'}"
       value="${value#\'}"
-      # Treat empty values as "not set" to avoid false positives (e.g. KEY=).
+      # Treat empty values as "not set"
       if [[ -z "$value" ]]; then
         return 1
       fi
@@ -215,15 +215,17 @@ write_env_key() {
   if [[ -z "$key" ]]; then
     return
   fi
-  # Skip overwriting existing non-empty values unless --force-env is set.
-  # This still allows writing when the key exists but is empty / placeholder.
+  
+  # FIX: Logic improved to allow overwrite if value is different
   if [[ "$FORCE_ENV" = false ]]; then
     local existing_value
     existing_value="$(read_env_key "$key" || true)"
-    if [[ -n "$existing_value" ]]; then
+    # Only skip if the value is EXACTLY the same as what we are trying to write
+    if [[ -n "$existing_value" ]] && [[ "$existing_value" == "$value" ]]; then
       return 0
     fi
   fi
+
   local tmp_file
   tmp_file="$(mktemp)"
   if [[ -f "$ENV_FILE" ]]; then
@@ -254,29 +256,36 @@ prompt_for_key() {
   local current_value="$4"
   local input_value=""
 
-  while true; do
-    if [[ -n "$current_value" ]]; then
-      echo -e "${GREEN}Current value:${NC} ${current_value:0:8}...${current_value: -4}"
-      echo -n "Keep current? [Y/n/new]: "
-      read -r keep_current
-      if [[ "$keep_current" =~ ^[Yy]?$ ]]; then
-        echo "$current_value"
-        return
-      elif [[ "$keep_current" =~ ^[Nn]$|^new$ ]]; then
-        current_value=""
-        continue
-      else
-        print_warn "Please enter Y, n, or new"
-        continue
-      fi
-    fi
+  # FIX: Removed the "Keep current? [Y/n]" logic.
+  # Instead, use standard default value prompt style.
+  
+  local display_default=""
+  if [[ -n "$current_value" ]]; then
+     # Mask the key for display
+     if [[ "${#current_value}" -gt 12 ]]; then
+        display_default="${current_value:0:8}...${current_value: -4}"
+     else
+        display_default="$current_value"
+     fi
+  fi
 
-    echo "$prompt_msg: "
+  while true; do
+    echo "$prompt_msg"
+    if [[ -n "$display_default" ]]; then
+        echo -n -e "Input (Press Enter to keep [${GREEN}${display_default}${NC}]): "
+    else
+        echo -n "Input: "
+    fi
+    
     read -r input_value
     echo ""
 
+    # User hit enter
     if [[ -z "$input_value" ]]; then
-      if [[ "$is_optional" == "true" ]]; then
+      if [[ -n "$current_value" ]]; then
+        echo "$current_value"
+        return
+      elif [[ "$is_optional" == "true" ]]; then
         print_info "Skipping ${key_name} (optional)"
         echo ""
         return
@@ -284,10 +293,11 @@ prompt_for_key() {
         print_warn "${key_name} is required"
         continue
       fi
+    else
+      # User entered a value
+      echo "$input_value"
+      return
     fi
-
-    echo "$input_value"
-    return
   done
 }
 
@@ -341,26 +351,22 @@ EOF
 
 EOF
 
+  # Standardize prompt style
+  local display_msg="Enter S3 public endpoint (or press Enter to skip)"
   if [[ -n "$current_value" ]]; then
-    echo -e "${GREEN}Current value:${NC} $current_value"
-    echo -n "Keep current? [Y/n/new]: "
-    read -r keep_current
-    if [[ "$keep_current" =~ ^[Yy]*$|^$ ]]; then
-      echo "$current_value"
-      return
-    elif [[ "$keep_current" == "new" ]]; then
-      current_value=""
-    else
-      echo ""
-      return
-    fi
+      echo -n "$display_msg [${current_value}]: "
+  else
+      echo -n "$display_msg: "
   fi
-
-  echo -n "Enter S3 public endpoint (or press Enter to skip): "
+  
   read -r input_value
   echo ""
 
   if [[ -z "$input_value" ]]; then
+    if [[ -n "$current_value" ]]; then
+        echo "$current_value"
+        return
+    fi
     print_info "Skipping S3 public endpoint (local development mode)"
     echo ""
     return
@@ -394,6 +400,10 @@ EOF
   existing_openai_base_url="$(read_env_key "OPENAI_BASE_URL" || true)"
   existing_openai_model="$(read_env_key "OPENAI_DEFAULT_MODEL" || true)"
   existing_s3_endpoint="$(read_env_key "S3_PUBLIC_ENDPOINT" || true)"
+
+  # FIX: Allow CLI args to override .env defaults during interactive setup
+  if [[ -n "$ANTHROPIC_KEY" ]]; then existing_anthropic="$ANTHROPIC_KEY"; fi
+  if [[ -n "$OPENAI_KEY" ]]; then existing_openai="$OPENAI_KEY"; fi
 
   # Prompt for Anthropic key (required)
   print_header "Required Configuration"
@@ -459,6 +469,7 @@ EOF
   S3_PUBLIC_ENDPOINT="$(prompt_for_s3_public_endpoint "$existing_s3_endpoint")"
 
   # Write all collected keys
+  # NOTE: write_env_key now handles check-before-write logic correctly
   if [[ -n "$ANTHROPIC_KEY" ]]; then
     write_env_key "ANTHROPIC_AUTH_TOKEN" "$ANTHROPIC_KEY"
     print_success "Anthropic API key configured"
@@ -497,6 +508,9 @@ EOF
   echo ""
 }
 
+# --- MAIN EXECUTION START ---
+
+# First pass: parse CLI args to override defaults
 while [[ $# -gt 0 ]]; do
   case "$1" in
     --data-dir)
@@ -562,19 +576,12 @@ if [[ ! -f "$ENV_FILE" ]]; then
   fi
 fi
 
-# Avoid hanging in non-interactive environments (e.g. CI) even if interactive is the default.
-# Temporarily disabled TTY check for compatibility with various terminal environments
-# if [[ "$INTERACTIVE" = true ]] && [[ ! -t 0 ]]; then
-#   warn "Interactive mode requested but stdin is not a TTY; falling back to non-interactive"
-#   INTERACTIVE=false
-# fi
-
 # Run interactive setup if requested
 if [[ "$INTERACTIVE" = true ]]; then
   interactive_setup
 fi
 
-# Handle API keys from CLI arguments
+# Handle API keys from CLI arguments (In non-interactive mode, or ensuring persistent write)
 if [[ -n "$ANTHROPIC_KEY" ]]; then
   write_env_key "ANTHROPIC_AUTH_TOKEN" "$ANTHROPIC_KEY"
   print_success "Anthropic API key configured"
