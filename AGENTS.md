@@ -52,10 +52,12 @@ uvicorn app.main:app --reload
 
 ```bash
 cd backend
-alembic revision --autogenerate -m "description"  # Create migration
-alembic upgrade head                               # Apply migrations
-alembic downgrade -1                               # Rollback one migration
+uv run -m alembic revision --autogenerate -m "description"  # Autogenerate migration (review and adjust)
+uv run -m alembic upgrade head                               # Apply migrations
+uv run -m alembic downgrade -1                               # Rollback one migration
 ```
+
+Guideline: Always start migrations with `--autogenerate` + `upgrade head`, then manually review and adjust the generated revision file. Do not hand-write a migration from scratch as the first step.
 
 ### Pre-commit Hooks
 
