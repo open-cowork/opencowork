@@ -53,6 +53,7 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
       const inputFiles = options?.attachments ?? [];
       const repoUrl = (options?.repo_url || "").trim();
       const gitBranch = (options?.git_branch || "").trim() || "main";
+      const gitTokenEnvKey = (options?.git_token_env_key || "").trim();
       const runSchedule = options?.run_schedule ?? null;
       const scheduledTask = options?.scheduled_task ?? null;
       if (
@@ -75,6 +76,9 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
         if (repoUrl) {
           config.repo_url = repoUrl;
           config.git_branch = gitBranch;
+          if (gitTokenEnvKey) {
+            config.git_token_env_key = gitTokenEnvKey;
+          }
         }
 
         if (mode === "scheduled") {
@@ -190,6 +194,7 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
             onModeChange={setMode}
             onSend={handleSendTask}
             isSubmitting={isSubmitting}
+            allowProjectize={false}
           />
 
           <QuickActions onPick={handleQuickActionPick} />

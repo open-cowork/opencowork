@@ -81,12 +81,15 @@ export const projectsService = {
     }
   },
 
-  createProject: async (name: string): Promise<ProjectItem> => {
+  createProject: async (payload: {
+    name: string;
+    repo_url?: string;
+    git_branch?: string;
+    git_token_env_key?: string | null;
+  }): Promise<ProjectItem> => {
     const project = await apiClient.post<ProjectApiResponse>(
       API_ENDPOINTS.projects,
-      {
-        name,
-      },
+      payload,
     );
     return mapProject(project);
   },

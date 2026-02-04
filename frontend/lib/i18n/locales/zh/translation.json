@@ -62,7 +62,29 @@
       "urlLabel": "GitHub 链接",
       "urlPlaceholder": "例如：https://github.com/org/repo",
       "branchLabel": "分支",
-      "branchPlaceholder": "例如：main"
+      "branchPlaceholder": "例如：main",
+      "usageLabel": "用途",
+      "usage": {
+        "session": {
+          "title": "仅本次使用（不创建项目）",
+          "help": "适合快速阅读/理解代码；不会新增项目"
+        },
+        "createProject": {
+          "title": "创建为项目（长期维护）",
+          "help": "适合持续维护/多次任务；创建后将作为项目默认仓库"
+        }
+      },
+      "projectNameLabel": "项目名称",
+      "projectNamePlaceholder": "例如：owner/repo",
+      "tokenKeyLabel": "GitHub Token 环境变量 Key（可选）",
+      "tokenKeyPlaceholder": "例如：GITHUB_TOKEN",
+      "tokenKeyHelp": "用于克隆私有仓库；请先在「环境变量」中设置该 Key 的值",
+      "goToEnvVars": "去环境变量设置",
+      "toasts": {
+        "missingGithubUrl": "请输入 GitHub 地址",
+        "createProjectFailed": "创建项目失败，请稍后重试",
+        "projectCreated": "已创建项目：{{name}}"
+      }
     },
     "browser": {
       "toggle": "浏览器"

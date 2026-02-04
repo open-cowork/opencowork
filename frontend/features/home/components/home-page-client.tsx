@@ -21,7 +21,7 @@ import type { TaskConfig } from "@/features/chat/types/api/session";
 export function HomePageClient() {
   const { t } = useT("translation");
   const router = useRouter();
-  const { lng, addTask, openSettings } = useAppShell();
+  const { lng, addTask, addProject, openSettings } = useAppShell();
 
   const [inputValue, setInputValue] = React.useState("");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -39,6 +39,9 @@ export function HomePageClient() {
       const inputFiles = options?.attachments ?? [];
       const repoUrl = (options?.repo_url || "").trim();
       const gitBranch = (options?.git_branch || "").trim() || "main";
+      const repoUsage = options?.repo_usage ?? null;
+      const projectName = (options?.project_name || "").trim();
+      const gitTokenEnvKey = (options?.git_token_env_key || "").trim();
       const runSchedule = options?.run_schedule ?? null;
       const scheduledTask = options?.scheduled_task ?? null;
       if (
@@ -62,6 +65,9 @@ export function HomePageClient() {
         if (repoUrl) {
           config.repo_url = repoUrl;
           config.git_branch = gitBranch;
+          if (gitTokenEnvKey) {
+            config.git_token_env_key = gitTokenEnvKey;
+          }
         }
         if (options?.browser_enabled) {
           config.browser_enabled = true;
@@ -94,10 +100,51 @@ export function HomePageClient() {
           return;
         }
 
+        let finalProjectId: string | undefined;
+        if (repoUsage === "create_project") {
+          if (!repoUrl) {
+            toast.error(t("hero.repo.toasts.missingGithubUrl"));
+            return;
+          }
+
+          const derived =
+            (() => {
+              try {
+                const parsed = new URL(repoUrl);
+                const host = parsed.hostname.toLowerCase();
+                if (host !== "github.com" && host !== "www.github.com")
+                  return "";
+                const parts = parsed.pathname.split("/").filter(Boolean);
+                if (parts.length < 2) return "";
+                const owner = parts[0];
+                let repo = parts[1];
+                if (repo.endsWith(".git")) repo = repo.slice(0, -4);
+                return owner && repo ? `${owner}/${repo}` : "";
+              } catch {
+                return "";
+              }
+            })() || repoUrl;
+
+          const created = await addProject(projectName || derived, {
+            repo_url: repoUrl,
+            git_branch: gitBranch,
+            git_token_env_key: gitTokenEnvKey || null,
+          });
+          if (!created) {
+            toast.error(t("hero.repo.toasts.createProjectFailed"));
+            return;
+          }
+          finalProjectId = created.id;
+          toast.success(
+            t("hero.repo.toasts.projectCreated", { name: created.name }),
+          );
+        }
+
         // 1. Call create session API
         const session = await createSessionAction({
           prompt: inputValue,
           config: Object.keys(config).length > 0 ? config : undefined,
+          projectId: finalProjectId,
           permission_mode: mode === "plan" ? "plan" : "default",
           schedule_mode: runSchedule?.schedule_mode,
           timezone: runSchedule?.timezone,
@@ -115,6 +162,7 @@ export function HomePageClient() {
           id: sessionId,
           timestamp: new Date().toISOString(),
           status: "running",
+          projectId: finalProjectId,
         });
 
         console.log("[Home] Navigating to chat session:", sessionId);
@@ -128,7 +176,7 @@ export function HomePageClient() {
         setIsSubmitting(false);
       }
     },
-    [addTask, inputValue, isSubmitting, lng, mode, router, t],
+    [addProject, addTask, inputValue, isSubmitting, lng, mode, router, t],
   );
 
   return (

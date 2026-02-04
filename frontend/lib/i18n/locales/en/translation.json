@@ -62,7 +62,29 @@
       "urlLabel": "GitHub URL",
       "urlPlaceholder": "e.g. https://github.com/org/repo",
       "branchLabel": "Branch",
-      "branchPlaceholder": "e.g. main"
+      "branchPlaceholder": "e.g. main",
+      "usageLabel": "Usage",
+      "usage": {
+        "session": {
+          "title": "Use for this task only (no project)",
+          "help": "Best for quick reading/understanding; won't create a project"
+        },
+        "createProject": {
+          "title": "Create a project (long-term)",
+          "help": "Best for ongoing work; will be saved as the project's default repo"
+        }
+      },
+      "projectNameLabel": "Project name",
+      "projectNamePlaceholder": "e.g. owner/repo",
+      "tokenKeyLabel": "GitHub token env key (optional)",
+      "tokenKeyPlaceholder": "e.g. GITHUB_TOKEN",
+      "tokenKeyHelp": "Used for cloning private repos. Set the key value in Env Vars first.",
+      "goToEnvVars": "Go to Env Vars",
+      "toasts": {
+        "missingGithubUrl": "Please enter a GitHub URL",
+        "createProjectFailed": "Failed to create project. Please try again.",
+        "projectCreated": "Project created: {{name}}"
+      }
     },
     "browser": {
       "toggle": "Browser"

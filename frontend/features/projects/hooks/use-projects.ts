@@ -6,6 +6,7 @@ import {
   updateProjectAction,
 } from "@/features/projects/actions/project-actions";
 import type { ProjectItem } from "@/features/projects/types";
+import type { ProjectRepoDefaultsInput } from "@/components/shared/app-shell-context";
 
 interface UseProjectsOptions {
   initialProjects?: ProjectItem[];
@@ -39,16 +40,22 @@ export function useProjects(options: UseProjectsOptions = {}) {
     fetchProjects();
   }, [enableClientFetch, fetchProjects]);
 
-  const addProject = useCallback(async (name: string) => {
-    try {
-      const newProject = await createProjectAction({ name });
-      setProjects((prev) => [...prev, newProject]);
-      return newProject;
-    } catch (error) {
-      console.error("Failed to create project", error);
-      return null;
-    }
-  }, []);
+  const addProject = useCallback(
+    async (name: string, options?: ProjectRepoDefaultsInput) => {
+      try {
+        const newProject = await createProjectAction({
+          name,
+          ...(options ?? {}),
+        });
+        setProjects((prev) => [...prev, newProject]);
+        return newProject;
+      } catch (error) {
+        console.error("Failed to create project", error);
+        return null;
+      }
+    },
+    [],
+  );
 
   const updateProject = useCallback(
     async (projectId: string, updates: { name?: string }) => {

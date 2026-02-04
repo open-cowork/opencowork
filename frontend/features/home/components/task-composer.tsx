@@ -23,6 +23,7 @@ import { playFileUploadSound } from "@/lib/utils/sound";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   Tooltip,
   TooltipContent,
@@ -45,15 +46,21 @@ import {
   type RunScheduleMode,
 } from "@/features/home/components/run-schedule-dialog";
 import { useSlashCommandAutocomplete } from "@/features/chat/hooks/use-slash-command-autocomplete";
+import { useAppShell } from "@/components/shared/app-shell-context";
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 
 export type ComposerMode = "plan" | "task" | "scheduled";
 
+export type RepoUsageMode = "session" | "create_project";
+
 export interface TaskSendOptions {
   attachments?: InputFile[];
   repo_url?: string | null;
   git_branch?: string | null;
+  git_token_env_key?: string | null;
+  repo_usage?: RepoUsageMode | null;
+  project_name?: string | null;
   browser_enabled?: boolean | null;
   run_schedule?: {
     schedule_mode: RunScheduleMode;
@@ -77,6 +84,7 @@ export function TaskComposer({
   onModeChange,
   onSend,
   isSubmitting,
+  allowProjectize = true,
   onFocus,
   onBlur,
 }: {
@@ -87,10 +95,12 @@ export function TaskComposer({
   onModeChange: (mode: ComposerMode) => void;
   onSend: (options?: TaskSendOptions) => void | Promise<void>;
   isSubmitting?: boolean;
+  allowProjectize?: boolean;
   onFocus?: () => void;
   onBlur?: () => void;
 }) {
   const { t } = useT("translation");
+  const { lng } = useAppShell();
   const isComposing = React.useRef(false);
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [isUploading, setIsUploading] = React.useState(false);
@@ -106,6 +116,9 @@ export function TaskComposer({
   const [repoDialogOpen, setRepoDialogOpen] = React.useState(false);
   const [repoUrl, setRepoUrl] = React.useState("");
   const [gitBranch, setGitBranch] = React.useState("main");
+  const [gitTokenEnvKey, setGitTokenEnvKey] = React.useState("");
+  const [repoUsage, setRepoUsage] = React.useState<RepoUsageMode>("session");
+  const [projectName, setProjectName] = React.useState("");
 
   const [runScheduleOpen, setRunScheduleOpen] = React.useState(false);
   const [runScheduleMode, setRunScheduleMode] =
@@ -141,6 +154,39 @@ export function TaskComposer({
     const derived = value.trim().slice(0, 32);
     if (derived) setScheduledName(derived);
   }, [mode, scheduledName, value]);
+
+  const envVarsHref = React.useMemo(() => {
+    const clean = (lng || "").trim();
+    return clean ? `/${clean}/capabilities/env-vars` : "/capabilities/env-vars";
+  }, [lng]);
+
+  const derivedProjectName = React.useMemo(() => {
+    const url = repoUrl.trim();
+    if (!url) return "";
+    try {
+      const parsed = new URL(url);
+      const host = parsed.hostname.toLowerCase();
+      if (host !== "github.com" && host !== "www.github.com") return "";
+      const parts = parsed.pathname.split("/").filter(Boolean);
+      if (parts.length < 2) return "";
+      const owner = parts[0];
+      let repo = parts[1];
+      if (repo.endsWith(".git")) repo = repo.slice(0, -4);
+      if (!owner || !repo) return "";
+      return `${owner}/${repo}`;
+    } catch {
+      return "";
+    }
+  }, [repoUrl]);
+
+  // Best-effort default project name when the user chooses "create project".
+  React.useEffect(() => {
+    if (!allowProjectize) return;
+    if (repoUsage !== "create_project") return;
+    if (projectName.trim()) return;
+    if (!derivedProjectName) return;
+    setProjectName(derivedProjectName);
+  }, [allowProjectize, derivedProjectName, projectName, repoUsage]);
 
   const scheduledSummary = React.useMemo(() => {
     const inferred = inferScheduleFromCron(scheduledCron);
@@ -245,6 +291,12 @@ export function TaskComposer({
       attachments,
       repo_url: repoUrl.trim() || null,
       git_branch: gitBranch.trim() || null,
+      git_token_env_key: repoUrl.trim() ? gitTokenEnvKey.trim() || null : null,
+      repo_usage: allowProjectize ? repoUsage : null,
+      project_name:
+        allowProjectize && repoUsage === "create_project"
+          ? (projectName.trim() || derivedProjectName || "").trim() || null
+          : null,
       browser_enabled: browserEnabled,
       run_schedule:
         mode === "scheduled"
@@ -275,12 +327,17 @@ export function TaskComposer({
     setRunScheduledAt(null);
   }, [
     attachments,
+    allowProjectize,
     browserEnabled,
+    derivedProjectName,
     gitBranch,
+    gitTokenEnvKey,
     isSubmitting,
     isUploading,
     mode,
     onSend,
+    projectName,
+    repoUsage,
     repoUrl,
     runScheduleMode,
     runScheduledAt,
@@ -341,6 +398,84 @@ export function TaskComposer({
                 placeholder={t("hero.repo.branchPlaceholder")}
               />
             </div>
+
+            {allowProjectize && mode !== "scheduled" ? (
+              <div className="space-y-2 md:col-span-2">
+                <Label>{t("hero.repo.usageLabel")}</Label>
+                <RadioGroup
+                  value={repoUsage}
+                  onValueChange={(value) =>
+                    setRepoUsage(value as RepoUsageMode)
+                  }
+                  className="gap-2"
+                >
+                  <label className="flex items-start gap-3 rounded-lg border border-border bg-background px-3 py-2.5">
+                    <RadioGroupItem value="session" className="mt-0.5" />
+                    <div className="min-w-0">
+                      <div className="text-sm font-medium text-foreground">
+                        {t("hero.repo.usage.session.title")}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {t("hero.repo.usage.session.help")}
+                      </div>
+                    </div>
+                  </label>
+
+                  <label className="flex items-start gap-3 rounded-lg border border-border bg-background px-3 py-2.5">
+                    <RadioGroupItem value="create_project" className="mt-0.5" />
+                    <div className="min-w-0">
+                      <div className="text-sm font-medium text-foreground">
+                        {t("hero.repo.usage.createProject.title")}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {t("hero.repo.usage.createProject.help")}
+                      </div>
+                    </div>
+                  </label>
+                </RadioGroup>
+              </div>
+            ) : null}
+
+            {allowProjectize &&
+            mode !== "scheduled" &&
+            repoUsage === "create_project" ? (
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="repo-project-name">
+                  {t("hero.repo.projectNameLabel")}
+                </Label>
+                <Input
+                  id="repo-project-name"
+                  value={projectName}
+                  onChange={(e) => setProjectName(e.target.value)}
+                  placeholder={t("hero.repo.projectNamePlaceholder")}
+                />
+              </div>
+            ) : null}
+
+            {repoUrl.trim() ? (
+              <div className="space-y-2 md:col-span-2">
+                <div className="flex items-center justify-between gap-2">
+                  <Label htmlFor="repo-token-env-key">
+                    {t("hero.repo.tokenKeyLabel")}
+                  </Label>
+                  <a
+                    href={envVarsHref}
+                    className="text-xs text-primary hover:underline"
+                  >
+                    {t("hero.repo.goToEnvVars")}
+                  </a>
+                </div>
+                <Input
+                  id="repo-token-env-key"
+                  value={gitTokenEnvKey}
+                  onChange={(e) => setGitTokenEnvKey(e.target.value)}
+                  placeholder={t("hero.repo.tokenKeyPlaceholder")}
+                />
+                <p className="text-xs text-muted-foreground">
+                  {t("hero.repo.tokenKeyHelp")}
+                </p>
+              </div>
+            ) : null}
           </div>
 
           <DialogFooter>

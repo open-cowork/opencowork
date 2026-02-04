@@ -98,6 +98,8 @@ export interface InputFile {
 export interface TaskConfig {
   repo_url?: string | null;
   git_branch?: string; // defaults to "main"
+  /** Env var key holding a GitHub token (e.g. "GITHUB_TOKEN"). */
+  git_token_env_key?: string | null;
   /** Built-in browser capability toggle (Playwright MCP is injected internally). */
   browser_enabled?: boolean;
   /** MCP server enable/disable toggles (true=enabled, false=disabled).
