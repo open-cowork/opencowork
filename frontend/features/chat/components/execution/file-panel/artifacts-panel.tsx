@@ -163,6 +163,7 @@ export function ArtifactsPanel({
                 selectFile(file);
               }}
               selectedFile={selectedFile}
+              sessionId={sessionId}
             />
           </div>
         )}

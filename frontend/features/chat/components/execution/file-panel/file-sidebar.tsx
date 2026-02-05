@@ -10,14 +10,19 @@ import {
   File as FileIcon,
   ChevronRight,
   ChevronDown,
+  Download,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { FileNode } from "@/features/chat/types";
+import { apiClient, API_ENDPOINTS } from "@/lib/api-client";
+import { toast } from "sonner";
+import { PanelHeaderAction } from "@/components/shared/panel-header";
 
 interface FileSidebarProps {
   files: FileNode[];
   onFileSelect: (file: FileNode) => void;
   selectedFile?: FileNode;
+  sessionId?: string;
 }
 
 function FileTreeItem({
@@ -164,11 +169,45 @@ export function FileSidebar({
   files,
   onFileSelect,
   selectedFile,
+  sessionId,
 }: FileSidebarProps) {
+  const handleDownload = async () => {
+    if (!sessionId) return;
+    try {
+      const response = await apiClient.get<{
+        url?: string | null;
+        filename?: string | null;
+      }>(API_ENDPOINTS.sessionWorkspaceArchive(sessionId));
+
+      if (response.url) {
+        const filename = response.filename || `workspace-${sessionId}.zip`;
+        const link = document.createElement("a");
+        link.href = response.url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.success("开始下载工作区归档");
+      } else {
+        toast.error("归档文件暂不可用");
+      }
+    } catch (error) {
+      console.error("[Artifacts] Failed to download workspace archive", error);
+      toast.error("下载失败");
+    }
+  };
+
   return (
     <aside className="flex h-full min-h-0 min-w-0 flex-col border-l border-border/60 bg-sidebar/60 text-sidebar-foreground">
-      <div className="px-3 py-2 text-xs font-semibold uppercase tracking-wide text-sidebar-foreground/70">
-        文件列表
+      <div className="flex items-center justify-between px-3 py-2">
+        <span className="text-xs font-semibold uppercase tracking-wide text-sidebar-foreground/70">
+          文件列表
+        </span>
+        {sessionId && (
+          <PanelHeaderAction onClick={handleDownload} aria-label="下载全部">
+            <Download className="size-4" />
+          </PanelHeaderAction>
+        )}
       </div>
       <ScrollArea className="flex-1 min-h-0">
         <div className="px-2 py-2 space-y-1 min-w-0 overflow-hidden">

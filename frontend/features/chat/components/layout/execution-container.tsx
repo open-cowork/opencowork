@@ -102,14 +102,9 @@ export function ExecutionContainer({ sessionId }: ExecutionContainerProps) {
       <TabsTrigger value="computer">
         <Monitor className="size-4" />
         {t("mobile.computer")}
-        {session?.status ? (
-          <Badge
-            variant={isSessionActive ? "secondary" : "outline"}
-            className="ml-1"
-          >
-            {isSessionActive
-              ? t("computer.status.live")
-              : t("computer.status.replay")}
+        {session?.status && isSessionActive ? (
+          <Badge variant="secondary" className="ml-1">
+            {t("computer.status.live")}
           </Badge>
         ) : null}
       </TabsTrigger>

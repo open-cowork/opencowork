@@ -445,7 +445,10 @@ function SidebarGroupContent({
     <div
       data-slot="sidebar-group-content"
       data-sidebar="group-content"
-      className={cn("w-full text-sm group-data-[collapsible=icon]:hidden", className)}
+      className={cn(
+        "w-full text-sm group-data-[collapsible=icon]:hidden",
+        className,
+      )}
       {...props}
     />
   );
@@ -467,7 +470,10 @@ function SidebarMenuItem({ className, ...props }: React.ComponentProps<"li">) {
     <li
       data-slot="sidebar-menu-item"
       data-sidebar="menu-item"
-      className={cn("group/menu-item relative", className)}
+      className={cn(
+        "group/menu-item relative w-full min-w-0 rounded-[10px] overflow-hidden",
+        className,
+      )}
       {...props}
     />
   );

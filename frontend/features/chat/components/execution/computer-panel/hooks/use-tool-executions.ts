@@ -19,38 +19,58 @@ export function useToolExecutions({
 }: UseToolExecutionsOptions) {
   const [executions, setExecutions] = useState<ToolExecutionResponse[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const [error, setError] = useState<Error | null>(null);
   const lastSessionIdRef = useRef<string | null>(null);
   const hasLoadedOnceRef = useRef(false);
   const requestSeqRef = useRef(0);
 
-  const fetchOnce = useCallback(async () => {
-    if (!sessionId) return;
-    const seq = (requestSeqRef.current += 1);
-    const shouldShowLoading = !hasLoadedOnceRef.current;
-    if (shouldShowLoading) {
-      setIsLoading(true);
-    }
-    try {
-      const data = await getToolExecutionsAction({
-        sessionId,
-        limit,
-        offset: 0,
-      });
-      if (seq !== requestSeqRef.current) return;
-      setExecutions(data);
-      setError(null);
-    } catch (err) {
-      if (seq !== requestSeqRef.current) return;
-      setError(err as Error);
-    } finally {
-      if (seq !== requestSeqRef.current) return;
+  const fetchOnce = useCallback(
+    async (replace = false) => {
+      if (!sessionId) return;
+      const seq = (requestSeqRef.current += 1);
+      const shouldShowLoading = !hasLoadedOnceRef.current && replace;
       if (shouldShowLoading) {
+        setIsLoading(true);
+      }
+
+      const offset = replace ? 0 : executions.length;
+
+      try {
+        const data = await getToolExecutionsAction({
+          sessionId,
+          limit,
+          offset,
+        });
+        if (seq !== requestSeqRef.current) return;
+
+        if (replace) {
+          setExecutions(data);
+        } else {
+          setExecutions((prev) => [...prev, ...data]);
+        }
+
+        setHasMore(data.length === limit);
+        setError(null);
+      } catch (err) {
+        if (seq !== requestSeqRef.current) return;
+        setError(err as Error);
+      } finally {
+        if (seq !== requestSeqRef.current) return;
         setIsLoading(false);
+        setIsLoadingMore(false);
         hasLoadedOnceRef.current = true;
       }
-    }
-  }, [limit, sessionId]);
+    },
+    [limit, sessionId, executions.length],
+  );
+
+  const loadMore = useCallback(() => {
+    if (isLoadingMore || !hasMore || !sessionId) return;
+    setIsLoadingMore(true);
+    void fetchOnce(false);
+  }, [fetchOnce, hasMore, isLoadingMore, sessionId]);
 
   // Reset state when session changes.
   useEffect(() => {
@@ -62,7 +82,9 @@ export function useToolExecutions({
     setExecutions([]);
     setError(null);
     setIsLoading(false);
-    void fetchOnce();
+    setIsLoadingMore(false);
+    setHasMore(true);
+    void fetchOnce(true);
   }, [fetchOnce, sessionId]);
 
   // Poll while active.
@@ -70,10 +92,18 @@ export function useToolExecutions({
     if (!sessionId) return;
     if (!isActive) return;
     const id = setInterval(() => {
-      void fetchOnce();
+      void fetchOnce(true);
     }, pollingIntervalMs);
     return () => clearInterval(id);
   }, [fetchOnce, isActive, pollingIntervalMs, sessionId]);
 
-  return { executions, isLoading, error, refetch: fetchOnce };
+  return {
+    executions,
+    isLoading,
+    isLoadingMore,
+    hasMore,
+    error,
+    refetch: () => fetchOnce(true),
+    loadMore,
+  };
 }

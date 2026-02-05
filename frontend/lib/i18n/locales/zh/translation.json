@@ -268,7 +268,7 @@
     "status": "状态"
   },
   "computer": {
-    "title": "Poco 电脑",
+    "title": "电脑",
     "description": "运行中查看浏览器与终端过程",
     "status": {
       "live": "实时同步",
