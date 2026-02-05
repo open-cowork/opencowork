@@ -15,6 +15,7 @@ from app.services.skill_stager import SkillStager
 from app.services.attachment_stager import AttachmentStager
 from app.services.claude_md_stager import ClaudeMdStager
 from app.services.slash_command_stager import SlashCommandStager
+from app.services.sub_agent_stager import SubAgentStager
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +33,7 @@ class RunPullService:
         self.attachment_stager = AttachmentStager()
         self.claude_md_stager = ClaudeMdStager()
         self.slash_command_stager = SlashCommandStager()
+        self.subagent_stager = SubAgentStager()
 
         self.worker_id = f"{socket.gethostname()}:{os.getpid()}"
         self._semaphore = asyncio.Semaphore(self.settings.max_concurrent_tasks)
@@ -304,6 +306,31 @@ class RunPullService:
                 # Best-effort: don't block execution if CLAUDE.md staging fails.
                 logger.warning(
                     f"Failed to stage CLAUDE.md for session {session_id}: {exc}"
+                )
+
+            step_started = time.perf_counter()
+            raw_agents_val = resolved_config.pop("subagent_raw_agents", None)
+            raw_agents = raw_agents_val if isinstance(raw_agents_val, dict) else {}
+            try:
+                staged_agents = self.subagent_stager.stage_raw_agents(
+                    user_id=user_id,
+                    session_id=session_id,
+                    raw_agents=raw_agents,
+                )
+                logger.info(
+                    "timing",
+                    extra={
+                        "step": "run_dispatch_stage_subagents",
+                        "duration_ms": int((time.perf_counter() - step_started) * 1000),
+                        "subagents_requested": len(raw_agents),
+                        "subagents_staged": len(staged_agents),
+                        **ctx,
+                    },
+                )
+            except Exception as exc:
+                # Best-effort: keep tasks running even if staging fails.
+                logger.warning(
+                    f"Failed to stage subagents for session {session_id}: {exc}"
                 )
 
             step_started = time.perf_counter()

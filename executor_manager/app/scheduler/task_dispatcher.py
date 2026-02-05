@@ -19,6 +19,7 @@ from app.services.config_resolver import ConfigResolver
 from app.services.skill_stager import SkillStager
 from app.services.attachment_stager import AttachmentStager
 from app.services.slash_command_stager import SlashCommandStager
+from app.services.sub_agent_stager import SubAgentStager
 
 logger = logging.getLogger(__name__)
 
@@ -66,6 +67,7 @@ class TaskDispatcher:
         skill_stager = SkillStager()
         attachment_stager = AttachmentStager()
         slash_command_stager = SlashCommandStager()
+        subagent_stager = SubAgentStager()
 
         user_id = config.get("user_id", "")
         container_mode = config.get("container_mode", "ephemeral")
@@ -173,6 +175,32 @@ class TaskDispatcher:
                     "commands_staged": len(staged_commands),
                 },
             )
+
+            step_started = time.perf_counter()
+            raw_agents_val = resolved_config.pop("subagent_raw_agents", None)
+            raw_agents = raw_agents_val if isinstance(raw_agents_val, dict) else {}
+            try:
+                staged_agents = subagent_stager.stage_raw_agents(
+                    user_id=user_id,
+                    session_id=session_id,
+                    raw_agents=raw_agents,
+                )
+                logger.info(
+                    "timing",
+                    extra={
+                        "step": "task_dispatch_stage_subagents",
+                        "duration_ms": int((time.perf_counter() - step_started) * 1000),
+                        "task_id": task_id,
+                        "session_id": session_id,
+                        "user_id": user_id,
+                        "subagents_requested": len(raw_agents),
+                        "subagents_staged": len(staged_agents),
+                    },
+                )
+            except Exception as exc:
+                logger.warning(
+                    f"Failed to stage subagents for session {session_id}: {exc}"
+                )
 
             step_started = time.perf_counter()
             browser_enabled = bool(resolved_config.get("browser_enabled"))

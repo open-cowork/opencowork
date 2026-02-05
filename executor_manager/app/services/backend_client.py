@@ -149,6 +149,31 @@ class BackendClient:
             data = response.json()
             return data.get("data", {}) or {}
 
+    async def resolve_subagents(
+        self, user_id: str, subagent_ids: list[int] | None
+    ) -> dict:
+        """Resolve enabled subagents for execution based on selected ids.
+
+        When `subagent_ids` is None, backend uses the user's enabled subagents
+        as defaults. An explicit empty list means "disable all subagents".
+        """
+        payload: dict = {}
+        if subagent_ids is not None:
+            payload["subagent_ids"] = subagent_ids
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{self.base_url}/api/v1/internal/subagents/resolve",
+                json=payload,
+                headers={
+                    "X-Internal-Token": self.settings.internal_api_token,
+                    "X-User-Id": user_id,
+                    **self._trace_headers(),
+                },
+            )
+            response.raise_for_status()
+            data = response.json()
+            return data.get("data", {}) or {}
+
     async def resolve_slash_commands(
         self, user_id: str, names: list[str] | None = None
     ) -> dict[str, str]:
