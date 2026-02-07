@@ -241,7 +241,7 @@ function ToolStep({ toolUse, toolResult, isOpen, onToggle }: ToolStepProps) {
             toolUse.subagent_transcript.length > 0 ? (
               <div>
                 <div className="text-[10px] uppercase text-muted-foreground mb-1 select-none">
-                  {t("chat.subagentTranscript", "子代理过程")}
+                  {t("chat.subagentTranscript", "Sub-agent Transcript")}
                 </div>
                 <div className="bg-muted/50 p-2 rounded overflow-x-auto text-foreground/90">
                   <pre className="whitespace-pre-wrap break-all">

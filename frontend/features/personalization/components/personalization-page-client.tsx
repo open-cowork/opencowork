@@ -65,13 +65,13 @@ export function PersonalizationPageClient() {
                 <div className="text-base font-medium">
                   {t(
                     "library.personalization.customInstructions.title",
-                    "自定义指令",
+                    "Custom Instructions",
                   )}
                 </div>
                 <div className="text-sm text-muted-foreground">
                   {t(
                     "library.personalization.customInstructions.description",
-                    "这些指令会影响你后续所有任务的回复方式与行为。",
+                    "These instructions affect how future tasks respond and behave.",
                   )}
                 </div>
               </div>
@@ -81,11 +81,11 @@ export function PersonalizationPageClient() {
                   {isEffectiveEnabled
                     ? t(
                         "library.personalization.customInstructions.status.enabled",
-                        "已启用",
+                        "Enabled",
                       )
                     : t(
                         "library.personalization.customInstructions.status.disabled",
-                        "未启用",
+                        "Disabled",
                       )}
                 </Label>
                 <Switch
@@ -99,13 +99,13 @@ export function PersonalizationPageClient() {
             <div className="text-sm text-muted-foreground">
               {t(
                 "library.personalization.customInstructions.hintScope",
-                "该设置为用户级全局：创建新会话、继续会话、定时任务都会生效。",
+                "This setting is user-global: it applies to new sessions, resumed sessions, and scheduled tasks.",
               )}
             </div>
             <div className="text-sm text-muted-foreground">
               {t(
                 "library.personalization.customInstructions.hintSecrets",
-                "不要在这里存放 API Key 等敏感信息。",
+                "Do not store sensitive information such as API keys here.",
               )}
             </div>
           </div>
@@ -115,7 +115,7 @@ export function PersonalizationPageClient() {
               <Label className="text-sm font-medium">
                 {t(
                   "library.personalization.customInstructions.editor.label",
-                  "指令内容",
+                  "Instruction Content",
                 )}
               </Label>
               <Button
@@ -133,7 +133,7 @@ export function PersonalizationPageClient() {
               >
                 {t(
                   "library.personalization.customInstructions.editor.insertTemplate",
-                  "插入示例",
+                  "Insert Example",
                 )}
               </Button>
             </div>
@@ -143,7 +143,7 @@ export function PersonalizationPageClient() {
               onChange={(e) => setContent(e.target.value)}
               placeholder={t(
                 "library.personalization.customInstructions.editor.placeholder",
-                "例如：始终用中文回答；保持专业语气；回答要点优先……",
+                "Example: always respond in English; keep a professional tone; prioritize key points...",
               )}
               className={cn("min-h-[360px] font-mono text-sm")}
               disabled={store.isLoading || store.isSaving}
@@ -152,7 +152,7 @@ export function PersonalizationPageClient() {
             <div className="text-xs text-muted-foreground">
               {t(
                 "library.personalization.customInstructions.editor.tip",
-                "提示：关闭开关表示不应用该指令；你仍可编辑并保存内容以便之后启用。",
+                "Tip: turning this off means the instruction won't apply; you can still edit and save it to enable later.",
               )}
             </div>
           </div>

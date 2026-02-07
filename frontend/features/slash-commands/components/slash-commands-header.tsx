@@ -45,7 +45,7 @@ export function SlashCommandsHeader({
           onChange={onSearchChange}
           placeholder={t(
             "library.slashCommands.searchPlaceholder",
-            "搜索命令...",
+            "Search commands...",
           )}
         />
         <Button
@@ -55,7 +55,7 @@ export function SlashCommandsHeader({
           onClick={onAddClick}
         >
           <Plus className="size-4" />
-          {t("library.slashCommands.header.add", "添加命令")}
+          {t("library.slashCommands.header.add", "Add Command")}
         </Button>
       </div>
     </header>

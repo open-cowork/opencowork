@@ -146,10 +146,10 @@ export function PullToRefresh({
             }`}
           >
             {isRefreshing
-              ? "正在刷新..."
+              ? "Refreshing..."
               : isThresholdMet
-                ? "释放立即刷新"
-                : "下拉刷新"}
+                ? "Release to refresh"
+                : "Pull to refresh"}
           </span>
         </div>
       </motion.div>

@@ -45,7 +45,7 @@ export function ConnectorDetail({ connector, onBack }: ConnectorDetailProps) {
             <X className="size-4" />
           </Button>
           <span className="text-sm font-medium text-muted-foreground">
-            连接器详情
+            Connector Details
           </span>
         </div>
       </div>
@@ -82,7 +82,7 @@ export function ConnectorDetail({ connector, onBack }: ConnectorDetailProps) {
                   </h3>
                   {isConnected && (
                     <Badge className="bg-success/10 text-success border-success/20 px-1.5 py-0 h-4 rounded-full text-[8px] font-bold uppercase">
-                      已连接
+                      Connected
                     </Badge>
                   )}
                 </div>
@@ -107,10 +107,10 @@ export function ConnectorDetail({ connector, onBack }: ConnectorDetailProps) {
               ) : isConnected ? (
                 <>
                   <Check className="mr-2 size-4" />
-                  已启用
+                  Enabled
                 </>
               ) : (
-                "立即连接"
+                "Connect Now"
               )}
             </Button>
           </div>
@@ -122,7 +122,7 @@ export function ConnectorDetail({ connector, onBack }: ConnectorDetailProps) {
             <div className="flex items-center gap-2">
               <div className="size-3.5 rounded-full bg-primary/20" />
               <h4 className="text-xs font-bold uppercase tracking-widest text-foreground">
-                核心能力
+                Core Capabilities
               </h4>
             </div>
 

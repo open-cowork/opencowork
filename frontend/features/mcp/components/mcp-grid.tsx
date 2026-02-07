@@ -63,7 +63,8 @@ export function McpGrid({
       {/* Stats bar with batch controls */}
       <div className="rounded-xl bg-muted/50 px-5 py-3 flex items-center justify-between">
         <span className="text-sm text-muted-foreground">
-          可用服务器: {totalCount ?? servers.length} · 已启用: {enabledCount}
+          Available servers: {totalCount ?? servers.length} · Enabled:{" "}
+          {enabledCount}
         </span>
         {installs.length > 0 && (
           <Button
@@ -73,7 +74,7 @@ export function McpGrid({
             className="h-7 px-2 text-xs"
           >
             <PowerOff className="size-3 mr-1" />
-            全部关闭
+            Disable all
           </Button>
         )}
       </div>
@@ -83,7 +84,7 @@ export function McpGrid({
           <SkeletonShimmer count={5} itemClassName="min-h-[64px]" gap="md" />
         ) : servers.length === 0 ? (
           <div className="rounded-xl border border-border/50 bg-muted/10 px-4 py-6 text-sm text-muted-foreground text-center">
-            暂无 MCP 服务器
+            No MCP servers yet
           </div>
         ) : (
           <StaggeredList
@@ -113,7 +114,7 @@ export function McpGrid({
                         variant="outline"
                         className="text-xs text-muted-foreground"
                       >
-                        {server.scope === "system" ? "系统" : "个人"}
+                        {server.scope === "system" ? "System" : "Personal"}
                       </Badge>
                     </div>
                   </div>
@@ -133,7 +134,7 @@ export function McpGrid({
                         disabled={isRowLoading}
                         title={t(
                           "library.mcpLibrary.actions.uninstall",
-                          "卸载",
+                          "Uninstall",
                         )}
                       >
                         <Trash2 className="size-4" />
@@ -144,7 +145,7 @@ export function McpGrid({
                       size="icon"
                       className="size-8"
                       onClick={() => onEditServer?.(server)}
-                      title="设置"
+                      title="Settings"
                     >
                       <Settings className="size-4" />
                     </Button>

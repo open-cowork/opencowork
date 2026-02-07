@@ -202,7 +202,7 @@ export function MainSidebar({
     Set<string>
   >(new Set());
 
-  // 管理每个项目的折叠状态
+  // Track expand/collapse state per project
   const [expandedProjects, setExpandedProjects] = React.useState<Set<string>>(
     new Set(),
   );
@@ -225,13 +225,13 @@ export function MainSidebar({
     }
   }, [params?.id, taskHistory]);
 
-  // 过滤出未归类到项目的任务
+  // Filter tasks not assigned to any project
   const unassignedTasks = React.useMemo(
     () => taskHistory.filter((task) => !task.projectId),
     [taskHistory],
   );
 
-  // 按项目分组任务
+  // Group tasks by project
   const tasksByProject = React.useMemo(() => {
     const grouped = new Map<string, TaskHistoryItem[]>();
     taskHistory.forEach((task) => {
@@ -409,10 +409,10 @@ export function MainSidebar({
         className="border-r-0 bg-sidebar overflow-hidden"
       >
         <SidebarHeader className="gap-2 pb-2">
-          {/* Logo 和折叠按钮 */}
+          {/* Logo and collapse toggle */}
           <div className="mb-3 flex items-center justify-between pt-2 group-data-[collapsible=icon]:justify-start">
             <div className="flex items-center gap-3 group-data-[collapsible=icon]:gap-0">
-              {/* 折叠状态下：默认显示 Logo，悬停显示展开按钮 */}
+              {/* Collapsed state: show logo by default, expand on hover */}
               <button
                 onClick={toggleSidebar}
                 className="group/logo relative flex size-8 items-center justify-center overflow-hidden rounded-lg bg-sidebar-primary text-sidebar-primary-foreground shadow-md transition-all hover:shadow-lg active:scale-95 active:shadow-sm"
@@ -440,7 +440,7 @@ export function MainSidebar({
 
           {!isSelectionMode && (
             <>
-              {/* 新建任务按钮 */}
+              {/* New task button */}
               <SidebarMenu className="group-data-[collapsible=icon]:px-0">
                 <SidebarMenuItem>
                   <SidebarMenuButton
@@ -458,9 +458,9 @@ export function MainSidebar({
 
               {TOP_NAV_ITEMS.map(({ id, labelKey, icon: Icon, href }) => {
                 const isDisabled = id === "search"; // Search temporarily disabled
-                // 根据不同的菜单项设置不同的动画效果
+                // Use different animations per menu item
                 const getIconAnimation = () => {
-                  if (isDisabled) return ""; // 禁用状态下不显示动画
+                  if (isDisabled) return ""; // No animation when disabled
                   switch (id) {
                     case "capabilities":
                       return "transition-all duration-300 group-hover/menu-item:rotate-12 group-hover/menu-item:scale-110";
@@ -490,7 +490,9 @@ export function MainSidebar({
                             "opacity-50 cursor-not-allowed hover:bg-transparent",
                         )}
                         tooltip={
-                          isDisabled ? `${t(labelKey)} (暂不可用)` : t(labelKey)
+                          isDisabled
+                            ? `${t(labelKey)} (Unavailable)`
+                            : t(labelKey)
                         }
                       >
                         <Icon
@@ -514,13 +516,13 @@ export function MainSidebar({
 
           {isSelectionMode && (
             <div className="px-2 py-1 text-sm font-medium text-sidebar-foreground group-data-[collapsible=icon]:hidden">
-              批量操作
+              Batch Actions
             </div>
           )}
         </SidebarHeader>
 
         <SidebarContent className="flex flex-col !overflow-hidden gap-0">
-          {/* 项目列表 - 放在上面 */}
+          {/* Project list - placed above */}
           <div className="flex-shrink-0 flex flex-col">
             <Collapsible
               defaultOpen
@@ -582,7 +584,7 @@ export function MainSidebar({
           </div>
 
           <div className="flex-1 min-h-0 flex flex-col">
-            {/* 所有任务（未归类） - 放在下面 */}
+            {/* All tasks (unassigned) - placed below */}
             <DroppableAllTasksGroup
               title={t("sidebar.allTasks")}
               tasks={unassignedTasks}
@@ -606,7 +608,7 @@ export function MainSidebar({
                 size="icon"
                 onClick={handleCancelSelectionMode}
                 className="size-8 text-muted-foreground hover:bg-sidebar-accent"
-                title={t("common.cancel") || "取消"}
+                title={t("common.cancel") || "Cancel"}
               >
                 <X className="size-4" />
               </Button>
@@ -621,13 +623,13 @@ export function MainSidebar({
                 onClick={handleDeleteSelectedItems}
                 disabled={selectedTaskIds.size + selectedProjectIds.size === 0}
                 className="size-8 text-destructive hover:text-destructive hover:bg-destructive/10"
-                title={t("common.delete") || "删除"}
+                title={t("common.delete") || "Delete"}
               >
                 <Trash2 className="size-4" />
               </Button>
             </div>
           ) : (
-            /* 底部工具栏 - 正常模式 */
+            /* Bottom toolbar - normal mode */
             <div className="flex items-center justify-start px-1 group-data-[collapsible=icon]:px-0">
               <Button
                 variant="ghost"

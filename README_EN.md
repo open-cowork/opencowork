@@ -14,7 +14,7 @@ Think of it as a **safer** (sandboxed isolation), **more beautiful** (modern UI)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.115+-green.svg)](https://fastapi.tiangolo.com/)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/poco-ai/poco-agent)
 
-[English](./README_EN.md) | [中文](./README_zh.md)
+[English](./README.md) | [English](./README_EN.md)
 
 </div>
 

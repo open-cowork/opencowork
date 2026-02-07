@@ -56,7 +56,7 @@ export function SkillUsageCard({ skills }: SkillUsageCardProps) {
       <CardHeader className="py-3 px-4 shrink-0">
         <CardTitle className="text-sm font-semibold flex items-center gap-2">
           <Zap className="size-4 text-foreground" />
-          <span className="flex-1">技能使用</span>
+          <span className="flex-1">Skill Usage</span>
           <Badge variant="outline" className="text-xs">
             {skills.length}
           </Badge>

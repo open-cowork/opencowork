@@ -43,11 +43,11 @@ interface SettingsDialogProps {
 }
 
 const SIDEBAR_ITEMS = [
-  { icon: User, label: "账户", id: "account" },
-  { icon: Settings, label: "设置", id: "settings" },
-  { icon: Activity, label: "使用情况", id: "usage" },
-  { icon: Calendar, label: "定时任务", id: "scheduled" },
-  { icon: Plug, label: "连接器", id: "connectors" },
+  { icon: User, label: "Account", id: "account" },
+  { icon: Settings, label: "Settings", id: "settings" },
+  { icon: Activity, label: "Usage", id: "usage" },
+  { icon: Calendar, label: "Scheduled Tasks", id: "scheduled" },
+  { icon: Plug, label: "Connectors", id: "connectors" },
 ];
 
 export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
@@ -119,7 +119,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                   size="sm"
                   className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 h-7 px-4 text-xs font-bold"
                 >
-                  升级
+                  Upgrade
                 </Button>
               </div>
               <div className="p-4 space-y-5">
@@ -128,7 +128,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <Sparkles className="size-4" />
-                      <span className="text-sm font-medium">积分</span>
+                      <span className="text-sm font-medium">Credits</span>
                       <HelpCircle className="size-3.5 opacity-50" />
                     </div>
                     <span className="text-xl font-bold tracking-tight">
@@ -136,7 +136,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                     </span>
                   </div>
                   <div className="flex items-center justify-between text-xs text-muted-foreground/60 pl-6">
-                    <span>免费积分</span>
+                    <span>Free Credits</span>
                     <span>{credits?.free}</span>
                   </div>
                 </div>
@@ -146,7 +146,9 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-muted-foreground">
                       <RefreshCw className="size-4" />
-                      <span className="text-sm font-medium">每日刷新积分</span>
+                      <span className="text-sm font-medium">
+                        Daily Refresh Credits
+                      </span>
                       <HelpCircle className="size-3.5 opacity-50" />
                     </div>
                     <span className="text-xl font-bold tracking-tight">
@@ -154,7 +156,8 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                     </span>
                   </div>
                   <div className="text-xs text-muted-foreground/60 pl-6">
-                    每天 {credits?.refreshTime} 刷新为 {credits?.dailyRefreshMax}
+                    Refreshes to {credits?.dailyRefreshMax} every day at{" "}
+                    {credits?.refreshTime}
                   </div>
                 </div>
               </div>
@@ -164,12 +167,12 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
       case "settings":
         return (
           <div className="p-6">
-            <h3 className="text-lg font-medium mb-4">通用设置</h3>
+            <h3 className="text-lg font-medium mb-4">General Settings</h3>
             <div className="space-y-4">
               <div className="flex items-center justify-between py-2">
                 <div className="flex items-center gap-2">
                   <Moon className="size-4 text-muted-foreground" />
-                  <span className="text-sm">深色模式</span>
+                  <span className="text-sm">Dark Mode</span>
                 </div>
                 <Switch
                   checked={theme === "dark"}
@@ -182,9 +185,11 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
               <div className="flex items-center justify-between py-2">
                 <div className="flex items-center gap-2">
                   <User className="size-4 text-muted-foreground" />
-                  <span className="text-sm">语言</span>
+                  <span className="text-sm">Language</span>
                 </div>
-                <span className="text-sm text-muted-foreground">简体中文</span>
+                <span className="text-sm text-muted-foreground">
+                  Simplified Chinese
+                </span>
               </div>
             </div>
           </div>
@@ -193,7 +198,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
         return (
           <div className="p-6">
             <div className="text-center text-muted-foreground py-10">
-              暂无使用数据
+              No usage data yet
             </div>
           </div>
         );
@@ -284,7 +289,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
         return (
           <div className="p-6">
             <div className="text-center text-muted-foreground py-10">
-              已连接的服务将显示在这里
+              Connected services will appear here
             </div>
           </div>
         );
@@ -300,7 +305,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
         showCloseButton={false}
       >
         <DialogHeader className="sr-only">
-          <DialogTitle>设置</DialogTitle>
+          <DialogTitle>Settings</DialogTitle>
         </DialogHeader>
         <div className="flex flex-1 min-h-0">
           {/* Left Sidebar */}
@@ -332,7 +337,7 @@ export function SettingsDialog({ open, onOpenChange }: SettingsDialogProps) {
                 className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors w-full"
               >
                 <HelpCircle className="size-4" />
-                <span>获取帮助</span>
+                <span>Get Help</span>
                 <ExternalLink className="size-3 ml-auto" />
               </button>
             </div>

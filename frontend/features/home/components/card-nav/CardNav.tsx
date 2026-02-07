@@ -57,7 +57,7 @@ interface InstalledItem {
  * An expandable card that shows MCP, Skill, and App sections on hover
  */
 export function CardNav({
-  triggerText = "将您的工具连接到 Poco",
+  triggerText = "Connect your tools to Poco",
   className = "",
   forceExpanded = false,
 }: CardNavProps) {
@@ -511,7 +511,7 @@ export function CardNav({
                         </button>
                       </TooltipTrigger>
                       <TooltipContent side="top" sideOffset={4}>
-                        <span>一键关闭</span>
+                        <span>Disable all</span>
                       </TooltipContent>
                     </Tooltip>
                   )}
@@ -524,14 +524,14 @@ export function CardNav({
                       }}
                       className="flex items-center justify-center size-6 rounded-full hover:bg-amber-500/20 transition-colors"
                       type="button"
-                      title="点击查看详情"
+                      title="Click to view details"
                     >
                       <AlertTriangle className="size-4 text-amber-500" />
                     </button>
                   )}
                 </div>
               </div>
-              {renderItemBadges(installedMcps, "未安装 MCP", "mcp")}
+              {renderItemBadges(installedMcps, "MCP not installed", "mcp")}
             </div>
 
             {/* Skill Card */}
@@ -571,7 +571,7 @@ export function CardNav({
                         </button>
                       </TooltipTrigger>
                       <TooltipContent side="top" sideOffset={4}>
-                        <span>一键关闭</span>
+                        <span>Disable all</span>
                       </TooltipContent>
                     </Tooltip>
                   )}
@@ -584,14 +584,14 @@ export function CardNav({
                       }}
                       className="flex items-center justify-center size-6 rounded-full hover:bg-amber-500/20 transition-colors"
                       type="button"
-                      title="点击查看详情"
+                      title="Click to view details"
                     >
                       <AlertTriangle className="size-4 text-amber-500" />
                     </button>
                   )}
                 </div>
               </div>
-              {renderItemBadges(installedSkills, "未安装技能", "skill")}
+              {renderItemBadges(installedSkills, "Skill not installed", "skill")}
             </div>
 
             {/* App Card */}
@@ -601,11 +601,11 @@ export function CardNav({
                   <AppWindow className="size-[1.125rem]" />
                 </div>
                 <span className="text-base font-semibold tracking-[-0.01em] text-foreground">
-                  应用
+                  Apps
                 </span>
               </div>
               <span className="text-xs italic text-muted-foreground">
-                即将推出
+                Coming Soon
               </span>
             </div>
           </div>

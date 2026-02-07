@@ -142,7 +142,7 @@ export function FileChangeCard({
           }`}
           onClick={handlePreviewClick}
           disabled={isSessionRunning}
-          title={isSessionRunning ? "执行中，暂不可预览" : "预览文件"}
+          title={isSessionRunning ? "Running; preview unavailable" : "Preview file"}
         >
           {isSessionRunning ? (
             <EyeOff className="size-4" />
@@ -159,18 +159,18 @@ export function FileChangeCard({
             <div className="flex items-center gap-1.5 text-success shrink-0">
               <Plus className="size-3 shrink-0" />
               <span className="font-medium shrink-0">{addedLines}</span>
-              <span className="text-muted-foreground shrink-0">行新增</span>
+              <span className="text-muted-foreground shrink-0">Lines added</span>
             </div>
           )}
           {deletedLines > 0 && (
             <div className="flex items-center gap-1.5 text-destructive shrink-0">
               <Minus className="size-3 shrink-0" />
               <span className="font-medium shrink-0">{deletedLines}</span>
-              <span className="text-muted-foreground shrink-0">行删除</span>
+              <span className="text-muted-foreground shrink-0">Lines removed</span>
             </div>
           )}
           <div className="ml-auto text-muted-foreground shrink-0">
-            共 {totalChanges} 行变更
+            Total {totalChanges} line changes
           </div>
         </div>
       )}
@@ -180,7 +180,7 @@ export function FileChangeCard({
         <div className="px-4 py-3 border-t border-border">
           <details className="group">
             <summary className="cursor-pointer text-xs font-medium text-muted-foreground hover:text-foreground transition-colors truncate">
-              查看差异
+              View diff
             </summary>
             <pre className="mt-2 text-xs font-mono bg-muted/50 rounded p-2 overflow-x-auto whitespace-pre max-h-40 overflow-y-auto">
               <code className="block">{change.diff}</code>

@@ -8,7 +8,7 @@ const listSessionsSchema = z.object({
 });
 
 const sessionIdSchema = z.object({
-  sessionId: z.string().trim().min(1, "缺少会话 ID"),
+  sessionId: z.string().trim().min(1, "Missing session ID"),
 });
 
 const getMessagesSchema = sessionIdSchema.extend({
@@ -25,7 +25,7 @@ const toolExecutionsSchema = sessionIdSchema.extend({
 });
 
 const browserScreenshotSchema = sessionIdSchema.extend({
-  toolUseId: z.string().trim().min(1, "缺少工具调用 ID"),
+  toolUseId: z.string().trim().min(1, "Missing tool call ID"),
 });
 
 export type ListSessionsInput = z.infer<typeof listSessionsSchema>;

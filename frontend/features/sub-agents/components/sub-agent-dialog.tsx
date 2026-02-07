@@ -94,8 +94,8 @@ export function SubAgentDialog({
 
   const title =
     mode === "create"
-      ? t("library.subAgents.dialog.createTitle", "新增子代理")
-      : t("library.subAgents.dialog.editTitle", "编辑子代理");
+      ? t("library.subAgents.dialog.createTitle", "New Sub-agent")
+      : t("library.subAgents.dialog.editTitle", "Edit Sub-agent");
 
   const isValid =
     Boolean(name.trim()) &&
@@ -162,7 +162,7 @@ export function SubAgentDialog({
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="subagent-name">
-                  {t("library.subAgents.fields.name", "名称")}
+                  {t("library.subAgents.fields.name", "Name")}
                 </Label>
                 <Input
                   id="subagent-name"
@@ -178,7 +178,7 @@ export function SubAgentDialog({
               </div>
 
               <div className="space-y-2">
-                <Label>{t("library.subAgents.fields.enabled", "启用")}</Label>
+                <Label>{t("library.subAgents.fields.enabled", "Enabled")}</Label>
                 <div className="flex items-center gap-3 rounded-md border border-border px-3 py-2">
                   <Switch
                     checked={enabled}
@@ -187,8 +187,8 @@ export function SubAgentDialog({
                   />
                   <span className="text-sm text-muted-foreground">
                     {enabled
-                      ? t("common.enabled", "已启用")
-                      : t("common.disabled", "已停用")}
+                      ? t("common.enabled", "Enabled")
+                      : t("common.disabled", "Disabled")}
                   </span>
                 </div>
               </div>
@@ -200,7 +200,7 @@ export function SubAgentDialog({
             >
               <TabsList>
                 <TabsTrigger value="structured">
-                  {t("library.subAgents.mode.structured", "结构化")}
+                  {t("library.subAgents.mode.structured", "Structured")}
                 </TabsTrigger>
                 <TabsTrigger value="raw">
                   {t("library.subAgents.mode.raw", "Markdown")}
@@ -211,7 +211,7 @@ export function SubAgentDialog({
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="subagent-description">
-                      {t("library.subAgents.fields.description", "描述")}
+                      {t("library.subAgents.fields.description", "Description")}
                     </Label>
                     <Input
                       id="subagent-description"
@@ -219,7 +219,7 @@ export function SubAgentDialog({
                       onChange={(e) => setDescription(e.target.value)}
                       placeholder={t(
                         "library.subAgents.fields.descriptionPlaceholder",
-                        "用于质量、安全和可维护性审查。",
+                        "For quality, safety, and maintainability reviews.",
                       )}
                       disabled={isSaving}
                     />
@@ -227,7 +227,7 @@ export function SubAgentDialog({
 
                   <div className="space-y-2">
                     <Label htmlFor="subagent-tools">
-                      {t("library.subAgents.fields.tools", "工具限制")}
+                      {t("library.subAgents.fields.tools", "Tool Restrictions")}
                     </Label>
                     <Input
                       id="subagent-tools"
@@ -243,14 +243,14 @@ export function SubAgentDialog({
                     <p className="text-xs text-muted-foreground">
                       {t(
                         "library.subAgents.fields.toolsHint",
-                        "留空表示继承所有可用工具。",
+                        "Leave blank to inherit all available tools.",
                       )}
                     </p>
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="subagent-prompt">
-                      {t("library.subAgents.fields.prompt", "系统提示")}
+                      {t("library.subAgents.fields.prompt", "System Prompt")}
                     </Label>
                     <Textarea
                       id="subagent-prompt"
@@ -258,7 +258,7 @@ export function SubAgentDialog({
                       onChange={(e) => setPrompt(e.target.value)}
                       placeholder={t(
                         "library.subAgents.fields.promptPlaceholder",
-                        "你是一位代码审查专家...",
+                        "You are a code review expert...",
                       )}
                       disabled={isSaving}
                       className="min-h-[220px]"
@@ -270,7 +270,7 @@ export function SubAgentDialog({
               <TabsContent value="raw">
                 <div className="space-y-2">
                   <Label htmlFor="subagent-raw">
-                    {t("library.subAgents.fields.rawMarkdown", "Markdown 内容")}
+                    {t("library.subAgents.fields.rawMarkdown", "Markdown Content")}
                   </Label>
                   <Textarea
                     id="subagent-raw"
@@ -278,7 +278,7 @@ export function SubAgentDialog({
                     onChange={(e) => setRawMarkdown(e.target.value)}
                     placeholder={t(
                       "library.subAgents.fields.rawMarkdownPlaceholder",
-                      "在这里粘贴完整的 .md（必须包含 YAML 前言，且 name 与上方一致）",
+                      "Paste the full .md here (must include YAML front matter and match the name above)",
                     )}
                     disabled={isSaving}
                     className="min-h-[260px] font-mono"
@@ -286,7 +286,7 @@ export function SubAgentDialog({
                   <p className="text-xs text-muted-foreground">
                     {t(
                       "library.subAgents.fields.rawMarkdownHint",
-                      "提示：raw 模式会以文件形式写入 ~/.claude/agents，并由 SDK 自动加载。",
+                      "Tip: raw mode writes a file to ~/.claude/agents and the SDK auto-loads it.",
                     )}
                   </p>
 
@@ -294,7 +294,7 @@ export function SubAgentDialog({
                     <Label htmlFor="subagent-raw-description">
                       {t(
                         "library.subAgents.fields.descriptionOptional",
-                        "描述（可选）",
+                        "Description (optional)",
                       )}
                     </Label>
                     <Input
@@ -303,7 +303,7 @@ export function SubAgentDialog({
                       onChange={(e) => setDescription(e.target.value)}
                       placeholder={t(
                         "library.subAgents.fields.descriptionPlaceholder",
-                        "用于质量、安全和可维护性审查。",
+                        "For quality, safety, and maintainability reviews.",
                       )}
                       disabled={isSaving}
                     />
@@ -326,7 +326,7 @@ export function SubAgentDialog({
               {isSaving ? (
                 <>
                   <Loader2 className="mr-2 size-4 animate-spin" />
-                  {t("common.saving", "保存中")}
+                  {t("common.saving", "Saving")}
                 </>
               ) : (
                 <>
@@ -336,8 +336,8 @@ export function SubAgentDialog({
                     <Save className="mr-2 size-4" />
                   )}
                   {mode === "create"
-                    ? t("common.create", "创建")
-                    : t("common.save", "保存")}
+                    ? t("common.create", "Create")
+                    : t("common.save", "Save")}
                 </>
               )}
             </Button>

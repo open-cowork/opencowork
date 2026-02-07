@@ -44,7 +44,7 @@ const createSessionSchema = z
       return hasPrompt || hasFiles;
     },
     {
-      message: "请输入任务内容",
+      message: "Please enter task content",
       path: ["prompt"],
     },
   )
@@ -54,7 +54,7 @@ const createSessionSchema = z
       return Boolean((data.scheduled_at || "").trim());
     },
     {
-      message: "请选择执行时间",
+      message: "Please select an execution time",
       path: ["scheduled_at"],
     },
   )
@@ -64,14 +64,14 @@ const createSessionSchema = z
       return !data.scheduled_at;
     },
     {
-      message: "夜间执行不支持设置执行时间",
+      message: "Night execution does not support setting a time",
       path: ["scheduled_at"],
     },
   );
 
 const sendMessageSchema = z
   .object({
-    sessionId: z.string().trim().min(1, "缺少会话 ID"),
+    sessionId: z.string().trim().min(1, "Missing session ID"),
     content: z.string(),
     attachments: z.array(inputFileSchema).optional(),
   })
@@ -80,7 +80,7 @@ const sendMessageSchema = z
       data.content.trim().length > 0 ||
       (data.attachments && data.attachments.length > 0),
     {
-      message: "请输入消息内容",
+      message: "Please enter message content",
       path: ["content"],
     },
   );
@@ -137,7 +137,7 @@ export async function sendMessageAction(input: SendMessageInput) {
 }
 
 const cancelSessionSchema = z.object({
-  sessionId: z.string().trim().min(1, "缺少会话 ID"),
+  sessionId: z.string().trim().min(1, "Missing session ID"),
   reason: z.string().optional().nullable(),
 });
 
@@ -151,7 +151,7 @@ export async function cancelSessionAction(input: CancelSessionInput) {
 }
 
 const deleteSessionSchema = z.object({
-  sessionId: z.string().trim().min(1, "缺少会话 ID"),
+  sessionId: z.string().trim().min(1, "Missing session ID"),
 });
 
 export type DeleteSessionInput = z.infer<typeof deleteSessionSchema>;
@@ -162,8 +162,12 @@ export async function deleteSessionAction(input: DeleteSessionInput) {
 }
 
 const renameSessionTitleSchema = z.object({
-  sessionId: z.string().trim().min(1, "缺少会话 ID"),
-  title: z.string().trim().min(1, "请输入会话名称").max(255, "会话名称过长"),
+  sessionId: z.string().trim().min(1, "Missing session ID"),
+  title: z
+    .string()
+    .trim()
+    .min(1, "Please enter a session name")
+    .max(255, "Session name is too long"),
 });
 
 export type RenameSessionTitleInput = z.infer<typeof renameSessionTitleSchema>;

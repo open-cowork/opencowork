@@ -31,7 +31,7 @@ export function useSkillStore() {
         setInstalls(installsData);
       } catch (error) {
         console.error("[SkillStore] Failed to fetch skills:", error);
-        toast.error("加载技能列表失败");
+        toast.error("Failed to load skills");
       } finally {
         setIsLoading(false);
       }
@@ -51,18 +51,18 @@ export function useSkillStore() {
             prev.filter((install) => install.id !== current.id),
           );
           setSkills((prev) => prev.filter((skill) => skill.id !== skillId));
-          toast.success("技能已卸载");
+          toast.success("Skill uninstalled");
         } else {
           const created = await skillsService.createInstall({
             skill_id: skillId,
             enabled: true,
           });
           setInstalls((prev) => [...prev, created]);
-          toast.success("技能已安装");
+          toast.success("Skill installed");
         }
       } catch (error) {
         console.error("[SkillStore] toggle failed:", error);
-        toast.error("操作失败，请稍后再试");
+        toast.error("Operation failed. Please try again later");
       } finally {
         setLoadingSkillId(null);
       }

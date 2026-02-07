@@ -339,7 +339,7 @@ class AgentExecutor:
         This keeps the Playwright MCP concept/config hidden from end users: they only toggle `browser_enabled`, and the executor wires the MCP server internally.
         """
 
-        # TODO: 这里的实现不够优雅
+        # TODO: This implementation is not elegant
         key = "__poco_playwright"
         if key in mcp_servers:
             return mcp_servers

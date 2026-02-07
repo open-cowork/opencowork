@@ -19,7 +19,7 @@ export function UsageTooltip({ stats }: UsageTooltipProps) {
   const formatDuration = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins}分${secs}秒`;
+    return `${mins}m ${secs}s`;
   };
 
   return (
@@ -37,7 +37,7 @@ export function UsageTooltip({ stats }: UsageTooltipProps) {
           </div>
           <Separator />
           <div>
-            <div className="text-sm font-medium mb-2">本次会话:</div>
+            <div className="text-sm font-medium mb-2">This Session:</div>
             <div className="text-xs space-y-1 text-muted-foreground">
               <div className="flex justify-between">
                 <span>Tokens:</span>
@@ -46,7 +46,7 @@ export function UsageTooltip({ stats }: UsageTooltipProps) {
                 </span>
               </div>
               <div className="flex justify-between">
-                <span>耗时:</span>
+                <span>Duration:</span>
                 <span className="font-medium text-foreground">
                   {formatDuration(stats.duration)}
                 </span>
@@ -55,22 +55,22 @@ export function UsageTooltip({ stats }: UsageTooltipProps) {
           </div>
           <Separator />
           <div>
-            <div className="text-sm font-medium mb-2">使用统计:</div>
+            <div className="text-sm font-medium mb-2">Usage Stats:</div>
             <div className="text-xs space-y-1 text-muted-foreground">
               <div className="flex justify-between">
-                <span>今日:</span>
+                <span>Today:</span>
                 <span className="font-medium text-foreground">
                   {stats.todayUsage.toLocaleString()} tokens
                 </span>
               </div>
               <div className="flex justify-between">
-                <span>本周:</span>
+                <span>This Week:</span>
                 <span className="font-medium text-foreground">
                   {stats.weekUsage.toLocaleString()} tokens
                 </span>
               </div>
               <div className="flex justify-between">
-                <span>本月:</span>
+                <span>This Month:</span>
                 <span className="font-medium text-foreground">
                   {stats.monthUsage.toLocaleString()} tokens
                 </span>

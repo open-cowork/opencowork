@@ -182,7 +182,7 @@ export function MessageContent({
               <summary className="cursor-pointer text-xs font-medium text-muted-foreground hover:text-foreground flex items-center gap-2 select-none">
                 <div className="flex items-center gap-1.5">
                   <Brain className="size-3.5" />
-                  <span>{t("chat.thinkingTitle", "思考过程")}</span>
+                  <span>{t("chat.thinkingTitle", "Reasoning")}</span>
                 </div>
               </summary>
               <div className="mt-2 border-t border-border/50 pt-2 text-xs whitespace-pre-wrap break-words break-all font-mono text-foreground/90">

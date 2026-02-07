@@ -16,7 +16,7 @@ function createNewChatSession(): ChatSession {
   return {
     id: `session-${Date.now()}`,
     taskId: `task-${Date.now()}`,
-    title: "新对话",
+    title: "New Conversation",
     status: "pending",
     model: "claude-sonnet-4.5",
     createdAt: new Date().toISOString(),
@@ -103,17 +103,17 @@ export function useChatCreation({
   const simulateAIResponse = React.useCallback(
     (userMessage: string) => {
       const aiMessageId = `msg-${Date.now()}`;
-      const responseContent = `我理解你的���求了。让我分析一下"${userMessage}"这个问题。
+      const responseContent = `I understand your request. Let me analyze "${userMessage}".
 
-## 分析结果
+## Analysis
 
-基于你提供的信息，我建议：
+Based on the information you provided, I suggest:
 
-1. **第一步**: 仔细分析需求
-2. **第二步**: 制定详细方案
-3. **第三步**: 逐步实施
+1. **Step 1**: Analyze the requirements carefully
+2. **Step 2**: Create a detailed plan
+3. **Step 3**: Implement gradually
 
-需要我详细展开某个部分吗？`;
+Would you like me to expand on any part?`;
 
       // Add empty AI message first
       const emptyMessage: ChatMessage = {

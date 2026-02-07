@@ -59,20 +59,20 @@ export function RenameProjectDialog({
           <DialogHeader>
             <DialogTitle>{t("project.rename")}</DialogTitle>
             <DialogDescription>
-              {t("project.renameDescription", "请输入新的项目名称")}
+              {t("project.renameDescription", "Please enter a new project name")}
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
               <Label htmlFor="project-name">
-                {t("project.nameLabel", "项目名称")}
+                {t("project.nameLabel", "Project Name")}
               </Label>
               <Input
                 ref={inputRef}
                 id="project-name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder={t("project.namePlaceholder", "请输入项目名称")}
+                placeholder={t("project.namePlaceholder", "Enter project name")}
                 onKeyDown={(e) => {
                   if (e.key === "Escape") {
                     onOpenChange(false);
@@ -87,10 +87,10 @@ export function RenameProjectDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
             >
-              {t("common.cancel", "取消")}
+              {t("common.cancel", "Cancel")}
             </Button>
             <Button type="submit" disabled={!name.trim()}>
-              {t("common.save", "保存")}
+              {t("common.save", "Save")}
             </Button>
           </DialogFooter>
         </form>

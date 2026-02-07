@@ -55,7 +55,7 @@ function FileChangesSummary({ fileChanges }: FileChangesSummaryProps) {
           {t("artifacts.summary.total")}
         </span>
         <span className="font-semibold">
-          {fileChanges.length} {t("artifacts.summary.totalFiles", "个文件")}
+          {fileChanges.length} {t("artifacts.summary.totalFiles", "files")}
         </span>
       </div>
 

@@ -36,7 +36,7 @@ export function useMcpCatalog() {
       setInstalls(installsData);
     } catch (error) {
       console.error("[MCP] Failed to fetch data:", error);
-      toast.error("加载 MCP 列表失败");
+      toast.error("Failed to load MCP list");
     } finally {
       setIsLoading(false);
     }
@@ -172,7 +172,7 @@ export function useMcpCatalog() {
         setServers((prev) =>
           prev.map((item) => (item.id === serverId ? updated : item)),
         );
-        toast.success(t("library.mcpLibrary.toasts.updated", "保存成功"));
+        toast.success(t("library.mcpLibrary.toasts.updated", "Saved successfully"));
         return updated;
       } catch (error) {
         console.error("[MCP] update failed:", error);
@@ -194,7 +194,7 @@ export function useMcpCatalog() {
           server_config,
         });
         setServers((prev) => [created, ...prev]);
-        toast.success(t("library.mcpLibrary.toasts.created", "创建成功"));
+        toast.success(t("library.mcpLibrary.toasts.created", "Created successfully"));
         return created;
       } catch (error) {
         console.error("[MCP] create failed:", error);
@@ -216,7 +216,10 @@ export function useMcpCatalog() {
         const server = servers.find((s) => s.id === serverId);
         const serverName = server?.name || "";
         toast.success(
-          `${serverName} MCP ${t("library.mcpLibrary.toasts.uninstalled", "已卸载")}`,
+          `${serverName} MCP ${t(
+            "library.mcpLibrary.toasts.uninstalled",
+            "uninstalled",
+          )}`,
         );
       } catch (error) {
         console.error("[MCP] uninstall failed:", error);

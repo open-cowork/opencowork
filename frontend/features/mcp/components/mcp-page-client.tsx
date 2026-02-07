@@ -57,7 +57,7 @@ export function McpPageClient() {
         refresh();
       } catch (error) {
         console.error("[McpPageClient] Failed to batch toggle:", error);
-        toast.error("操作失败，请重试");
+        toast.error("Operation failed. Please try again.");
       }
     },
     [installs, refresh],

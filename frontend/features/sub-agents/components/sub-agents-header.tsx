@@ -35,7 +35,7 @@ export function SubAgentsHeader({
           <ArrowLeft className="size-5" />
         </Button>
         <span className="text-lg font-bold tracking-tight">
-          {t("library.subAgents.header.title", "子代理")}
+          {t("library.subAgents.header.title", "Sub-agents")}
         </span>
       </div>
 
@@ -45,7 +45,7 @@ export function SubAgentsHeader({
           onChange={onSearchChange}
           placeholder={t(
             "library.subAgents.searchPlaceholder",
-            "搜索子代理...",
+            "Search sub-agents...",
           )}
         />
         <Button
@@ -55,7 +55,7 @@ export function SubAgentsHeader({
           onClick={onAddClick}
         >
           <Plus className="size-4" />
-          {t("library.subAgents.header.add", "添加子代理")}
+          {t("library.subAgents.header.add", "Add Sub-agent")}
         </Button>
       </div>
     </header>

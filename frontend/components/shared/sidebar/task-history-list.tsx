@@ -165,7 +165,7 @@ function DraggableTask({
           </div>
         ) : (
           <>
-            {/* 拖拽手柄 */}
+            {/* Drag handle */}
             <div
               className="size-4 shrink-0 flex items-center justify-center cursor-grab active:cursor-grabbing text-muted-foreground transition-opacity group-data-[collapsible=icon]:hidden"
               {...listeners}
@@ -174,7 +174,7 @@ function DraggableTask({
               <GripVertical className="size-3" />
             </div>
 
-            {/* 第一栏：状态指示器 */}
+            {/* Column 1: status indicator */}
             {task.status === "running" ? (
               <Loader2 className="size-3 shrink-0 animate-spin text-info" />
             ) : (
@@ -188,7 +188,7 @@ function DraggableTask({
             )}
             <span className="sr-only">{t(statusMeta.labelKey)}</span>
 
-            {/* 第二栏：文字 */}
+            {/* Column 2: text */}
             <span
               className={cn(
                 "flex-1 min-w-0 truncate text-sm group-data-[collapsible=icon]:hidden",
@@ -200,7 +200,7 @@ function DraggableTask({
         )}
       </SidebarMenuButton>
 
-      {/* 第三栏：更多按钮 - 仅在非选择模式显示 */}
+      {/* Column 3: more button - only in non-selection mode */}
       {!isSelectionMode && (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

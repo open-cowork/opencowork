@@ -25,13 +25,13 @@ export function ArtifactsHeader({
   onToggleSidebar,
   headerAction,
 }: ArtifactsHeaderProps) {
-  const headerTitle = title || selectedFile?.name || "文档预览";
+  const headerTitle = title || selectedFile?.name || "Document Preview";
 
   return (
     <PanelHeader
       icon={Layers}
       title={headerTitle}
-      description="工作区文件预览"
+      description="Workspace file preview"
       className="border-b"
       content={
         headerAction ? (
@@ -42,7 +42,7 @@ export function ArtifactsHeader({
         onToggleSidebar ? (
           <PanelHeaderAction
             onClick={onToggleSidebar}
-            aria-label={isSidebarCollapsed ? "侧边栏打开" : "侧边栏关闭"}
+            aria-label={isSidebarCollapsed ? "Open sidebar" : "Close sidebar"}
           >
             {isSidebarCollapsed ? (
               <PanelLeftOpen className="size-4" />

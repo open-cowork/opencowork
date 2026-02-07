@@ -25,7 +25,7 @@ export function useSlashCommandsStore() {
     } catch (error) {
       console.error("[SlashCommands] Failed to fetch:", error);
       toast.error(
-        t("library.slashCommands.toasts.loadError", "加载命令列表失败"),
+        t("library.slashCommands.toasts.loadError", "Failed to load commands"),
       );
     } finally {
       setIsLoading(false);
@@ -42,11 +42,11 @@ export function useSlashCommandsStore() {
       try {
         const created = await slashCommandsService.create(input);
         setCommands((prev) => [created, ...prev]);
-        toast.success(t("library.slashCommands.toasts.created", "命令已创建"));
+        toast.success(t("library.slashCommands.toasts.created", "Command created"));
         return created;
       } catch (error) {
         console.error("[SlashCommands] create failed:", error);
-        toast.error(t("library.slashCommands.toasts.error", "操作失败"));
+        toast.error(t("library.slashCommands.toasts.error", "Operation failed"));
         return null;
       } finally {
         setSavingId(null);
@@ -63,11 +63,11 @@ export function useSlashCommandsStore() {
         setCommands((prev) =>
           prev.map((c) => (c.id === commandId ? updated : c)),
         );
-        toast.success(t("library.slashCommands.toasts.updated", "命令已更新"));
+        toast.success(t("library.slashCommands.toasts.updated", "Command updated"));
         return updated;
       } catch (error) {
         console.error("[SlashCommands] update failed:", error);
-        toast.error(t("library.slashCommands.toasts.error", "操作失败"));
+        toast.error(t("library.slashCommands.toasts.error", "Operation failed"));
         return null;
       } finally {
         setSavingId(null);
@@ -82,10 +82,10 @@ export function useSlashCommandsStore() {
       try {
         await slashCommandsService.remove(commandId);
         setCommands((prev) => prev.filter((c) => c.id !== commandId));
-        toast.success(t("library.slashCommands.toasts.deleted", "命令已删除"));
+        toast.success(t("library.slashCommands.toasts.deleted", "Command deleted"));
       } catch (error) {
         console.error("[SlashCommands] delete failed:", error);
-        toast.error(t("library.slashCommands.toasts.error", "操作失败"));
+        toast.error(t("library.slashCommands.toasts.error", "Operation failed"));
       } finally {
         setSavingId(null);
       }

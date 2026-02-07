@@ -65,11 +65,11 @@ export function SkillsGrid({
       {/* Stats bar with batch controls */}
       <div className="rounded-xl bg-muted/50 px-5 py-3 flex items-center justify-between">
         <span className="text-sm text-muted-foreground">
-          {t("library.skillsManager.stats.available", "可用技能")}:{" "}
+          {t("library.skillsManager.stats.available", "Available skills")}:{" "}
           {totalCount ?? skills.length} ·{" "}
-          {t("library.skillsManager.stats.installed", "已安装")}:{" "}
+          {t("library.skillsManager.stats.installed", "Installed")}:{" "}
           {installedCount} ·{" "}
-          {t("library.skillsManager.stats.enabled", "已启用")}: {enabledCount}
+          {t("library.skillsManager.stats.enabled", "Enabled")}: {enabledCount}
         </span>
         {installs.length > 0 && (
           <Button
@@ -79,7 +79,7 @@ export function SkillsGrid({
             className="h-7 px-2 text-xs"
           >
             <PowerOff className="size-3 mr-1" />
-            全部关闭
+            Disable all
           </Button>
         )}
       </div>
@@ -89,7 +89,7 @@ export function SkillsGrid({
           <SkeletonShimmer count={5} itemClassName="min-h-[64px]" gap="md" />
         ) : !isLoading && skills.length === 0 ? (
           <div className="rounded-xl border border-border/50 bg-muted/10 px-4 py-6 text-sm text-muted-foreground text-center">
-            {t("library.skillsManager.empty", "暂无技能")}
+            {t("library.skillsManager.empty", "No skills yet")}
           </div>
         ) : (
           <StaggeredList
@@ -122,8 +122,8 @@ export function SkillsGrid({
                         className="text-xs text-muted-foreground"
                       >
                         {skill.scope === "system"
-                          ? t("library.skillsManager.scope.system", "系统")
-                          : t("library.skillsManager.scope.user", "个人")}
+                          ? t("library.skillsManager.scope.system", "System")
+                          : t("library.skillsManager.scope.user", "Personal")}
                       </Badge>
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">
@@ -148,7 +148,7 @@ export function SkillsGrid({
                         className="rounded-lg"
                         title={t(
                           "library.skillsManager.actions.uninstall",
-                          "卸载",
+                          "Uninstall",
                         )}
                       >
                         <Trash2 className="size-4" />
@@ -160,7 +160,7 @@ export function SkillsGrid({
                       disabled={isRowLoading}
                       onClick={() => onInstall?.(skill.id)}
                     >
-                      {t("library.skillsManager.actions.install", "安装")}
+                      {t("library.skillsManager.actions.install", "Install")}
                     </Button>
                   )}
                 </div>

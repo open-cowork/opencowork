@@ -161,7 +161,9 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
       }
 
       if (file.size > MAX_FILE_SIZE) {
-        toast.error(t("hero.toasts.fileTooLarge", "文件过大，最大支持 100MB"));
+        toast.error(
+          t("hero.toasts.fileTooLarge", "File too large. Max size is 100MB"),
+        );
         if (fileInputRef.current) {
           fileInputRef.current.value = "";
         }
@@ -172,11 +174,13 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
         setIsUploading(true);
         const uploadedFile = await uploadAttachment(file);
         setAttachments((prev) => [...prev, uploadedFile]);
-        toast.success(t("hero.toasts.uploadSuccess", "文件上传成功"));
+        toast.success(
+          t("hero.toasts.uploadSuccess", "File uploaded successfully"),
+        );
         playFileUploadSound(); // Play sound on successful upload
       } catch (error) {
         console.error("Upload failed:", error);
-        toast.error(t("hero.toasts.uploadFailed", "文件上传失败"));
+        toast.error(t("hero.toasts.uploadFailed", "File upload failed"));
       } finally {
         setIsUploading(false);
         if (fileInputRef.current) {
@@ -305,8 +309,8 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
               onClick={onCancel}
               disabled={isCancelling}
               className="flex-shrink-0 flex items-center justify-center size-8 rounded-md bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors disabled:cursor-not-allowed disabled:opacity-60"
-              aria-label={t("chat.cancelTask", "取消任务")}
-              title={t("chat.cancelTask", "取消任务")}
+              aria-label={t("chat.cancelTask", "Cancel task")}
+              title={t("chat.cancelTask", "Cancel task")}
             >
               {isCancelling ? (
                 <Loader2 className="size-4 animate-spin" />

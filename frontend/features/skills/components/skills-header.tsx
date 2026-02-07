@@ -39,7 +39,7 @@ export function SkillsHeader({
           <ArrowLeft className="size-5" />
         </Button>
         <span className="text-lg font-bold tracking-tight">
-          {t("library.skillsPage.header.title", "Skills 管理")}
+          {t("library.skillsPage.header.title", "Skills Management")}
         </span>
       </div>
 
@@ -48,11 +48,11 @@ export function SkillsHeader({
         <HeaderSearchInput
           value={searchQuery}
           onChange={onSearchChange}
-          placeholder={t("library.skillsPage.searchPlaceholder", "搜索技能...")}
+          placeholder={t("library.skillsPage.searchPlaceholder", "Search skills...")}
         />
         <Button variant="ghost" size="sm" className="gap-2" onClick={onImport}>
           <Search className="size-4" />
-          {t("library.skillsImport.title", "导入技能")}
+          {t("library.skillsImport.title", "Import Skills")}
         </Button>
       </div>
     </header>

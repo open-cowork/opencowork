@@ -30,7 +30,7 @@ export function ChatContainer({ taskId, isNewChat }: ChatContainerProps) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen">
-        <div className="text-muted-foreground">加载中...</div>
+        <div className="text-muted-foreground">Loading...</div>
       </div>
     );
   }

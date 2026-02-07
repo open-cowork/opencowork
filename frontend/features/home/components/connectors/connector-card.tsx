@@ -44,7 +44,7 @@ export function ConnectorCard({
               variant="outline"
               className="text-[9px] h-4 bg-muted/30 border-border text-muted-foreground/60 px-1.5"
             >
-              开发中
+              In Development
             </Badge>
           )}
         </div>
@@ -90,23 +90,23 @@ export function CapabilityFeature({
  */
 export const DEFAULT_CAPABILITIES = [
   {
-    title: "自动化流程",
-    desc: "基于事件驱动，触发复杂任务流",
+    title: "Automated Workflows",
+    desc: "Event-driven triggers for complex task flows",
     icon: Globe,
   },
   {
-    title: "智能协作助手",
-    desc: "AI 深入理解上下文，提供建议",
+    title: "Intelligent Collaboration",
+    desc: "AI understands context deeply and offers suggestions",
     icon: Info,
   },
   {
-    title: "安全管理系统",
-    desc: "采用企业级加密，确保数据安全",
+    title: "Secure Management",
+    desc: "Enterprise-grade encryption for data safety",
     icon: Shield,
   },
   {
-    title: "全局搜索索引",
-    desc: "跨平台查询，毫秒级召回对话",
+    title: "Global Search Index",
+    desc: "Cross-platform search with millisecond-level recall",
     icon: Search,
   },
 ];

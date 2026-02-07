@@ -131,7 +131,7 @@ export function ArtifactsPanel({
   return (
     <div className="flex h-full min-h-0 flex-col min-w-0 overflow-hidden">
       <ArtifactsHeader
-        title="文件变更"
+        title="File Changes"
         selectedFile={selectedFile}
         isSidebarCollapsed={isSidebarCollapsed}
         onToggleSidebar={handleToggleSidebar}

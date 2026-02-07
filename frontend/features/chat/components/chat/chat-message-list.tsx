@@ -213,13 +213,13 @@ export function ChatMessageList({
                           <div className="text-xs font-medium text-foreground">
                             {t(
                               "chat.internalContextInjected",
-                              "内部上下文已注入",
+                              "Internal context injected",
                             )}
                           </div>
                           <div className="text-xs text-muted-foreground">
                             {t(
                               "chat.internalContextSubtitle",
-                              "来自技能/系统/工具的消息（不代表你的输入）",
+                              "Messages from skills/system/tools (not your input)",
                             )}
                           </div>
                         </div>
@@ -232,10 +232,10 @@ export function ChatMessageList({
                           onClick={() => toggleInternalContext(message.id)}
                         >
                           {expanded
-                            ? t("chat.internalContextHide", "收起")
+                            ? t("chat.internalContextHide", "Collapse")
                             : t(
                                 "chat.internalContextView",
-                                "查看（{{count}}）",
+                                "View ({{count}})",
                                 { count: internalTexts.length },
                               )}
                         </Button>
@@ -254,7 +254,7 @@ export function ChatMessageList({
                               className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
                               onClick={() => copyInternalContext(internalTexts)}
                             >
-                              {t("chat.internalContextCopy", "复制")}
+                              {t("chat.internalContextCopy", "Copy")}
                             </Button>
                           </div>
                         </div>
@@ -305,7 +305,7 @@ export function ChatMessageList({
             size="icon"
             onClick={scrollToBottom}
             className="h-10 w-10 rounded-full shadow-lg hover:shadow-xl transition-shadow bg-background"
-            title={t("chat.scrollToLatestMessage", "跳转到最新消息")}
+            title={t("chat.scrollToLatestMessage", "Jump to latest message")}
           >
             <ArrowDown className="h-5 w-5" />
           </Button>

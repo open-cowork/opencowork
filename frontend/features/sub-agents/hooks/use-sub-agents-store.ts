@@ -25,7 +25,7 @@ export function useSubAgentsStore() {
     } catch (error) {
       console.error("[SubAgents] Failed to fetch:", error);
       toast.error(
-        t("library.subAgents.toasts.loadError", "加载子代理列表失败"),
+        t("library.subAgents.toasts.loadError", "Failed to load sub-agents"),
       );
     } finally {
       setIsLoading(false);
@@ -42,11 +42,11 @@ export function useSubAgentsStore() {
       try {
         const created = await subAgentsService.create(input);
         setSubAgents((prev) => [created, ...prev]);
-        toast.success(t("library.subAgents.toasts.created", "子代理已创建"));
+        toast.success(t("library.subAgents.toasts.created", "Sub-agent created"));
         return created;
       } catch (error) {
         console.error("[SubAgents] create failed:", error);
-        toast.error(t("library.subAgents.toasts.error", "操作失败"));
+        toast.error(t("library.subAgents.toasts.error", "Operation failed"));
         return null;
       } finally {
         setSavingId(null);
@@ -63,11 +63,11 @@ export function useSubAgentsStore() {
         setSubAgents((prev) =>
           prev.map((a) => (a.id === subAgentId ? updated : a)),
         );
-        toast.success(t("library.subAgents.toasts.updated", "子代理已更新"));
+        toast.success(t("library.subAgents.toasts.updated", "Sub-agent updated"));
         return updated;
       } catch (error) {
         console.error("[SubAgents] update failed:", error);
-        toast.error(t("library.subAgents.toasts.error", "操作失败"));
+        toast.error(t("library.subAgents.toasts.error", "Operation failed"));
         return null;
       } finally {
         setSavingId(null);
@@ -82,10 +82,10 @@ export function useSubAgentsStore() {
       try {
         await subAgentsService.remove(subAgentId);
         setSubAgents((prev) => prev.filter((a) => a.id !== subAgentId));
-        toast.success(t("library.subAgents.toasts.deleted", "子代理已删除"));
+        toast.success(t("library.subAgents.toasts.deleted", "Sub-agent deleted"));
       } catch (error) {
         console.error("[SubAgents] delete failed:", error);
-        toast.error(t("library.subAgents.toasts.error", "操作失败"));
+        toast.error(t("library.subAgents.toasts.error", "Operation failed"));
       } finally {
         setSavingId(null);
       }

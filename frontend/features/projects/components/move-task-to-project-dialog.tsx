@@ -62,12 +62,12 @@ export function MoveTaskToProjectDialog({
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>{t("sidebar.moveToProject")}</DialogTitle>
-          <DialogDescription>选择一个项目以移动此任务</DialogDescription>
+          <DialogDescription>Select a project to move this task</DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <ScrollArea className="max-h-[200px]">
             <div className="space-y-1 pr-4">
-              {/* "无项目"选项 - 移除任务的项目关联 */}
+              {/* "No Project" option - remove the task's project association */}
               <button
                 type="button"
                 onClick={() => setSelectedProjectId(null)}
@@ -82,10 +82,10 @@ export function MoveTaskToProjectDialog({
                 `}
               >
                 <Folder className="size-4 shrink-0" />
-                <span>无项目</span>
+                <span>No Project</span>
               </button>
 
-              {/* 项目列表 */}
+              {/* Project list */}
               {projects.map((project) => (
                 <button
                   key={project.id}
@@ -110,10 +110,10 @@ export function MoveTaskToProjectDialog({
         </div>
         <DialogFooter>
           <Button type="button" variant="outline" onClick={handleCancel}>
-            取消
+            Cancel
           </Button>
           <Button type="button" onClick={handleMove}>
-            移动
+            Move
           </Button>
         </DialogFooter>
       </DialogContent>

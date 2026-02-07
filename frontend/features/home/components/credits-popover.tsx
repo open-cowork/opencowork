@@ -26,7 +26,7 @@ export function CreditsPopover({ trigger }: CreditsPopoverProps) {
         <div className="flex flex-col">
           {/* Header Section */}
           <div className="flex items-center justify-between p-5 pb-4">
-            <h3 className="text-xl font-semibold tracking-tight">专业版</h3>
+            <h3 className="text-xl font-semibold tracking-tight">Pro Plan</h3>
           </div>
 
           <Separator className="bg-border/50 border-dashed" />
@@ -38,14 +38,14 @@ export function CreditsPopover({ trigger }: CreditsPopoverProps) {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Sparkles className="size-4" />
-                  <span className="text-sm font-medium">积分</span>
+                  <span className="text-sm font-medium">Credits</span>
                 </div>
                 <span className="text-xl font-bold tracking-tight">
-                  余量无限
+                  Unlimited Balance
                 </span>
               </div>
               <div className="flex items-center justify-between text-xs text-muted-foreground/60 pl-6">
-                <span>免费积分</span>
+                <span>Free Credits</span>
                 <span>9999</span>
               </div>
             </div>
@@ -55,12 +55,14 @@ export function CreditsPopover({ trigger }: CreditsPopoverProps) {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <RefreshCw className="size-4" />
-                  <span className="text-sm font-medium">每日刷新积分</span>
+                  <span className="text-sm font-medium">
+                    Daily Refresh Credits
+                  </span>
                 </div>
                 <span className="text-xl font-bold tracking-tight">9999</span>
               </div>
               <div className="text-xs text-muted-foreground/60 pl-6">
-                每天 00:00 刷新为 9999
+                Refreshes to 9999 daily at 00:00
               </div>
             </div>
           </div>
@@ -71,7 +73,7 @@ export function CreditsPopover({ trigger }: CreditsPopoverProps) {
               variant="ghost"
               className="h-auto p-0 text-muted-foreground hover:text-foreground text-xs flex items-center gap-1 hover:bg-transparent"
             >
-              查看使用情况
+              View Usage
               <ChevronRight className="size-3" />
             </Button>
           </div>

@@ -40,7 +40,7 @@ export function McpHeader({
           <ArrowLeft className="size-5" />
         </Button>
         <span className="text-lg font-bold tracking-tight">
-          {t("library.mcpLibrary.header.title", "MCP 服务器管理")}
+          {t("library.mcpLibrary.header.title", "MCP Server Management")}
         </span>
       </div>
 
@@ -51,12 +51,12 @@ export function McpHeader({
           onChange={onSearchChange}
           placeholder={t(
             "library.mcpLibrary.searchPlaceholder",
-            "搜索服务器...",
+            "Search servers...",
           )}
         />
         <Button variant="ghost" size="sm" className="gap-2" onClick={onAddMcp}>
           <Plus className="size-4" />
-          {t("library.mcpLibrary.header.add", "添加MCP")}
+          {t("library.mcpLibrary.header.add", "Add MCP")}
         </Button>
       </div>
     </header>

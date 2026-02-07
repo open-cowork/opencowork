@@ -7,11 +7,11 @@ export function useProjectTasks(
   initialTasksFn?: () => TaskHistoryItem[],
   projectId?: string,
 ) {
-  // 初始化任务列表
+  // Initialize task list
   const [tasks, setTasks] = React.useState<TaskHistoryItem[]>(() => {
     if (initialTasksFn) {
       const allTasks = initialTasksFn();
-      // 如果指定了projectId，只返回该项目的任���
+      // If projectId is specified, return only tasks for that project
       if (projectId) {
         return allTasks.filter((task) => task.projectId === projectId);
       }
@@ -20,7 +20,7 @@ export function useProjectTasks(
     return [];
   });
 
-  // 添加任务
+  // Add task
   const addTask = React.useCallback(
     (title: string, metadata?: Partial<TaskHistoryItem>) => {
       const newTask: TaskHistoryItem = {
@@ -37,12 +37,12 @@ export function useProjectTasks(
     [projectId],
   );
 
-  // 删除任务
+  // Remove task
   const removeTask = React.useCallback((taskId: string) => {
     setTasks((prev) => prev.filter((task) => task.id !== taskId));
   }, []);
 
-  // 更新任务项目关联
+  // Update task-project association
   const updateTaskProject = React.useCallback(
     (taskId: string, newProjectId: string | undefined) => {
       setTasks((prev) =>
@@ -54,7 +54,7 @@ export function useProjectTasks(
     [],
   );
 
-  // 重命名任务
+  // Rename task
   const renameTask = React.useCallback((taskId: string, newName: string) => {
     setTasks((prev) =>
       prev.map((task) =>

@@ -32,7 +32,7 @@ export function useSkillCatalog() {
     } catch (error) {
       console.error("[Skills] Failed to fetch data:", error);
       toast.error(
-        t("library.skillsManager.toasts.loadError", "加载技能列表失败"),
+        t("library.skillsManager.toasts.loadError", "Failed to load skills"),
       );
     } finally {
       setIsLoading(false);
@@ -53,13 +53,16 @@ export function useSkillCatalog() {
         });
         setInstalls((prev) => [created, ...prev]);
         toast.success(
-          t("library.skillsManager.toasts.installed", "技能已安装"),
+          t("library.skillsManager.toasts.installed", "Skill installed"),
         );
         playMcpInstallSound();
       } catch (error) {
         console.error("[Skills] install failed:", error);
         toast.error(
-          t("library.skillsManager.toasts.actionError", "操作失败，请稍后再试"),
+          t(
+            "library.skillsManager.toasts.actionError",
+            "Operation failed. Please try again later",
+          ),
         );
       } finally {
         setLoadingId(null);
@@ -75,12 +78,15 @@ export function useSkillCatalog() {
         await skillsService.deleteInstall(installId);
         await refresh();
         toast.success(
-          t("library.skillsManager.toasts.uninstalled", "技能已卸载"),
+          t("library.skillsManager.toasts.uninstalled", "Skill uninstalled"),
         );
       } catch (error) {
         console.error("[Skills] uninstall failed:", error);
         toast.error(
-          t("library.skillsManager.toasts.actionError", "操作失败，请稍后再试"),
+          t(
+            "library.skillsManager.toasts.actionError",
+            "Operation failed. Please try again later",
+          ),
         );
       } finally {
         setLoadingId(null);
@@ -98,7 +104,7 @@ export function useSkillCatalog() {
         ? skills.find((s) => s.id === install.skill_id)
         : null;
       const skillName =
-        skill?.name || t("library.skillsManager.unknownSkill", "未知技能");
+        skill?.name || t("library.skillsManager.unknownSkill", "Unknown skill");
 
       // Optimistic update
       setInstalls((prev) =>
@@ -113,8 +119,11 @@ export function useSkillCatalog() {
         );
         toast.success(
           enabled
-            ? `${skillName} ${t("library.skillsManager.toasts.enabled", "已启用")}`
-            : `${skillName} ${t("library.skillsManager.toasts.disabled", "已停用")}`,
+            ? `${skillName} ${t("library.skillsManager.toasts.enabled", "enabled")}`
+            : `${skillName} ${t(
+                "library.skillsManager.toasts.disabled",
+                "disabled",
+              )}`,
         );
         if (enabled) {
           playMcpInstallSound();
@@ -128,7 +137,10 @@ export function useSkillCatalog() {
           ),
         );
         toast.error(
-          t("library.skillsManager.toasts.actionError", "操作失败，请稍后再试"),
+          t(
+            "library.skillsManager.toasts.actionError",
+            "Operation failed. Please try again later",
+          ),
         );
       } finally {
         setLoadingId(null);

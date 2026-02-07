@@ -5,7 +5,7 @@ import {
 } from "@/features/projects/services/projects-service";
 
 const createProjectSchema = z.object({
-  name: z.string().trim().min(1, "请输入项目名称"),
+  name: z.string().trim().min(1, "Please enter a project name"),
   repo_url: z.string().trim().optional().nullable(),
   git_branch: z.string().trim().optional().nullable(),
   git_token_env_key: z.string().trim().optional().nullable(),
@@ -20,19 +20,19 @@ const listTasksSchema = z.object({
 });
 
 const updateProjectSchema = z.object({
-  projectId: z.string().trim().min(1, "请选择项目"),
-  name: z.string().trim().min(1, "请输入项目名称").optional(),
+  projectId: z.string().trim().min(1, "Please select a project"),
+  name: z.string().trim().min(1, "Please enter a project name").optional(),
   repo_url: z.string().trim().optional().nullable(),
   git_branch: z.string().trim().optional().nullable(),
   git_token_env_key: z.string().trim().optional().nullable(),
 });
 
 const deleteProjectSchema = z.object({
-  projectId: z.string().trim().min(1, "请选择项目"),
+  projectId: z.string().trim().min(1, "Please select a project"),
 });
 
 const moveTaskToProjectSchema = z.object({
-  sessionId: z.string().trim().min(1, "缺少任务 ID"),
+  sessionId: z.string().trim().min(1, "Missing task ID"),
   projectId: z.string().trim().min(1).nullable().optional(),
 });
 

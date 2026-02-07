@@ -5,12 +5,12 @@ const DEFAULT_USER_PROFILE: UserProfile = {
   email: "user@poco.com",
   avatar: "",
   plan: "free",
-  planName: "免费",
+  planName: "Free",
 };
 
 const DEFAULT_USER_CREDITS: UserCredits = {
-  total: "无限",
-  free: "无限",
+  total: "Unlimited",
+  free: "Unlimited",
   dailyRefreshCurrent: 9999,
   dailyRefreshMax: 9999,
   refreshTime: "08:00",

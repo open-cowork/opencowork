@@ -38,7 +38,7 @@ export function PersonalizationHeader({
           <ArrowLeft className="size-5" />
         </Button>
         <span className="text-lg font-bold tracking-tight">
-          {t("library.personalization.header.title", "个性化")}
+          {t("library.personalization.header.title", "Personalization")}
         </span>
       </div>
 
@@ -51,7 +51,7 @@ export function PersonalizationHeader({
           disabled={isLoading || isSaving}
         >
           <RefreshCw className="size-4" />
-          {t("library.personalization.header.refresh", "刷新")}
+          {t("library.personalization.header.refresh", "Refresh")}
         </Button>
         <Button
           variant="ghost"
@@ -61,7 +61,7 @@ export function PersonalizationHeader({
           disabled={isLoading || isSaving}
         >
           <Trash2 className="size-4" />
-          {t("library.personalization.header.clear", "清空")}
+          {t("library.personalization.header.clear", "Clear")}
         </Button>
         <Button
           size="sm"
@@ -71,8 +71,8 @@ export function PersonalizationHeader({
         >
           <Save className="size-4" />
           {isSaving
-            ? t("library.personalization.header.saving", "保存中...")
-            : t("library.personalization.header.save", "保存")}
+            ? t("library.personalization.header.saving", "Saving...")
+            : t("library.personalization.header.save", "Save")}
         </Button>
       </div>
     </header>

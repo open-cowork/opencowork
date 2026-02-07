@@ -28,7 +28,7 @@ export function EnvVarsHeader({ onAddClick }: EnvVarsHeaderProps) {
           <ArrowLeft className="size-5" />
         </Button>
         <span className="text-lg font-bold tracking-tight">
-          {t("library.envVars.header.title", "环境变量管理")}
+          {t("library.envVars.header.title", "Environment Variables")}
         </span>
       </div>
 
@@ -41,7 +41,7 @@ export function EnvVarsHeader({ onAddClick }: EnvVarsHeaderProps) {
           onClick={onAddClick}
         >
           <Plus className="size-4" />
-          {t("library.envVars.header.add", "添加变量")}
+          {t("library.envVars.header.add", "Add Variable")}
         </Button>
       </div>
     </header>

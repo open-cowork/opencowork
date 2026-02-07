@@ -589,7 +589,7 @@ export function TaskComposer({
         }}
       />
 
-      {/* 输入区域 */}
+      {/* Input Area */}
       <div className="relative px-4 pb-3 pt-4">
         {slashAutocomplete.isOpen ? (
           <div className="absolute bottom-full left-0 mb-2 w-full overflow-hidden rounded-lg border border-border bg-popover shadow-md">
@@ -729,9 +729,9 @@ export function TaskComposer({
         ) : null}
       </div>
 
-      {/* 底部工具栏 */}
+      {/* Bottom Toolbar */}
       <div className="flex items-center justify-between px-3 pb-3">
-        {/* 左侧：模式选择（Icon + Hover Label） */}
+        {/* Left: Mode Selection (Icon + Hover Label) */}
         <div className="flex items-center gap-2 min-h-[32px]">
           <div className="flex items-center gap-1 rounded-2xl border border-border bg-muted/20 p-1">
             <Tooltip>
@@ -826,7 +826,7 @@ export function TaskComposer({
           </div>
         </div>
 
-        {/* 右侧操作按钮 */}
+        {/* Right: Action Buttons */}
         <div className="flex items-center gap-1">
           <Tooltip>
             <TooltipTrigger asChild>

@@ -185,7 +185,7 @@ export function HomePageClient() {
 
       <div className="flex flex-1 flex-col items-center justify-start px-6 pt-[20vh] min-h-0 overflow-auto">
         <div className="w-full max-w-2xl">
-          {/* 欢迎语 */}
+          {/* Welcome Message */}
           <div className="mb-8 text-center">
             <h1 className="text-3xl font-medium tracking-tight text-foreground">
               {t("hero.title")}

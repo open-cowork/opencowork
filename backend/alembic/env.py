@@ -8,7 +8,7 @@ from alembic import context
 from app.core.settings import get_settings
 from app.models import Base
 
-# 添加项目路径
+# Add project path
 sys_path = Path(__file__).resolve().parent.parent
 if str(sys_path) not in sys.path:
     sys.path.append(str(sys_path))
@@ -18,7 +18,7 @@ if str(sys_path) not in sys.path:
 # access to the values within the .ini file in use.
 config = context.config
 
-# 从 settings 获取数据库 URL
+# Get database URL from settings
 settings = get_settings()
 config.set_main_option("sqlalchemy.url", settings.database_url)
 

@@ -61,7 +61,7 @@ export function McpSettingsDialog({
       <DialogContent className="max-w-2xl p-0 gap-0">
         <DialogHeader className="px-6 py-4 border-b bg-muted/5">
           <DialogTitle className="text-lg font-semibold">
-            {t("library.mcpLibrary.actions.configure", "配置 MCP 服务器")}
+            {t("library.mcpLibrary.actions.configure", "Configure MCP Server")}
           </DialogTitle>
         </DialogHeader>
 
@@ -69,7 +69,7 @@ export function McpSettingsDialog({
           <div className="space-y-4">
             <div className="space-y-2">
               <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-                MCP 名称 <span className="text-destructive">*</span>
+                MCP Name <span className="text-destructive">*</span>
               </Label>
               <Input
                 value={name}
@@ -82,7 +82,7 @@ export function McpSettingsDialog({
 
           <div className="space-y-2">
             <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-              完整的 JSON 配置
+              Full JSON Configuration
             </Label>
             <Textarea
               value={jsonConfig}
@@ -94,7 +94,7 @@ export function McpSettingsDialog({
         </div>
         <DialogFooter className="px-6 py-4 border-t">
           <Button variant="outline" onClick={onClose}>
-            {t("common.cancel", "取消")}
+            {t("common.cancel", "Cancel")}
           </Button>
           <Button
             variant="outline"
@@ -116,7 +116,7 @@ export function McpSettingsDialog({
               }
             }}
           >
-            {t("common.save", "保存")}
+            {t("common.save", "Save")}
           </Button>
         </DialogFooter>
       </DialogContent>

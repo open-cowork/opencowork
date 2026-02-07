@@ -46,8 +46,8 @@ export function SlashCommandsList({
     <div className="space-y-6">
       <div className="rounded-xl bg-muted/50 px-5 py-3">
         <span className="text-sm text-muted-foreground">
-          {t("library.slashCommands.summary", "可用命令")} {commands.length} ·{" "}
-          {t("library.slashCommands.enabled", "已启用")} {enabledCount}
+          {t("library.slashCommands.summary", "Commands")} {commands.length} ·{" "}
+          {t("library.slashCommands.enabled", "Enabled")} {enabledCount}
         </span>
       </div>
 
@@ -56,7 +56,7 @@ export function SlashCommandsList({
           <SkeletonShimmer count={5} itemClassName="min-h-[64px]" gap="md" />
         ) : commands.length === 0 ? (
           <div className="rounded-xl border border-border/50 bg-muted/10 px-4 py-6 text-sm text-muted-foreground text-center">
-            {t("library.slashCommands.empty", "暂无命令")}
+            {t("library.slashCommands.empty", "No commands yet")}
           </div>
         ) : (
           <StaggeredList
@@ -69,7 +69,7 @@ export function SlashCommandsList({
               const busy = savingId === cmd.id;
               const modeLabel =
                 cmd.mode === "structured"
-                  ? t("library.slashCommands.mode.structured", "结构化")
+                  ? t("library.slashCommands.mode.structured", "Structured")
                   : t("library.slashCommands.mode.raw", "Markdown");
 
               return (
@@ -105,7 +105,7 @@ export function SlashCommandsList({
                       className="size-8"
                       onClick={() => onEdit?.(cmd)}
                       disabled={busy}
-                      title={t("common.edit", "编辑")}
+                      title={t("common.edit", "Edit")}
                     >
                       <Settings className="size-4" />
                     </Button>
@@ -125,12 +125,15 @@ export function SlashCommandsList({
                       <AlertDialogContent>
                         <AlertDialogHeader>
                           <AlertDialogTitle>
-                            {t("library.slashCommands.delete.title", "删除命令？")}
+                            {t(
+                              "library.slashCommands.delete.title",
+                              "Delete command?",
+                            )}
                           </AlertDialogTitle>
                           <AlertDialogDescription>
                             {t(
                               "library.slashCommands.delete.description",
-                              "删除后将无法在会话中使用该命令。",
+                              "After deletion, this command cannot be used in sessions.",
                             )}
                           </AlertDialogDescription>
                         </AlertDialogHeader>
