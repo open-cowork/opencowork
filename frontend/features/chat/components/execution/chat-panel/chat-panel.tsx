@@ -37,6 +37,7 @@ interface ChatPanelProps {
   currentStep?: string;
   updateSession: (newSession: Partial<ExecutionSession>) => void;
   onIconClick?: () => void;
+  hideHeader?: boolean;
 }
 
 /**
@@ -61,6 +62,7 @@ export function ChatPanel({
   currentStep,
   updateSession,
   onIconClick,
+  hideHeader = false,
 }: ChatPanelProps) {
   const { t } = useT("translation");
   const { refreshTasks } = useTaskHistoryContext();
@@ -193,26 +195,28 @@ export function ChatPanel({
   return (
     <div className="flex flex-col h-full bg-background min-w-0">
       {/* Header */}
-      <PanelHeader
-        icon={MessageSquare}
-        title={
-          session?.task_name ||
-          session?.new_message?.title ||
-          t("chat.executionTitle")
-        }
-        description={session?.title || t("chat.emptyStateDesc")}
-        onIconClick={onIconClick}
-        action={
-          session?.session_id ? (
-            <PanelHeaderAction
-              onClick={() => setIsRenameDialogOpen(true)}
-              title={t("sidebar.rename")}
-            >
-              <Pencil className="size-4" />
-            </PanelHeaderAction>
-          ) : null
-        }
-      />
+      {!hideHeader ? (
+        <PanelHeader
+          icon={MessageSquare}
+          title={
+            session?.task_name ||
+            session?.new_message?.title ||
+            t("chat.executionTitle")
+          }
+          description={session?.title || t("chat.emptyStateDesc")}
+          onIconClick={onIconClick}
+          action={
+            session?.session_id ? (
+              <PanelHeaderAction
+                onClick={() => setIsRenameDialogOpen(true)}
+                title={t("sidebar.rename")}
+              >
+                <Pencil className="size-4" />
+              </PanelHeaderAction>
+            ) : null
+          }
+        />
+      ) : null}
 
       {/* Top Section: Todo List (full width) */}
       {hasTodos && (

@@ -436,3 +436,14 @@
     max-width: 80dvw !important;
   }
 }
+
+/* Prevent iOS Safari from zooming when focusing form controls. */
+@supports (-webkit-touch-callout: none) {
+  @media (max-width: 768px) {
+    input:not([type="range"]),
+    textarea,
+    select {
+      font-size: 16px !important;
+    }
+  }
+}

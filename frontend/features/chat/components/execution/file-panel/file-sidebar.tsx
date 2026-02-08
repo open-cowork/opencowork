@@ -24,6 +24,7 @@ interface FileSidebarProps {
   onFileSelect: (file: FileNode) => void;
   selectedFile?: FileNode;
   sessionId?: string;
+  embedded?: boolean;
 }
 
 function FileTreeItem({
@@ -167,6 +168,7 @@ export function FileSidebar({
   onFileSelect,
   selectedFile,
   sessionId,
+  embedded = false,
 }: FileSidebarProps) {
   const { t } = useT("translation");
 
@@ -197,7 +199,14 @@ export function FileSidebar({
   };
 
   return (
-    <aside className="flex h-full w-full min-h-0 min-w-0 max-w-full flex-col overflow-hidden border-l border-border/60 bg-sidebar/60 text-sidebar-foreground">
+    <aside
+      className={cn(
+        "flex h-full w-full min-h-0 min-w-0 max-w-full flex-col overflow-hidden text-sidebar-foreground",
+        embedded
+          ? "border-0 bg-transparent"
+          : "border-l border-border/60 bg-sidebar/60",
+      )}
+    >
       <div className="flex w-full min-w-0 items-center justify-between overflow-hidden px-3 py-2">
         <span className="min-w-0 truncate text-xs font-semibold uppercase tracking-wide text-sidebar-foreground/70">
           {t("fileSidebar.title")}

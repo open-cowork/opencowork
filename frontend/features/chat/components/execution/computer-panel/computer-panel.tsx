@@ -41,6 +41,7 @@ interface ComputerPanelProps {
     | "stopped";
   browserEnabled?: boolean;
   headerAction?: React.ReactNode;
+  hideHeader?: boolean;
 }
 
 type ReplayFilter = "all" | "browser" | "terminal";
@@ -155,6 +156,7 @@ export function ComputerPanel({
   sessionId,
   sessionStatus,
   headerAction,
+  hideHeader = false,
 }: ComputerPanelProps) {
   const { t } = useT("translation");
   const isActive = sessionStatus === "running" || sessionStatus === "accepted";
@@ -831,18 +833,20 @@ export function ComputerPanel({
 
   return (
     <div className="flex h-full min-h-0 min-w-0 flex-col overflow-hidden">
-      <PanelHeader
-        icon={Monitor}
-        title={t("computer.title")}
-        description={t("computer.description")}
-        content={
-          headerAction ? (
-            <div className="flex min-w-0 items-center overflow-hidden">
-              {headerAction}
-            </div>
-          ) : undefined
-        }
-      />
+      {!hideHeader ? (
+        <PanelHeader
+          icon={Monitor}
+          title={t("computer.title")}
+          description={t("computer.description")}
+          content={
+            headerAction ? (
+              <div className="flex min-w-0 items-center overflow-hidden">
+                {headerAction}
+              </div>
+            ) : undefined
+          }
+        />
+      ) : null}
       <div className="flex-1 min-h-0 overflow-hidden p-3 sm:p-4">
         <div className="h-full min-h-0 flex flex-col gap-3">
           <div className="flex-1 min-h-0 overflow-hidden rounded-xl border bg-card">

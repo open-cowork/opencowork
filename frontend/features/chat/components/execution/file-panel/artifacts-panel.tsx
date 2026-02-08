@@ -22,6 +22,7 @@ interface ArtifactsPanelProps {
     | "canceled"
     | "stopped";
   headerAction?: React.ReactNode;
+  hideHeader?: boolean;
 }
 
 /**
@@ -48,6 +49,7 @@ export function ArtifactsPanel({
   sessionId,
   sessionStatus,
   headerAction,
+  hideHeader = false,
 }: ArtifactsPanelProps) {
   const { t } = useT("translation");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(false);
@@ -132,23 +134,34 @@ export function ArtifactsPanel({
 
   return (
     <div className="flex h-full min-h-0 flex-col min-w-0 overflow-hidden">
-      <ArtifactsHeader
-        title={t("artifactsPanel.fileChanges")}
-        selectedFile={selectedFile}
-        isSidebarCollapsed={isSidebarCollapsed}
-        onToggleSidebar={handleToggleSidebar}
-        sessionId={sessionId}
-        headerAction={headerAction}
-      />
+      {!hideHeader ? (
+        <ArtifactsHeader
+          title={t("artifactsPanel.fileChanges")}
+          selectedFile={selectedFile}
+          isSidebarCollapsed={isSidebarCollapsed}
+          onToggleSidebar={handleToggleSidebar}
+          sessionId={sessionId}
+          headerAction={headerAction}
+        />
+      ) : null}
       <div
         className={cn(
           "flex-1 min-h-0 grid grid-cols-1 gap-0 transition-all duration-200 overflow-hidden",
           isSidebarCollapsed
-            ? "md:grid-cols-1"
-            : "md:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]",
+            ? "grid-cols-1"
+            : hideHeader
+              ? "grid-cols-[minmax(0,3fr)_minmax(0,1fr)]"
+              : "md:grid-cols-[minmax(0,3fr)_minmax(0,1fr)]",
         )}
       >
-        <div className="min-w-0 border-b border-border/60 bg-background md:border-b-0 overflow-hidden">
+        <div
+          className={cn(
+            "min-w-0 bg-background overflow-hidden",
+            hideHeader
+              ? "border-r border-border/60"
+              : "border-b border-border/60 md:border-b-0",
+          )}
+        >
           <div className="flex h-full flex-col overflow-hidden">
             <div className="flex-1 min-h-0 overflow-hidden p-3 sm:p-4">
               {contentNode}
@@ -156,7 +169,14 @@ export function ArtifactsPanel({
           </div>
         </div>
         {!isSidebarCollapsed && (
-          <div className="h-full w-full min-h-0 min-w-0 overflow-hidden border-t border-border/60 bg-muted/30 md:border-t-0">
+          <div
+            className={cn(
+              "h-full w-full min-h-0 min-w-0 overflow-hidden bg-muted/30",
+              hideHeader
+                ? undefined
+                : "border-t border-border/60 md:border-t-0",
+            )}
+          >
             <FileSidebar
               files={files}
               onFileSelect={(file) => {
