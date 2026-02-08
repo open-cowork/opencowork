@@ -1,18 +1,13 @@
 import * as React from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useT } from "@/lib/i18n/client";
 
 import type { McpDisplayItem } from "@/features/capabilities/mcp/hooks/use-mcp-catalog";
+import { CapabilityDialogContent } from "@/features/capabilities/components/capability-dialog-content";
 
 interface McpSettingsDialogProps {
   item: McpDisplayItem | null;
@@ -58,14 +53,41 @@ export function McpSettingsDialog({
 
   return (
     <Dialog open={open} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-2xl p-0 gap-0">
-        <DialogHeader className="px-6 py-4 border-b bg-muted/5">
-          <DialogTitle className="text-lg font-semibold">
-            {t("mcpSettings.configureServer")}
-          </DialogTitle>
-        </DialogHeader>
-
-        <div className="p-6 bg-background space-y-6">
+      <CapabilityDialogContent
+        title={t("mcpSettings.configureServer")}
+        size="md"
+        bodyClassName="space-y-6 bg-background px-6 py-6"
+        footer={
+          <DialogFooter className="grid grid-cols-2 gap-2">
+            <Button variant="outline" onClick={onClose} className="w-full">
+              {t("common.cancel")}
+            </Button>
+            <Button
+              className="w-full"
+              onClick={() => {
+                try {
+                  const parsed = JSON.parse(jsonConfig);
+                  const trimmedName = name.trim();
+                  if (isNew && !trimmedName) {
+                    throw new Error("Name required");
+                  }
+                  onSave({
+                    serverId: item?.server.id,
+                    name: trimmedName,
+                    serverConfig: parsed,
+                  });
+                  onClose();
+                } catch {
+                  console.error("Invalid JSON or name");
+                }
+              }}
+            >
+              {t("common.save")}
+            </Button>
+          </DialogFooter>
+        }
+      >
+        <div className="space-y-6">
           <div className="space-y-4">
             <div className="space-y-2">
               <Label className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
@@ -93,34 +115,7 @@ export function McpSettingsDialog({
             />
           </div>
         </div>
-        <DialogFooter className="px-6 py-4 border-t">
-          <Button variant="outline" onClick={onClose}>
-            {t("common.cancel")}
-          </Button>
-          <Button
-            variant="outline"
-            onClick={() => {
-              try {
-                const parsed = JSON.parse(jsonConfig);
-                const trimmedName = name.trim();
-                if (isNew && !trimmedName) {
-                  throw new Error("Name required");
-                }
-                onSave({
-                  serverId: item?.server.id,
-                  name: trimmedName,
-                  serverConfig: parsed,
-                });
-                onClose();
-              } catch {
-                console.error("Invalid JSON or name");
-              }
-            }}
-          >
-            {t("common.save")}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
+      </CapabilityDialogContent>
     </Dialog>
   );
 }

@@ -76,17 +76,6 @@ export function MobileExecutionView({
           onSwiper={(swiper) => {
             swiperRef.current = swiper;
           }}
-          onTouchEnd={(swiper) => {
-            // diff > 0 means Pulling Right (L->R)
-            // isBeginning means we are at the start edge
-            if (
-              swiper.activeIndex === 0 &&
-              swiper.touches.diff > 70 &&
-              swiper.isBeginning
-            ) {
-              setOpenMobile(true);
-            }
-          }}
         >
           <SwiperSlide className="h-full">
             <div

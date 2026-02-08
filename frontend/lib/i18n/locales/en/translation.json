@@ -976,6 +976,7 @@
   },
   "common": {
     "cancel": "Cancel",
+    "close": "Close",
     "create": "Create",
     "delete": "Delete",
     "edit": "Edit",

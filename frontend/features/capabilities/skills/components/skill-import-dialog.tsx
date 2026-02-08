@@ -6,13 +6,7 @@ import { toast } from "sonner";
 import { CheckCheck, ListChecks } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogFooter } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -24,6 +18,7 @@ import type {
   SkillImportCandidate,
   SkillImportCommitResponse,
 } from "@/features/capabilities/skills/types";
+import { CapabilityDialogContent } from "@/features/capabilities/components/capability-dialog-content";
 
 type SourceTab = "zip" | "github";
 
@@ -281,17 +276,44 @@ export function SkillImportDialog({
 
   return (
     <Dialog open={open} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent
-        showCloseButton={false}
-        className="max-w-3xl p-0 gap-0 max-h-[calc(100vh-4rem)] overflow-hidden flex flex-col"
+      <CapabilityDialogContent
+        title={t("library.skillsImport.title")}
+        bodyClassName="space-y-6 bg-background px-6 py-6"
+        footer={
+          <DialogFooter className="grid grid-cols-2 gap-2">
+            <Button
+              variant="outline"
+              onClick={handleClose}
+              disabled={isCommitting}
+              className="w-full"
+            >
+              {t("common.cancel")}
+            </Button>
+            {!hasPreview ? (
+              <Button
+                onClick={onDiscover}
+                disabled={isDiscovering}
+                className="w-full"
+              >
+                {isDiscovering
+                  ? t("library.skillsImport.actions.discovering")
+                  : t("library.skillsImport.actions.discover")}
+              </Button>
+            ) : (
+              <Button
+                onClick={onCommit}
+                disabled={!canCommit || isCommitting}
+                className="w-full"
+              >
+                {isCommitting
+                  ? t("library.skillsImport.actions.committing")
+                  : t("library.skillsImport.actions.commit")}
+              </Button>
+            )}
+          </DialogFooter>
+        }
       >
-        <DialogHeader className="px-6 py-4 border-b bg-muted/5">
-          <DialogTitle className="text-lg font-semibold">
-            {t("library.skillsImport.title")}
-          </DialogTitle>
-        </DialogHeader>
-
-        <div className="p-6 bg-background space-y-6 overflow-y-auto flex-1 min-h-0">
+        <div className="space-y-6">
           {!hasPreview && (
             <Tabs value={tab} onValueChange={(v) => setTab(v as SourceTab)}>
               <TabsList>
@@ -599,30 +621,7 @@ export function SkillImportDialog({
             </div>
           )}
         </div>
-
-        <DialogFooter className="px-6 py-4 border-t">
-          <Button
-            variant="outline"
-            onClick={handleClose}
-            disabled={isCommitting}
-          >
-            {t("common.cancel")}
-          </Button>
-          {!hasPreview ? (
-            <Button onClick={onDiscover} disabled={isDiscovering}>
-              {isDiscovering
-                ? t("library.skillsImport.actions.discovering")
-                : t("library.skillsImport.actions.discover")}
-            </Button>
-          ) : (
-            <Button onClick={onCommit} disabled={!canCommit || isCommitting}>
-              {isCommitting
-                ? t("library.skillsImport.actions.committing")
-                : t("library.skillsImport.actions.commit")}
-            </Button>
-          )}
-        </DialogFooter>
-      </DialogContent>
+      </CapabilityDialogContent>
     </Dialog>
   );
 }

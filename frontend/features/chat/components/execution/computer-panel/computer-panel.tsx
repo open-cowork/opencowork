@@ -743,11 +743,11 @@ export function ComputerPanel({
 
   const timelineList = (
     <ScrollArea className="h-full" ref={scrollAreaRef}>
-      <div className="p-2 space-y-1">
+      <div className="flex h-full flex-col space-y-1 p-2">
         {isLoading && replayFrames.length === 0 ? (
           <>{renderSkeletons(5)}</>
         ) : replayFrames.length === 0 ? (
-          <div className="p-4 text-sm text-muted-foreground text-center">
+          <div className="flex flex-1 items-center justify-center rounded-lg bg-muted/30 px-4 py-6 text-center text-sm text-muted-foreground">
             {t("computer.replay.empty")}
           </div>
         ) : (

@@ -4,17 +4,12 @@ import * as React from "react";
 import { Loader2, Plus, Save } from "lucide-react";
 
 import { useT } from "@/lib/i18n/client";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { EnvVarUpsertInput } from "@/features/capabilities/env-vars/hooks/use-env-vars-store";
+import { CapabilityDialogContent } from "@/features/capabilities/components/capability-dialog-content";
 
 export type EnvVarDialogMode = "create" | "edit" | "override";
 
@@ -89,16 +84,53 @@ export function AddEnvVarDialog({
 
   const isValid =
     Boolean(key.trim()) && (requiresValue ? Boolean(value.trim()) : true);
+  const formId = "env-var-dialog-form";
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit}>
-          <div className="space-y-4 py-4">
+      <CapabilityDialogContent
+        title={title}
+        size="md"
+        footer={
+          <DialogFooter className="grid grid-cols-2 gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={isSaving}
+              className="w-full"
+            >
+              {t("common.cancel")}
+            </Button>
+            <Button
+              type="submit"
+              form={formId}
+              disabled={!isValid || isSaving}
+              className="w-full"
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="mr-2 size-4 animate-spin" />
+                  {t("library.envVars.saving")}
+                </>
+              ) : (
+                <>
+                  {mode === "create" ? (
+                    <Plus className="mr-2 size-4" />
+                  ) : (
+                    <Save className="mr-2 size-4" />
+                  )}
+                  {mode === "create"
+                    ? t("library.envVars.addButton")
+                    : t("library.envVars.save")}
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        }
+      >
+        <form id={formId} onSubmit={handleSubmit}>
+          <div className="space-y-4">
             {/* Key */}
             <div className="space-y-2">
               <Label htmlFor="env-key">{t("library.envVars.keyLabel")}</Label>
@@ -147,38 +179,8 @@ export function AddEnvVarDialog({
               {t("library.envVars.secretHelp")}
             </p>
           </div>
-
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={isSaving}
-            >
-              {t("common.cancel")}
-            </Button>
-            <Button type="submit" disabled={!isValid || isSaving}>
-              {isSaving ? (
-                <>
-                  <Loader2 className="mr-2 size-4 animate-spin" />
-                  {t("library.envVars.saving")}
-                </>
-              ) : (
-                <>
-                  {mode === "create" ? (
-                    <Plus className="mr-2 size-4" />
-                  ) : (
-                    <Save className="mr-2 size-4" />
-                  )}
-                  {mode === "create"
-                    ? t("library.envVars.addButton")
-                    : t("library.envVars.save")}
-                </>
-              )}
-            </Button>
-          </DialogFooter>
         </form>
-      </DialogContent>
+      </CapabilityDialogContent>
     </Dialog>
   );
 }

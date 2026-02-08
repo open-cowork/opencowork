@@ -4,13 +4,7 @@ import * as React from "react";
 import { Loader2, Plus, Save } from "lucide-react";
 
 import { useT } from "@/lib/i18n/client";
-import {
-  Dialog,
-  DialogContent,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -23,6 +17,7 @@ import type {
   SubAgentMode,
   SubAgentUpdateInput,
 } from "@/features/capabilities/sub-agents/types";
+import { CapabilityDialogContent } from "@/features/capabilities/components/capability-dialog-content";
 
 export type SubAgentDialogMode = "create" | "edit";
 
@@ -102,6 +97,7 @@ export function SubAgentDialog({
     (agentMode === "raw"
       ? Boolean(rawMarkdown.trim())
       : Boolean(description.trim()) && Boolean(prompt.trim()));
+  const formId = "sub-agent-dialog-form";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -152,13 +148,46 @@ export function SubAgentDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl">
-        <DialogHeader>
-          <DialogTitle>{title}</DialogTitle>
-        </DialogHeader>
-
-        <form onSubmit={handleSubmit}>
-          <div className="space-y-4 py-4">
+      <CapabilityDialogContent
+        title={title}
+        footer={
+          <DialogFooter className="grid grid-cols-2 gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={isSaving}
+              className="w-full"
+            >
+              {t("common.cancel")}
+            </Button>
+            <Button
+              type="submit"
+              form={formId}
+              disabled={!isValid || isSaving}
+              className="w-full"
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="mr-2 size-4 animate-spin" />
+                  {t("common.saving")}
+                </>
+              ) : (
+                <>
+                  {mode === "create" ? (
+                    <Plus className="mr-2 size-4" />
+                  ) : (
+                    <Save className="mr-2 size-4" />
+                  )}
+                  {mode === "create" ? t("common.create") : t("common.save")}
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        }
+      >
+        <form id={formId} onSubmit={handleSubmit}>
+          <div className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="subagent-name">
@@ -293,36 +322,8 @@ export function SubAgentDialog({
               </TabsContent>
             </Tabs>
           </div>
-
-          <DialogFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={isSaving}
-            >
-              {t("common.cancel")}
-            </Button>
-            <Button type="submit" disabled={!isValid || isSaving}>
-              {isSaving ? (
-                <>
-                  <Loader2 className="mr-2 size-4 animate-spin" />
-                  {t("common.saving")}
-                </>
-              ) : (
-                <>
-                  {mode === "create" ? (
-                    <Plus className="mr-2 size-4" />
-                  ) : (
-                    <Save className="mr-2 size-4" />
-                  )}
-                  {mode === "create" ? t("common.create") : t("common.save")}
-                </>
-              )}
-            </Button>
-          </DialogFooter>
         </form>
-      </DialogContent>
+      </CapabilityDialogContent>
     </Dialog>
   );
 }

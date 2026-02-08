@@ -428,3 +428,14 @@
   border-color: hsl(var(--primary)) !important;
   box-shadow: 0 2px 8px hsl(var(--primary) / 0.25) !important;
 }
+
+@media (max-width: 640px) {
+  [data-slot="dialog-content"],
+  [data-slot="alert-dialog-content"] {
+    width: auto !important;
+    max-width: min(
+      calc(100vw - var(--dialog-mobile-gutter, 2.5rem)),
+      var(--dialog-mobile-max, 32rem)
+    ) !important;
+  }
+}

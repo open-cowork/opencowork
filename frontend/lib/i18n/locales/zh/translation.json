@@ -976,6 +976,7 @@
   },
   "common": {
     "cancel": "取消",
+    "close": "关闭",
     "create": "创建",
     "delete": "删除",
     "save": "保存",

@@ -92,8 +92,20 @@ export function EnvVarsGrid({
 
   if (!vars.length) {
     return (
-      <div className="text-sm text-muted-foreground border border-dashed border-border/50 rounded-xl px-4 py-6 text-center">
-        {t("library.envVars.empty")}
+      <div className="space-y-4">
+        <div className="text-sm text-muted-foreground border border-dashed border-border/50 rounded-xl px-4 py-6 text-center">
+          {t("library.envVars.empty")}
+        </div>
+        {onAddClick ? (
+          <Button
+            className="w-full justify-center gap-2 sm:w-auto"
+            onClick={onAddClick}
+            aria-label={t("library.envVars.header.add")}
+          >
+            <Plus className="size-4" />
+            {t("library.envVars.header.add")}
+          </Button>
+        ) : null}
       </div>
     );
   }
