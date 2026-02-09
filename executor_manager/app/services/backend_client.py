@@ -149,6 +149,22 @@ class BackendClient:
             data = response.json()
             return data.get("data", {}) or {}
 
+    async def resolve_plugin_config(self, user_id: str, plugin_ids: list[int]) -> dict:
+        """Resolve effective plugin config for execution based on selected plugin ids."""
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{self.base_url}/api/v1/internal/plugin-config/resolve",
+                json={"plugin_ids": plugin_ids},
+                headers={
+                    "X-Internal-Token": self.settings.internal_api_token,
+                    "X-User-Id": user_id,
+                    **self._trace_headers(),
+                },
+            )
+            response.raise_for_status()
+            data = response.json()
+            return data.get("data", {}) or {}
+
     async def resolve_subagents(
         self, user_id: str, subagent_ids: list[int] | None
     ) -> dict:

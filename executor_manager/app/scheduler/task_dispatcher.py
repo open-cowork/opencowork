@@ -17,6 +17,7 @@ from app.services.container_pool import ContainerPool
 from app.services.executor_client import ExecutorClient
 from app.services.config_resolver import ConfigResolver
 from app.services.skill_stager import SkillStager
+from app.services.plugin_stager import PluginStager
 from app.services.attachment_stager import AttachmentStager
 from app.services.slash_command_stager import SlashCommandStager
 from app.services.sub_agent_stager import SubAgentStager
@@ -65,6 +66,7 @@ class TaskDispatcher:
         container_pool = TaskDispatcher.get_container_pool()
         config_resolver = ConfigResolver(backend_client)
         skill_stager = SkillStager()
+        plugin_stager = PluginStager()
         attachment_stager = AttachmentStager()
         slash_command_stager = SlashCommandStager()
         subagent_stager = SubAgentStager()
@@ -133,6 +135,25 @@ class TaskDispatcher:
                     "session_id": session_id,
                     "user_id": user_id,
                     "skills_staged": len(staged_skills),
+                },
+            )
+
+            step_started = time.perf_counter()
+            staged_plugins = plugin_stager.stage_plugins(
+                user_id=user_id,
+                session_id=session_id,
+                plugins=resolved_config.get("plugin_files") or {},
+            )
+            resolved_config["plugin_files"] = staged_plugins
+            logger.info(
+                "timing",
+                extra={
+                    "step": "task_dispatch_stage_plugins",
+                    "duration_ms": int((time.perf_counter() - step_started) * 1000),
+                    "task_id": task_id,
+                    "session_id": session_id,
+                    "user_id": user_id,
+                    "plugins_staged": len(staged_plugins),
                 },
             )
 

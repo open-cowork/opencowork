@@ -108,6 +108,20 @@ class ConfigResolver:
         input_files = config_snapshot.get("input_files") or []
 
         step_started = time.perf_counter()
+        plugin_files = await self._resolve_effective_plugin_files(
+            user_id, config_snapshot
+        )
+        logger.info(
+            "timing",
+            extra={
+                "step": "config_resolve_plugin_files",
+                "duration_ms": int((time.perf_counter() - step_started) * 1000),
+                "plugins": len(plugin_files) if isinstance(plugin_files, dict) else 0,
+                **ctx,
+            },
+        )
+
+        step_started = time.perf_counter()
         try:
             resolved_subagents = await self._resolve_effective_subagents(
                 user_id, config_snapshot
@@ -143,6 +157,7 @@ class ConfigResolver:
         step_started = time.perf_counter()
         resolved_mcp = self._resolve_mcp(mcp_config, env_map)
         resolved_skills = self._resolve_skills(skill_files, env_map)
+        resolved_plugins = self._resolve_plugins(plugin_files, env_map)
         resolved_inputs = _resolve_env_value(input_files, env_map)
         logger.info(
             "timing",
@@ -157,6 +172,7 @@ class ConfigResolver:
         resolved = dict(config_snapshot)
         resolved["mcp_config"] = resolved_mcp
         resolved["skill_files"] = resolved_skills
+        resolved["plugin_files"] = resolved_plugins
         resolved["input_files"] = resolved_inputs
         if isinstance(structured_agents, dict):
             # Expose as `agents` to match ClaudeAgentOptions (programmatic subagents).
@@ -258,6 +274,24 @@ class ConfigResolver:
         legacy = config_snapshot.get("skill_files")
         return legacy if isinstance(legacy, dict) else {}
 
+    async def _resolve_effective_plugin_files(
+        self, user_id: str, config_snapshot: dict
+    ) -> dict:
+        """Resolve plugins for execution.
+
+        Priority:
+        1) config_snapshot.plugin_ids -> fetch entries via backend internal API
+        2) legacy config_snapshot.plugin_files already contains entry configs
+        """
+        plugin_ids = self._normalize_ids(config_snapshot.get("plugin_ids"))
+        if plugin_ids:
+            return await self.backend_client.resolve_plugin_config(
+                user_id=user_id, plugin_ids=plugin_ids
+            )
+
+        legacy = config_snapshot.get("plugin_files")
+        return legacy if isinstance(legacy, dict) else {}
+
     async def _resolve_effective_subagents(
         self, user_id: str, config_snapshot: dict
     ) -> dict:
@@ -342,6 +376,18 @@ class ConfigResolver:
     def _resolve_skills(skills: dict, env_map: dict[str, str]) -> dict:
         resolved: dict = {}
         for name, config in (skills or {}).items():
+            if not isinstance(config, dict):
+                continue
+            if config.get("enabled") is False:
+                resolved[name] = {"enabled": False}
+                continue
+            resolved[name] = _resolve_env_value(config, env_map)
+        return resolved
+
+    @staticmethod
+    def _resolve_plugins(plugins: dict, env_map: dict[str, str]) -> dict:
+        resolved: dict = {}
+        for name, config in (plugins or {}).items():
             if not isinstance(config, dict):
                 continue
             if config.get("enabled") is False:

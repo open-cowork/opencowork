@@ -23,6 +23,7 @@ class ErrorCode(Enum):
     MCP_SERVER_NOT_FOUND = (40002, "MCP server not found")
     SKILL_NOT_FOUND = (40003, "Skill not found")
     SKILL_DOWNLOAD_FAILED = (40004, "Skill download failed")
+    PLUGIN_DOWNLOAD_FAILED = (40005, "Plugin download failed")
 
     WORKSPACE_NOT_FOUND = (22001, "Workspace not found")
     WORKSPACE_ARCHIVE_FAILED = (22002, "Failed to archive workspace")

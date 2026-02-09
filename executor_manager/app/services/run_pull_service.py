@@ -12,6 +12,7 @@ from app.services.backend_client import BackendClient
 from app.services.executor_client import ExecutorClient
 from app.services.config_resolver import ConfigResolver
 from app.services.skill_stager import SkillStager
+from app.services.plugin_stager import PluginStager
 from app.services.attachment_stager import AttachmentStager
 from app.services.claude_md_stager import ClaudeMdStager
 from app.services.slash_command_stager import SlashCommandStager
@@ -30,6 +31,7 @@ class RunPullService:
         self.container_pool = TaskDispatcher.get_container_pool()
         self.config_resolver = ConfigResolver(self.backend_client)
         self.skill_stager = SkillStager()
+        self.plugin_stager = PluginStager()
         self.attachment_stager = AttachmentStager()
         self.claude_md_stager = ClaudeMdStager()
         self.slash_command_stager = SlashCommandStager()
@@ -235,6 +237,23 @@ class RunPullService:
                     "step": "run_dispatch_stage_skills",
                     "duration_ms": int((time.perf_counter() - step_started) * 1000),
                     "skills_staged": len(staged_skills),
+                    **ctx,
+                },
+            )
+
+            step_started = time.perf_counter()
+            staged_plugins = self.plugin_stager.stage_plugins(
+                user_id=user_id,
+                session_id=session_id,
+                plugins=resolved_config.get("plugin_files") or {},
+            )
+            resolved_config["plugin_files"] = staged_plugins
+            logger.info(
+                "timing",
+                extra={
+                    "step": "run_dispatch_stage_plugins",
+                    "duration_ms": int((time.perf_counter() - step_started) * 1000),
+                    "plugins_staged": len(staged_plugins),
                     **ctx,
                 },
             )

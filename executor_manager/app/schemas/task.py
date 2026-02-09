@@ -24,7 +24,11 @@ class TaskConfig(BaseModel):
     # Built-in browser capability toggle (Playwright MCP is injected internally by the executor).
     browser_enabled: bool = False
     mcp_config: dict = Field(default_factory=dict)
+    mcp_server_ids: list[int] = Field(default_factory=list)
     skill_files: dict = Field(default_factory=dict)
+    skill_ids: list[int] = Field(default_factory=list)
+    plugin_files: dict = Field(default_factory=dict)
+    plugin_ids: list[int] = Field(default_factory=list)
     input_files: list[InputFile] = Field(default_factory=list)
     user_id: str = ""
     container_mode: Literal["ephemeral", "persistent"] = "ephemeral"
