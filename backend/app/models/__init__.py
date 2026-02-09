@@ -7,6 +7,8 @@ from app.models.agent_session import AgentSession
 from app.models.claude_md import UserClaudeMdSetting
 from app.models.env_var import UserEnvVar
 from app.models.mcp_server import McpServer
+from app.models.plugin import Plugin
+from app.models.plugin_import_job import PluginImportJob
 from app.models.project import Project
 from app.models.skill import Skill
 from app.models.skill_import_job import SkillImportJob
@@ -15,6 +17,7 @@ from app.models.sub_agent import SubAgent
 from app.models.tool_execution import ToolExecution
 from app.models.usage_log import UsageLog
 from app.models.user_mcp_install import UserMcpInstall
+from app.models.user_plugin_install import UserPluginInstall
 from app.models.user_input_request import UserInputRequest
 from app.models.user_skill_install import UserSkillInstall
 
@@ -28,6 +31,8 @@ __all__ = [
     "UserClaudeMdSetting",
     "UserEnvVar",
     "McpServer",
+    "Plugin",
+    "PluginImportJob",
     "Project",
     "Skill",
     "SkillImportJob",
@@ -36,6 +41,7 @@ __all__ = [
     "ToolExecution",
     "UsageLog",
     "UserMcpInstall",
+    "UserPluginInstall",
     "UserInputRequest",
     "UserSkillInstall",
 ]

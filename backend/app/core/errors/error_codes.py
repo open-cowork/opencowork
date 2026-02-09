@@ -25,6 +25,9 @@ class ErrorCode(Enum):
     SLASH_COMMAND_ALREADY_EXISTS = (15002, "Slash command already exists")
     SUBAGENT_NOT_FOUND = (16001, "Subagent not found")
     SUBAGENT_ALREADY_EXISTS = (16002, "Subagent already exists")
+    PLUGIN_NOT_FOUND = (17001, "Plugin not found")
+    PLUGIN_ALREADY_EXISTS = (17002, "Plugin already exists")
+    PLUGIN_MODIFY_FORBIDDEN = (17003, "Plugin modification forbidden")
 
     INTERNAL_ERROR = (50000, "Internal server error")
     DATABASE_ERROR = (50101, "Database operation failed")

@@ -6,6 +6,7 @@ import {
   Zap,
   Server,
   AppWindow,
+  Plug,
   CheckCircle2,
   XCircle,
   AlertCircle,
@@ -18,8 +19,10 @@ import {
 } from "@/components/ui/tooltip";
 import { mcpService } from "@/features/capabilities/mcp/services/mcp-service";
 import { skillsService } from "@/features/capabilities/skills/services/skills-service";
+import { pluginsService } from "@/features/capabilities/plugins/services/plugins-service";
 import type { McpServer } from "@/features/capabilities/mcp/types";
 import type { Skill } from "@/features/capabilities/skills/types";
+import type { Plugin } from "@/features/capabilities/plugins/types";
 import type {
   SkillUse,
   McpStatusItem,
@@ -46,17 +49,20 @@ export function StatusBar({
   const { t } = useT("translation");
   const [mcpServers, setMcpServers] = React.useState<McpServer[]>([]);
   const [allSkills, setAllSkills] = React.useState<Skill[]>([]);
+  const [allPresets, setAllPresets] = React.useState<Plugin[]>([]);
 
   // Load MCP servers and skills on mount
   React.useEffect(() => {
     const loadData = async () => {
       try {
-        const [serversData, skillsData] = await Promise.all([
+        const [serversData, skillsData, pluginsData] = await Promise.all([
           mcpService.listServers(),
           skillsService.listSkills(),
+          pluginsService.listPlugins(),
         ]);
         setMcpServers(serversData);
         setAllSkills(skillsData);
+        setAllPresets(pluginsData);
       } catch (error) {
         console.error("[StatusBar] Failed to load config data:", error);
       }
@@ -81,6 +87,14 @@ export function StatusBar({
       .filter((skill): skill is Skill => skill !== undefined);
   }, [configSnapshot?.skill_ids, allSkills]);
 
+  // Find presets by IDs from config snapshot
+  const configuredPresets = React.useMemo(() => {
+    const pluginIds = configSnapshot?.plugin_ids ?? [];
+    return pluginIds
+      .map((id) => allPresets.find((plugin) => plugin.id === id))
+      .filter((plugin): plugin is Plugin => plugin !== undefined);
+  }, [configSnapshot?.plugin_ids, allPresets]);
+
   const visibleMcpStatuses = React.useMemo(() => {
     // Hide built-in/internal MCP servers (e.g. executor-injected Playwright MCP).
     return (mcpStatuses ?? []).filter((mcp) => {
@@ -93,11 +107,12 @@ export function StatusBar({
   const hasSkills = configuredSkills.length > 0 || skills.length > 0;
   const hasMcp =
     configuredMcpServers.length > 0 || visibleMcpStatuses.length > 0;
+  const hasPresets = configuredPresets.length > 0;
   const hasBrowser = Boolean(
     configSnapshot?.browser_enabled || browser?.enabled,
   );
 
-  if (!hasSkills && !hasMcp && !hasBrowser) {
+  if (!hasSkills && !hasMcp && !hasPresets && !hasBrowser) {
     return null;
   }
 
@@ -119,6 +134,12 @@ export function StatusBar({
           status: "configured" as const,
         }))
       : visibleMcpStatuses;
+
+  const displayPresets = configuredPresets.map((plugin) => ({
+    id: String(plugin.id),
+    name: plugin.name,
+    status: "configured" as const,
+  }));
 
   const getSkillStatusIcon = (status: string) => {
     if (status === "configured") {
@@ -199,6 +220,43 @@ export function StatusBar({
                   >
                     {getSkillStatusIcon(skill.status)}
                     <span className="text-foreground">{skill.name}</span>
+                  </div>
+                ))}
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        )}
+
+        {/* Presets Card */}
+        {hasPresets && (
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div className="group flex min-w-0 max-w-full items-center gap-2 rounded-lg border border-border/60 bg-card px-3 py-2 transition-all hover:border-border hover:shadow-sm cursor-pointer">
+                <Plug className="size-3.5 text-foreground group-hover:text-foreground/80 transition-colors" />
+                <span className="min-w-0 truncate text-xs font-medium text-foreground">
+                  {t("chat.statusBar.pluginsConfigured")}
+                </span>
+                <Badge
+                  variant="secondary"
+                  className="text-xs h-5 px-1.5 bg-muted text-foreground"
+                >
+                  {displayPresets.length}
+                </Badge>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent
+              side="top"
+              className="p-2 bg-card border-border shadow-lg"
+              sideOffset={8}
+            >
+              <div className="space-y-1.5 max-h-[200px] overflow-y-auto">
+                {displayPresets.map((plugin) => (
+                  <div
+                    key={plugin.id}
+                    className="flex items-center gap-2 text-sm px-1"
+                  >
+                    {getSkillStatusIcon(plugin.status)}
+                    <span className="text-foreground">{plugin.name}</span>
                   </div>
                 ))}
               </div>

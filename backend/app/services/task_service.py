@@ -11,6 +11,7 @@ from app.repositories.run_repository import RunRepository
 from app.repositories.session_repository import SessionRepository
 from app.repositories.sub_agent_repository import SubAgentRepository
 from app.repositories.user_mcp_install_repository import UserMcpInstallRepository
+from app.repositories.user_plugin_install_repository import UserPluginInstallRepository
 from app.repositories.user_skill_install_repository import UserSkillInstallRepository
 from app.schemas.session import TaskConfig
 from app.schemas.task import TaskEnqueueRequest, TaskEnqueueResponse
@@ -269,6 +270,8 @@ class TaskService:
         merged_base.pop("mcp_config", None)
         # Legacy field (no longer used after switching to skill_ids).
         merged_base.pop("skill_files", None)
+        # Legacy field (not used; plugins are tracked via plugin_ids).
+        merged_base.pop("plugin_files", None)
         # input_files are treated as per-run inputs and should not be persisted into the session-level config snapshot.
         merged_base.pop("input_files", None)
 
@@ -276,9 +279,11 @@ class TaskService:
             merged_base.get("mcp_server_ids")
         )
         base_skill_ids = self._normalize_skill_ids(merged_base.get("skill_ids"))
+        base_plugin_ids = self._normalize_plugin_ids(merged_base.get("plugin_ids"))
 
         mcp_toggles: dict[str, bool] | None = None
         skill_toggles: dict[str, bool] | None = None
+        plugin_toggles: dict[str, bool] | None = None
         if task_config is not None:
             # Only merge fields explicitly provided by the caller to avoid
             # overriding existing session config with schema defaults.
@@ -289,6 +294,8 @@ class TaskService:
             mcp_toggles = request_config.pop("mcp_config", None)
             # Extract skill_config toggles before merging (don't merge as dict)
             skill_toggles = request_config.pop("skill_config", None)
+            # Extract plugin_config toggles before merging (don't merge as dict)
+            plugin_toggles = request_config.pop("plugin_config", None)
             merged_base = self._merge_config_map(merged_base, request_config)
 
         if mcp_toggles is not None:
@@ -310,6 +317,17 @@ class TaskService:
             merged_base["skill_ids"] = base_skill_ids
         else:
             merged_base["skill_ids"] = self._build_user_skill_ids_defaults(db, user_id)
+
+        if plugin_toggles is not None:
+            merged_base["plugin_ids"] = self._build_user_plugin_ids_with_toggles(
+                db, user_id, plugin_toggles
+            )
+        elif base_plugin_ids is not None:
+            merged_base["plugin_ids"] = base_plugin_ids
+        else:
+            merged_base["plugin_ids"] = self._build_user_plugin_ids_defaults(
+                db, user_id
+            )
 
         selected_subagent_ids = self._normalize_subagent_ids(
             merged_base.get("subagent_ids")
@@ -394,6 +412,25 @@ class TaskService:
                     continue
         return result
 
+    @staticmethod
+    def _normalize_plugin_ids(value: object) -> list[int] | None:
+        if not isinstance(value, list):
+            return None
+        result: list[int] = []
+        for item in value:
+            if isinstance(item, int):
+                result.append(item)
+                continue
+            if isinstance(item, str):
+                item = item.strip()
+                if not item:
+                    continue
+                try:
+                    result.append(int(item))
+                except ValueError:
+                    continue
+        return result
+
     def _build_user_mcp_server_ids_defaults(
         self, db: Session, user_id: str
     ) -> list[int]:
@@ -450,4 +487,28 @@ class TaskService:
                 continue
             if install.enabled:
                 result.append(install.skill_id)
+        return result
+
+    def _build_user_plugin_ids_defaults(self, db: Session, user_id: str) -> list[int]:
+        """Return enabled plugin ids from user's installations."""
+        result: list[int] = []
+        installs = UserPluginInstallRepository.list_by_user(db, user_id)
+        for install in installs:
+            if install.enabled:
+                result.append(install.plugin_id)
+        return result
+
+    def _build_user_plugin_ids_with_toggles(
+        self, db: Session, user_id: str, toggles: dict[str, bool]
+    ) -> list[int]:
+        """Return enabled plugin ids from user's installations with task-level toggles."""
+        result: list[int] = []
+        installs = UserPluginInstallRepository.list_by_user(db, user_id)
+        for install in installs:
+            if str(install.plugin_id) in toggles:
+                if toggles[str(install.plugin_id)]:
+                    result.append(install.plugin_id)
+                continue
+            if install.enabled:
+                result.append(install.plugin_id)
         return result
