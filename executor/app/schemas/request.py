@@ -40,6 +40,8 @@ class TaskConfig(BaseModel):
     mcp_server_ids: list[int] = Field(default_factory=list)
     skill_files: dict = Field(default_factory=dict)
     skill_ids: list[int] = Field(default_factory=list)
+    plugin_files: dict = Field(default_factory=dict)
+    plugin_ids: list[int] = Field(default_factory=list)
     agents: dict[str, AgentDefinition] = Field(default_factory=dict)
     input_files: list[InputFile] = Field(default_factory=list)
 

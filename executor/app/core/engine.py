@@ -3,6 +3,7 @@ import os
 import re
 import time
 from datetime import datetime, timedelta, timezone
+from pathlib import Path
 
 from claude_agent_sdk import ClaudeAgentOptions
 from claude_agent_sdk.client import ClaudeSDKClient
@@ -13,6 +14,7 @@ from claude_agent_sdk.types import (
     HookMatcher,
     PermissionResultAllow,
     PermissionResultDeny,
+    SdkPluginConfig,
     SyncHookJSONOutput,
 )
 from dotenv import load_dotenv
@@ -259,6 +261,8 @@ class AgentExecutor:
                     )
                 agents = resolved or None
 
+            plugins = self._discover_plugins()
+
             options = ClaudeAgentOptions(
                 cwd=ctx.cwd,
                 resume=self.sdk_session_id,
@@ -282,6 +286,7 @@ class AgentExecutor:
                 can_use_tool=can_use_tool,
                 hooks={"PreToolUse": [HookMatcher(matcher=None, hooks=[dummy_hook])]},
                 agents=agents,
+                plugins=plugins,
             )
 
             async with ClaudeSDKClient(options=options) as client:
@@ -331,6 +336,30 @@ class AgentExecutor:
                 lines.append(f"- {display}")
         lines.append("Do not modify files under inputs/ unless the user asks.")
         return "\n".join(lines)
+
+    def _discover_plugins(self) -> list[SdkPluginConfig]:
+        """Discover staged plugins under /workspace/.claude_data/plugins.
+
+        Plugins are staged by Executor Manager into the workspace. The SDK expects the plugin
+        root directory (containing `.claude-plugin/plugin.json`).
+        """
+        root = Path(self.workspace.root_path) / ".claude_data" / "plugins"
+        if not root.exists() or not root.is_dir():
+            return []
+
+        configs: list[SdkPluginConfig] = []
+        try:
+            for entry in sorted(root.iterdir(), key=lambda p: p.name.lower()):
+                if not entry.is_dir() or entry.is_symlink():
+                    continue
+                manifest = entry / ".claude-plugin" / "plugin.json"
+                if not manifest.exists() or not manifest.is_file():
+                    continue
+                configs.append(SdkPluginConfig(type="local", path=str(entry)))
+        except Exception:
+            return []
+
+        return configs
 
     @staticmethod
     def _inject_playwright_mcp(mcp_servers: dict) -> dict:
