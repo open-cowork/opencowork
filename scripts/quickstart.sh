@@ -80,8 +80,7 @@ msg() {
     "error.missing_cmd") [[ "$LANG" == "zh" ]] && echo "缺少命令" || echo "Missing command" ;;
     "error.unknown_option") [[ "$LANG" == "zh" ]] && echo "未知选项" || echo "Unknown option" ;;
     "error.docker_not_found") [[ "$LANG" == "zh" ]] && echo "未找到 docker compose" || echo "docker compose not found" ;;
-    "error.anthropic_not_set") [[ "$LANG" == "zh" ]] && echo "未设置 Anthropic 认证。请在 .env 中设置 ANTHROPIC_API_KEY 或 ANTHROPIC_AUTH_TOKEN（二选一），或运行 ./scripts/quickstart.sh（交互式）并传递 --anthropic-key。" || echo "Anthropic credential is not set. Configure exactly one of ANTHROPIC_API_KEY or ANTHROPIC_AUTH_TOKEN in .env, or run ./scripts/quickstart.sh (interactive) / pass --anthropic-key." ;;
-    "error.anthropic_conflict") [[ "$LANG" == "zh" ]] && echo "检测到同时设置了 ANTHROPIC_API_KEY 和 ANTHROPIC_AUTH_TOKEN。请仅保留一个。" || echo "Both ANTHROPIC_API_KEY and ANTHROPIC_AUTH_TOKEN are set. Keep only one." ;;
+    "error.anthropic_not_set") [[ "$LANG" == "zh" ]] && echo "未设置 Anthropic API Key。请在 .env 中设置 ANTHROPIC_API_KEY，或运行 ./scripts/quickstart.sh（交互式）并传递 --anthropic-key。" || echo "Anthropic API key is not set. Configure ANTHROPIC_API_KEY in .env, or run ./scripts/quickstart.sh (interactive) / pass --anthropic-key." ;;
 
     # Headers
     "header.quickstart") [[ "$LANG" == "zh" ]] && echo "Poco 快速启动" || echo "Poco Quickstart" ;;
@@ -128,8 +127,7 @@ msg() {
     "warn.chmod_data_failed") [[ "$LANG" == "zh" ]] && echo "chmod RustFS 数据目录失败。您可能需要运行: sudo chown -R" || echo "Failed to chmod RustFS data dir. You may need to run: sudo chown -R" ;;
     "warn.chmod_workspace_failed") [[ "$LANG" == "zh" ]] && echo "chmod 工作空间目录失败。您可能需要运行: sudo chown -R" || echo "Failed to chmod workspace directories. You may need to run: sudo chown -R" ;;
     "warn.rustfs_init_failed") [[ "$LANG" == "zh" ]] && echo "rustfs-init 失败；您可以重试: docker compose --profile init up -d rustfs-init" || echo "rustfs-init failed; you can retry: docker compose --profile init up -d rustfs-init" ;;
-    "warn.anthropic_not_set") [[ "$LANG" == "zh" ]] && echo "未设置 Anthropic 认证（ANTHROPIC_API_KEY 或 ANTHROPIC_AUTH_TOKEN）！" || echo "Anthropic credential is not set (ANTHROPIC_API_KEY or ANTHROPIC_AUTH_TOKEN)!" ;;
-    "warn.anthropic_conflict") [[ "$LANG" == "zh" ]] && echo "检测到 ANTHROPIC_API_KEY 和 ANTHROPIC_AUTH_TOKEN 同时设置，运行时会失败。" || echo "ANTHROPIC_API_KEY and ANTHROPIC_AUTH_TOKEN are both set; runtime will fail." ;;
+    "warn.anthropic_not_set") [[ "$LANG" == "zh" ]] && echo "未设置 Anthropic API Key（ANTHROPIC_API_KEY）！" || echo "Anthropic API key is not set (ANTHROPIC_API_KEY)!" ;;
     "warn.default_model") [[ "$LANG" == "zh" ]] && echo "DEFAULT_MODEL 看起来不像 Claude 模型（应以 'claude-' 开头）。" || echo "DEFAULT_MODEL doesn't look like a Claude model (expected prefix 'claude-')." ;;
     "warn.use_openai_model") [[ "$LANG" == "zh" ]] && echo "如果您想使用 OpenAI 模型，请设置 OPENAI_DEFAULT_MODEL。" || echo "If you meant an OpenAI model, set OPENAI_DEFAULT_MODEL instead." ;;
     "warn.openai_model") [[ "$LANG" == "zh" ]] && echo "OPENAI_DEFAULT_MODEL 看起来不像典型的 OpenAI 模型名称（例如 gpt-4o-mini）。" || echo "OPENAI_DEFAULT_MODEL doesn't look like a typical OpenAI model name (e.g. gpt-4o-mini)." ;;
@@ -336,9 +334,6 @@ read_env_key() {
       if [[ "$key" == "ANTHROPIC_API_KEY" && "$value" == "sk-ant-xxxxx" ]]; then
         return 1
       fi
-      if [[ "$key" == "ANTHROPIC_AUTH_TOKEN" && "$value" == "sk-ant-xxxxx" ]]; then
-        return 1
-      fi
       if [[ "$key" == "OPENAI_API_KEY" && "$value" == "sk-xxxxx" ]]; then
         return 1
       fi
@@ -349,40 +344,12 @@ read_env_key() {
   return 1
 }
 
-anthropic_credential_state() {
-  local has_api_key=false
-  local has_auth_token=false
-
+anthropic_api_key_state() {
   if read_env_key "ANTHROPIC_API_KEY" >/dev/null 2>&1; then
-    has_api_key=true
-  fi
-  if read_env_key "ANTHROPIC_AUTH_TOKEN" >/dev/null 2>&1; then
-    has_auth_token=true
-  fi
-
-  if [[ "$has_api_key" = true ]] && [[ "$has_auth_token" = true ]]; then
-    echo "conflict"
-    return
-  fi
-  if [[ "$has_api_key" = true ]]; then
-    echo "api_key"
-    return
-  fi
-  if [[ "$has_auth_token" = true ]]; then
-    echo "auth_token"
+    echo "configured"
     return
   fi
   echo "missing"
-}
-
-anthropic_credential_target_key() {
-  local state
-  state="$(anthropic_credential_state)"
-  if [[ "$state" == "auth_token" ]]; then
-    echo "ANTHROPIC_AUTH_TOKEN"
-    return
-  fi
-  echo "ANTHROPIC_API_KEY"
 }
 
 write_env_key() {
@@ -615,9 +582,6 @@ interactive_setup() {
   local existing_s3_endpoint
 
   existing_anthropic="$(read_env_key "ANTHROPIC_API_KEY" || true)"
-  if [[ -z "$existing_anthropic" ]]; then
-    existing_anthropic="$(read_env_key "ANTHROPIC_AUTH_TOKEN" || true)"
-  fi
   existing_anthropic_base_url="$(read_env_key "ANTHROPIC_BASE_URL" || true)"
   existing_default_model="$(read_env_key "DEFAULT_MODEL" || true)"
   existing_openai="$(read_env_key "OPENAI_API_KEY" || true)"
@@ -759,9 +723,7 @@ EOF
   # Write all collected keys
   # NOTE: write_env_key now handles check-before-write logic correctly
   if [[ -n "$ANTHROPIC_KEY" ]]; then
-    local anthropic_key_target
-    anthropic_key_target="$(anthropic_credential_target_key)"
-    write_env_key "$anthropic_key_target" "$ANTHROPIC_KEY"
+    write_env_key "ANTHROPIC_API_KEY" "$ANTHROPIC_KEY"
     print_success "$(msg "success.anthropic_configured")"
   fi
 
@@ -881,8 +843,7 @@ fi
 # Handle API keys from CLI arguments (non-interactive mode).
 if [[ "$INTERACTIVE" = false ]]; then
   if [[ -n "$ANTHROPIC_KEY" ]]; then
-    anthropic_key_target="$(anthropic_credential_target_key)"
-    write_env_key "$anthropic_key_target" "$ANTHROPIC_KEY"
+    write_env_key "ANTHROPIC_API_KEY" "$ANTHROPIC_KEY"
     print_success "$(msg "success.anthropic_configured")"
   fi
 
@@ -948,12 +909,8 @@ chmod -R u+rwX "$WORKSPACE_DIR_ABS" 2>/dev/null || \
   warn "$(msg "warn.chmod_workspace_failed") \"$(id -u)\":\"$(id -g)\" \"$WORKSPACE_DIR_ABS\""
 
 if [[ "$START_ALL" = true ]]; then
-  anthropic_credential_state_value="$(anthropic_credential_state)"
-  if [[ "$anthropic_credential_state_value" == "conflict" ]]; then
-    print_error "$(msg "error.anthropic_conflict")"
-    exit 1
-  fi
-  if [[ "$anthropic_credential_state_value" == "missing" ]]; then
+  anthropic_api_key_state_value="$(anthropic_api_key_state)"
+  if [[ "$anthropic_api_key_state_value" == "missing" ]]; then
     print_error "$(msg "error.anthropic_not_set")"
     exit 1
   fi
@@ -1011,36 +968,14 @@ fi
 print_header "$(msg "header.setup_complete")"
 
 # Check Anthropic credential state
-anthropic_credential_state_value="$(anthropic_credential_state)"
-if [[ "$anthropic_credential_state_value" == "conflict" ]]; then
-  print_warn "$(msg "warn.anthropic_conflict")"
-  if [[ "$LANG" == "zh" ]]; then
-    cat <<EOF
-
-  请在 .env 中仅保留一个变量：
-    - ANTHROPIC_API_KEY（推荐）
-    - ANTHROPIC_AUTH_TOKEN（兼容 Bearer 网关）
-
-  在此获取密钥: https://console.anthropic.com/
-EOF
-  else
-    cat <<EOF
-
-  Keep exactly one credential variable in .env:
-    - ANTHROPIC_API_KEY (recommended)
-    - ANTHROPIC_AUTH_TOKEN (for bearer-token gateways)
-
-  Get credentials at: https://console.anthropic.com/
-EOF
-  fi
-elif [[ "$anthropic_credential_state_value" == "missing" ]]; then
+anthropic_api_key_state_value="$(anthropic_api_key_state)"
+if [[ "$anthropic_api_key_state_value" == "missing" ]]; then
   print_warn "$(msg "warn.anthropic_not_set")"
   if [[ "$LANG" == "zh" ]]; then
     cat <<EOF
 
-  请在 .env 中设置以下任一变量：
-    - ANTHROPIC_API_KEY（推荐）
-    - ANTHROPIC_AUTH_TOKEN（兼容 Bearer 网关）
+  请在 .env 中设置:
+    - ANTHROPIC_API_KEY
 
   或运行:
     ./scripts/quickstart.sh
@@ -1050,9 +985,8 @@ EOF
   else
     cat <<EOF
 
-  Set one credential variable in .env:
-    - ANTHROPIC_API_KEY (recommended)
-    - ANTHROPIC_AUTH_TOKEN (for bearer-token gateways)
+  Set in .env:
+    - ANTHROPIC_API_KEY
 
   Or run:
     ./scripts/quickstart.sh
@@ -1079,7 +1013,7 @@ print_success "$(msg "success.bootstrap")"
 echo ""
 if [[ "$LANG" == "zh" ]]; then
   echo "后续步骤:"
-  echo "  1. 确保在 .env 中仅设置了 ANTHROPIC_API_KEY 或 ANTHROPIC_AUTH_TOKEN（只能一个）"
+  echo "  1. 确保在 .env 中已设置 ANTHROPIC_API_KEY"
   if [[ "$START_ALL" = true ]]; then
     echo "  2. 打开浏览器: http://localhost:3000"
     echo "  3. 查看日志: docker compose logs -f backend executor-manager frontend"
@@ -1089,7 +1023,7 @@ if [[ "$LANG" == "zh" ]]; then
   fi
 else
   echo "Next steps:"
-  echo "  1. Make sure exactly one of ANTHROPIC_API_KEY or ANTHROPIC_AUTH_TOKEN is set in .env"
+  echo "  1. Make sure ANTHROPIC_API_KEY is set in .env"
   if [[ "$START_ALL" = true ]]; then
     echo "  2. Open browser: http://localhost:3000"
     echo "  3. View logs: docker compose logs -f backend executor-manager frontend"
