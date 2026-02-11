@@ -129,12 +129,14 @@ class CommandService:
 
             tags: list[str] = []
             if session_id == active_session_id:
-                tags.append("当前")
+                tags.append("👉 当前")
             if session_id in watched_set:
-                tags.append("订阅")
+                tags.append("👀 订阅")
             tag_str = f" [{' / '.join(tags)}]" if tags else ""
 
-            lines.append(f"{idx}. [{status}] {title} ({short_id}){tag_str}")
+            lines.append(
+                f"{idx}. {_format_status_badge(status)} {title} ({short_id}){tag_str}"
+            )
 
         lines.append("")
         lines.append("使用 /connect <序号|session_id> 连接会话")
@@ -189,8 +191,8 @@ class CommandService:
         )
         WatchRepository.add_watch(db, channel_id=channel.id, session_id=session_id)
         return [
-            f"已连接会话：{session_id}\n"
-            f"前端查看: {self.formatter.session_url(session_id)}"
+            f"🔗 已连接会话：{session_id}\n"
+            f"🌐 前端查看: {self.formatter.session_url(session_id)}"
         ]
 
     async def _cmd_watch(self, db: Session, channel: Channel, args: str) -> list[str]:
@@ -199,8 +201,8 @@ class CommandService:
             return ["用法：/watch <session_id>"]
         WatchRepository.add_watch(db, channel_id=channel.id, session_id=session_id)
         return [
-            f"已订阅会话：{session_id}\n"
-            f"前端查看: {self.formatter.session_url(session_id)}"
+            f"👀 已订阅会话：{session_id}\n"
+            f"🌐 前端查看: {self.formatter.session_url(session_id)}"
         ]
 
     async def _cmd_unwatch(self, db: Session, channel: Channel, args: str) -> list[str]:
@@ -239,8 +241,8 @@ class CommandService:
                 "当前没有绑定的会话。用 /list 查看会话并 /connect，或者用 /new 创建。"
             ]
         return [
-            f"当前会话：{active.session_id}\n"
-            f"前端查看: {self.formatter.session_url(active.session_id)}"
+            f"👉 当前会话：{active.session_id}\n"
+            f"🌐 前端查看: {self.formatter.session_url(active.session_id)}"
         ]
 
     async def _cmd_clear(self, db: Session, channel: Channel, args: str) -> list[str]:
@@ -388,3 +390,23 @@ def _parse_positive_int(raw: str, *, default: int, max_value: int) -> int:
     if val <= 0:
         return default
     return min(val, max_value)
+
+
+def _format_status_badge(status: str) -> str:
+    text = status.strip() or "unknown"
+    return f"{_status_emoji(text)} [{text}]"
+
+
+def _status_emoji(status: str) -> str:
+    normalized = status.strip().lower()
+    if normalized in {"completed", "done", "success", "succeeded"}:
+        return "✅"
+    if normalized in {"claimed", "running", "in_progress", "executing"}:
+        return "⏳"
+    if normalized in {"pending", "queued", "scheduled", "created"}:
+        return "🕒"
+    if normalized in {"failed", "error"}:
+        return "❌"
+    if normalized in {"cancelled", "canceled", "aborted"}:
+        return "🚫"
+    return "❔"

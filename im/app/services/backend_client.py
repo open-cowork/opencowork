@@ -102,6 +102,12 @@ class BackendClient:
             return []
         return data
 
+    async def get_session_messages(self, *, session_id: str) -> list[dict[str, Any]]:
+        data = await self._request("GET", f"/sessions/{session_id}/messages")
+        if not isinstance(data, list):
+            return []
+        return data
+
     async def list_user_input_requests(
         self, *, session_id: str | None = None
     ) -> list[dict[str, Any]]:

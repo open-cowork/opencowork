@@ -27,6 +27,9 @@ class Settings(BaseSettings):
     poll_user_input_interval_seconds: float = Field(
         default=2.0, alias="POLL_USER_INPUT_INTERVAL_SECONDS"
     )
+    poll_session_messages_interval_seconds: float = Field(
+        default=2.0, alias="POLL_SESSION_MESSAGES_INTERVAL_SECONDS"
+    )
     poll_sessions_recent_interval_seconds: float = Field(
         default=5.0, alias="POLL_SESSIONS_RECENT_INTERVAL_SECONDS"
     )

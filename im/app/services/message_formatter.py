@@ -16,16 +16,12 @@ class MessageFormatter:
     def format_task_created(
         self, *, session_id: str, run_id: str | None, status: str | None
     ) -> str:
-        parts = [
-            "已创建任务",
-            f"session_id: {session_id}",
-        ]
-        if run_id:
-            parts.append(f"run_id: {run_id}")
-        if status:
-            parts.append(f"run_status: {status}")
-        parts.append(f"前端查看: {self.session_url(session_id)}")
-        return "\n".join(parts)
+        _ = run_id
+        suffix = _task_created_suffix(status)
+        lines = [f"🚀 已创建任务{suffix}"]
+        if session_id:
+            lines.append(f"🌐 前端查看: {self.session_url(session_id)}")
+        return "\n".join(lines)
 
     def format_terminal_notification(
         self,
@@ -36,25 +32,29 @@ class MessageFormatter:
         run_id: str | None,
         last_error: str | None,
     ) -> str:
+        _ = run_id
         clean_title = (title or "").strip()
-        header = (
-            "任务完成"
-            if status == "completed"
-            else ("任务失败" if status == "failed" else f"任务结束({status})")
-        )
+        normalized_status = _normalize_status(status)
+        header = _terminal_header(normalized_status)
         lines = [header]
         if clean_title:
-            lines.append(f"标题: {clean_title}")
-        lines.append(f"session_id: {session_id}")
-        if run_id:
-            lines.append(f"run_id: {run_id}")
-        if status == "failed" and last_error:
+            lines.append(f"📝 标题: {clean_title}")
+        if normalized_status == "failed" and last_error:
             err = last_error.strip()
             if len(err) > 800:
                 err = err[:800] + "...(truncated)"
-            lines.append(f"错误: {err}")
-        lines.append(f"前端查看: {self.session_url(session_id)}")
+            lines.append(f"⚠️ 错误: {err}")
+        lines.append(f"🌐 前端查看: {self.session_url(session_id)}")
         return "\n".join(lines)
+
+    def format_assistant_text_update(
+        self, *, session_id: str, text: str, title: str | None = None
+    ) -> str:
+        _ = session_id, title
+        clean_text = _clean_stream_text(text)
+        if not clean_text:
+            return ""
+        return f"💬 {clean_text}"
 
     def format_user_input_request(
         self,
@@ -130,3 +130,46 @@ class MessageFormatter:
         lines.append(f"/answer {request_id} {json.dumps(example, ensure_ascii=False)}")
         lines.append(f"前端查看: {self.session_url(session_id)}")
         return "\n".join(lines)
+
+
+def _normalize_status(status: str | None) -> str:
+    normalized = (status or "").strip().lower()
+    if normalized == "cancelled":
+        return "canceled"
+    return normalized or "unknown"
+
+
+def _task_created_suffix(status: str | None) -> str:
+    normalized = _normalize_status(status)
+    if normalized in {"queued", "pending", "created", "scheduled"}:
+        return "，当前排队中 🕒"
+    if normalized in {"claimed", "running", "in_progress", "executing"}:
+        return "，已开始运行 ⏳"
+    if normalized in {"completed", "done", "success", "succeeded"}:
+        return "，已完成 ✅"
+    if normalized in {"failed", "error"}:
+        return "，执行失败 ❌"
+    if normalized in {"canceled", "aborted"}:
+        return "，已取消 🚫"
+    return ""
+
+
+def _terminal_header(status: str) -> str:
+    if status == "completed":
+        return "✅ 任务完成（已同步全部结果）"
+    if status == "failed":
+        return "❌ 任务失败"
+    if status == "canceled":
+        return "🚫 任务已取消"
+    if status in {"claimed", "running", "in_progress", "executing"}:
+        return "⏳ 任务进行中"
+    if status in {"queued", "pending", "created", "scheduled"}:
+        return "🕒 任务排队中"
+    return f"📌 任务状态更新（{status}）"
+
+
+def _clean_stream_text(text: str) -> str:
+    cleaned = (text or "").replace("\ufffd", "").strip()
+    if len(cleaned) > 3000:
+        return cleaned[:3000] + "\n...(truncated)"
+    return cleaned

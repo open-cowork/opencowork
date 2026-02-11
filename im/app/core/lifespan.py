@@ -23,6 +23,7 @@ async def lifespan(_: FastAPI):
 
     try:
         tasks.append(asyncio.create_task(poller.run_user_input_loop()))
+        tasks.append(asyncio.create_task(poller.run_session_messages_loop()))
         tasks.append(asyncio.create_task(poller.run_sessions_recent_loop()))
         tasks.append(asyncio.create_task(poller.run_sessions_full_loop()))
         if dingtalk_stream.enabled:
