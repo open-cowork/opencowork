@@ -20,13 +20,9 @@ USER root
 COPY --chown=app:app im/app /app/app
 COPY --chown=app:app im/README.md /app/README.md
 
-COPY --chown=app:app docker/im/start.sh /app/start.sh
-RUN chmod +x /app/start.sh
-
 EXPOSE 8002
 
 USER app
 
 ENTRYPOINT []
-CMD ["/app/start.sh"]
-
+CMD ["/app/.venv/bin/uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8002"]
