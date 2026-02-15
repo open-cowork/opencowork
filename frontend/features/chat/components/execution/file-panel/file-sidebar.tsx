@@ -19,6 +19,7 @@ import { toast } from "sonner";
 import { PanelHeaderAction } from "@/components/shared/panel-header";
 import { useT } from "@/lib/i18n/client";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { logger } from "@/lib/logger";
 
 interface FileSidebarProps {
   files: FileNode[];
@@ -212,7 +213,7 @@ export function FileSidebar({
         toast.error(t("fileSidebar.archiveNotAvailable"));
       }
     } catch (error) {
-      console.error("[Artifacts] Failed to download workspace archive", error);
+      logger.error("[Artifacts] Failed to download workspace archive", error);
       toast.error(t("fileSidebar.downloadFailed"));
     }
   };

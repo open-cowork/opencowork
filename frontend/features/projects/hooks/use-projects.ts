@@ -1,16 +1,17 @@
 import { useCallback } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  createProjectAction,
-  deleteProjectAction,
-  listProjectsAction,
-  updateProjectAction,
-} from "@/features/projects/actions/project-actions";
+  createProject as createProjectApi,
+  deleteProject as deleteProjectApi,
+  listProjects as listProjectsApi,
+  updateProject as updateProjectApi,
+} from "@/features/projects/api/projects";
 import type { ProjectItem } from "@/features/projects/types";
 import type {
   ProjectRepoDefaultsInput,
   ProjectUpdatesInput,
 } from "@/components/shared/app-shell-context";
+import { logger } from "@/lib/logger";
 
 interface UseProjectsOptions {
   initialProjects?: ProjectItem[];
@@ -27,7 +28,7 @@ export function useProjects(options: UseProjectsOptions = {}) {
 
   const projectsQuery = useQuery({
     queryKey: PROJECTS_QUERY_KEY,
-    queryFn: () => listProjectsAction(),
+    queryFn: () => listProjectsApi(),
     enabled: enableClientFetch,
     initialData: initialProjects,
   });
@@ -35,8 +36,7 @@ export function useProjects(options: UseProjectsOptions = {}) {
   const projects = projectsQuery.data ?? [];
 
   const createMutation = useMutation({
-    mutationFn: (input: Parameters<typeof createProjectAction>[0]) =>
-      createProjectAction(input),
+    mutationFn: createProjectApi,
     onSuccess: (created) => {
       queryClient.setQueryData<ProjectItem[]>(PROJECTS_QUERY_KEY, (prev) => [
         ...(prev ?? []),
@@ -46,8 +46,7 @@ export function useProjects(options: UseProjectsOptions = {}) {
   });
 
   const updateMutation = useMutation({
-    mutationFn: (input: Parameters<typeof updateProjectAction>[0]) =>
-      updateProjectAction(input),
+    mutationFn: updateProjectApi,
     onSuccess: (updated, variables) => {
       queryClient.setQueryData<ProjectItem[]>(PROJECTS_QUERY_KEY, (prev) =>
         (prev ?? []).map((project) =>
@@ -60,7 +59,7 @@ export function useProjects(options: UseProjectsOptions = {}) {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (projectId: string) => deleteProjectAction({ projectId }),
+    mutationFn: (projectId: string) => deleteProjectApi({ projectId }),
     onMutate: async (projectId) => {
       await queryClient.cancelQueries({ queryKey: PROJECTS_QUERY_KEY });
       const previousProjects =
@@ -71,7 +70,7 @@ export function useProjects(options: UseProjectsOptions = {}) {
       return { previousProjects };
     },
     onError: (error, _projectId, ctx) => {
-      console.error("Failed to delete project", error);
+      logger.error("Failed to delete project", error);
       if (ctx?.previousProjects) {
         queryClient.setQueryData<ProjectItem[]>(
           PROJECTS_QUERY_KEY,
@@ -89,7 +88,7 @@ export function useProjects(options: UseProjectsOptions = {}) {
       try {
         return await createMutation.mutateAsync({ name, ...(options ?? {}) });
       } catch (error) {
-        console.error("Failed to create project", error);
+        logger.error("Failed to create project", error);
         return null;
       }
     },
@@ -101,7 +100,7 @@ export function useProjects(options: UseProjectsOptions = {}) {
       try {
         return await updateMutation.mutateAsync({ projectId, ...updates });
       } catch (error) {
-        console.error("Failed to update project", error);
+        logger.error("Failed to update project", error);
         return null;
       }
     },

@@ -14,6 +14,7 @@ import type {
   UserInputQuestion,
   UserInputRequest,
 } from "@/features/chat/types";
+import { logger } from "@/lib/logger";
 
 interface UserInputRequestCardProps {
   request: UserInputRequest;
@@ -141,7 +142,7 @@ export function UserInputRequestCard({
       toast.success(t("chat.askUserSubmitted"));
       playTaskCompleteSound();
     } catch (error) {
-      console.error("Submit AskUserQuestion failed:", error);
+      logger.error("Submit AskUserQuestion failed:", error);
       toast.error(t("chat.askUserFailed"));
     }
   };

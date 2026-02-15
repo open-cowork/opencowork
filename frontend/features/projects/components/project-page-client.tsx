@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { useT } from "@/lib/i18n/client";
 
 import { useAutosizeTextarea } from "@/features/home/hooks/use-autosize-textarea";
-import { createSessionAction } from "@/features/chat/actions/session-actions";
+import { createSession } from "@/features/chat/api/session";
 import type { ProjectItem, TaskHistoryItem } from "@/features/projects/types";
 import type {
   ComposerMode,
@@ -21,6 +21,9 @@ import { toast } from "sonner";
 import type { TaskConfig } from "@/features/chat/types/api/session";
 import { TaskEntrySection } from "@/features/home/components/task-entry-section";
 import { useComposerModeHotkeys } from "@/features/home/hooks/use-composer-mode-hotkeys";
+import { setSessionPrompt } from "@/lib/storage/session-prompt";
+import { routes } from "@/lib/routes";
+import { logger } from "@/lib/logger";
 
 interface ProjectPageClientProps {
   projectId: string;
@@ -57,8 +60,7 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
   );
 
   const projectTitle = React.useMemo(() => {
-    const baseName =
-      currentProject?.name || t("project.untitled", "Untitled Project");
+    const baseName = currentProject?.name || t("project.untitled");
     return t("project.titleWithCount", {
       name: baseName,
       count: projectTaskCount,
@@ -102,6 +104,10 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
   const handleSendTask = React.useCallback(
     async (options?: TaskSendOptions) => {
       const inputFiles = options?.attachments ?? [];
+      const normalizedPrompt = inputValue.trim();
+      const prompt =
+        normalizedPrompt ||
+        (inputFiles.length > 0 ? t("common.uploadedFiles") : normalizedPrompt);
       const repoUrl = (options?.repo_url || "").trim();
       const gitBranch = (options?.git_branch || "").trim() || "main";
       const gitTokenEnvKey = (options?.git_token_env_key || "").trim();
@@ -109,15 +115,14 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
       const scheduledTask = options?.scheduled_task ?? null;
       if (
         (mode === "scheduled"
-          ? inputValue.trim() === ""
-          : inputValue.trim() === "" && inputFiles.length === 0) ||
+          ? normalizedPrompt === ""
+          : normalizedPrompt === "" && inputFiles.length === 0) ||
         isSubmitting
       ) {
         return;
       }
 
       setIsSubmitting(true);
-      console.log("[Project] Sending task:", inputValue, { mode });
 
       try {
         // Best-effort: persist repo defaults on the project for future runs.
@@ -143,8 +148,7 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
 
         if (mode === "scheduled") {
           const name =
-            (scheduledTask?.name || "").trim() ||
-            inputValue.trim().slice(0, 32);
+            (scheduledTask?.name || "").trim() || normalizedPrompt.slice(0, 32);
           const cron = (scheduledTask?.cron || "").trim() || "*/5 * * * *";
           const timezone = (scheduledTask?.timezone || "").trim() || "UTC";
           const enabled = Boolean(scheduledTask?.enabled ?? true);
@@ -154,7 +158,7 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
             name,
             cron,
             timezone,
-            prompt: inputValue,
+            prompt,
             enabled,
             reuse_session: reuseSession,
             project_id: projectId,
@@ -162,12 +166,12 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
           });
           toast.success(t("library.scheduledTasks.toasts.created"));
           setInputValue("");
-          router.push(`/${lng}/capabilities/scheduled-tasks`);
+          router.push(routes.scheduledTasks(lng));
           return;
         }
 
-        const session = await createSessionAction({
-          prompt: inputValue,
+        const session = await createSession({
+          prompt,
           projectId,
           config: Object.keys(config).length > 0 ? config : undefined,
           permission_mode: mode === "plan" ? "plan" : "default",
@@ -175,11 +179,9 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
           timezone: runSchedule?.timezone,
           scheduled_at: runSchedule?.scheduled_at,
         });
-        console.log("session", session);
+        setSessionPrompt(session.sessionId, prompt);
 
-        localStorage.setItem(`session_prompt_${session.sessionId}`, inputValue);
-
-        addTask(inputValue, {
+        addTask(prompt, {
           id: session.sessionId,
           timestamp: new Date().toISOString(),
           status: "running",
@@ -188,9 +190,9 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
 
         setInputValue("");
 
-        router.push(`/${lng}/chat/${session.sessionId}`);
+        router.push(routes.chat(lng, session.sessionId));
       } catch (error) {
-        console.error("[Project] Failed to create session", error);
+        logger.error("[Project] Failed to create session", error);
       } finally {
         setIsSubmitting(false);
       }
@@ -219,7 +221,7 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
     async (targetProjectId: string) => {
       await deleteProject(targetProjectId);
       if (targetProjectId === projectId) {
-        router.push(`/${lng}/home`);
+        router.push(routes.home(lng));
       }
     },
     [deleteProject, projectId, lng, router],

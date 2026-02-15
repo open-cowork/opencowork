@@ -1,4 +1,5 @@
 import { useEffect, useRef, useCallback, useState } from "react";
+import { logger } from "@/lib/logger";
 
 export interface AdaptivePollingOptions {
   /**
@@ -123,7 +124,7 @@ export function useAdaptivePolling({
         setCurrentInterval(interval);
       }
     } catch (error) {
-      console.error("[AdaptivePolling] Poll error:", error);
+      logger.warn("[AdaptivePolling] Poll error", error);
 
       if (enableBackoff) {
         setErrorCount((prev) => {

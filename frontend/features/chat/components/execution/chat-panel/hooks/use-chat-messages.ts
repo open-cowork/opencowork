@@ -1,15 +1,17 @@
 import { useEffect, useRef, useState, useCallback, useMemo } from "react";
-import { sendMessageAction } from "@/features/chat/actions/session-actions";
 import {
-  getMessagesAction,
-  getRunsBySessionAction,
-} from "@/features/chat/actions/query-actions";
+  getMessages as getMessagesApi,
+  getRunsBySession as getRunsBySessionApi,
+} from "@/features/chat/api/query";
+import { sendMessage as sendMessageApi } from "@/features/chat/api/session";
 import type {
   ChatMessage,
   ExecutionSession,
   InputFile,
   UsageResponse,
 } from "@/features/chat/types";
+import { useT } from "@/lib/i18n/client";
+import { logger } from "@/lib/logger";
 
 interface UseChatMessagesOptions {
   session: ExecutionSession | null;
@@ -42,6 +44,7 @@ export function useChatMessages({
   pollingInterval = Number(process.env.NEXT_PUBLIC_MESSAGE_POLLING_INTERVAL) ||
     3000,
 }: UseChatMessagesOptions): UseChatMessagesReturn {
+  const { t } = useT("translation");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isLoadingHistory, setIsLoadingHistory] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
@@ -57,7 +60,7 @@ export function useChatMessages({
   const refreshRealUserMessageIds = useCallback(async () => {
     if (!session?.session_id) return;
     try {
-      const runs = await getRunsBySessionAction({
+      const runs = await getRunsBySessionApi({
         sessionId: session.session_id,
       });
       const ids = runs
@@ -72,7 +75,7 @@ export function useChatMessages({
       });
       setRunUsageByUserMessageId(usageByMessageId);
     } catch (error) {
-      console.error("[Chat] Failed to load runs:", error);
+      logger.error("[Chat] Failed to load runs:", error);
       // Keep as null so message rendering falls back to showing all user messages.
       realUserMessageIdsRef.current = null;
       setRunUsageByUserMessageId({});
@@ -87,7 +90,7 @@ export function useChatMessages({
       }
 
       const realUserMessageIds = realUserMessageIdsRef.current ?? undefined;
-      return getMessagesAction({
+      return getMessagesApi({
         sessionId,
         realUserMessageIds,
       });
@@ -150,17 +153,16 @@ export function useChatMessages({
       if (!normalizedContent && !hasAttachments) return;
 
       const sessionId = session.session_id;
-      console.log(
-        `[Chat] Sending message to session ${sessionId}:`,
-        normalizedContent,
-      );
+      const finalContent =
+        normalizedContent ||
+        (hasAttachments ? t("common.uploadedFiles") : normalizedContent);
       setIsTyping(true);
 
       // Create a new user message for instant UI update
       const newMessage: ChatMessage = {
         id: `msg-${Date.now()}`,
         role: "user",
-        content: normalizedContent,
+        content: finalContent,
         status: "sent",
         timestamp: new Date().toISOString(),
         attachments,
@@ -169,12 +171,11 @@ export function useChatMessages({
       setMessages((prev) => [...prev, newMessage]);
 
       try {
-        await sendMessageAction({
+        await sendMessageApi({
           sessionId,
-          content: normalizedContent,
+          content: finalContent,
           attachments,
         });
-        console.log("[Chat] Message sent successfully");
 
         // Refresh runs so multi-turn conversations only show real user inputs.
         await refreshRealUserMessageIds();
@@ -186,12 +187,13 @@ export function useChatMessages({
         );
         setMessages((prev) => mergeMessages(prev, server.messages));
       } catch (error) {
-        console.error("[Chat] Failed to send message or get reply:", error);
+        logger.error("[Chat] Failed to send message or get reply:", error);
         setIsTyping(false);
       }
     },
     [
       session,
+      t,
       mergeMessages,
       refreshRealUserMessageIds,
       fetchMessagesWithFilter,
@@ -226,7 +228,7 @@ export function useChatMessages({
           return mergeMessages(prev, history.messages);
         });
       } catch (error) {
-        console.error("[Chat] Failed to load messages:", error);
+        logger.error("[Chat] Failed to load messages:", error);
       } finally {
         setIsLoadingHistory(false);
       }
@@ -245,10 +247,6 @@ export function useChatMessages({
     if (session.session_id && !isTerminal) {
       interval = setInterval(fetchMessages, pollingInterval);
     } else if (session.session_id && isTerminal) {
-      console.log(
-        `%c [Message Polling] Stopped for session ${session.session_id}`,
-        "color: #f59e0b; font-weight: bold;",
-      );
       // Refresh run usage once the session becomes terminal so UI can display cost/tokens.
       void refreshRealUserMessageIds();
     }

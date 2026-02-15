@@ -18,6 +18,16 @@ const eslintConfig = defineConfig([
   {
     rules: {
       "@next/next/no-html-link-for-pages": "off",
+      "no-console": "error",
+    },
+  },
+  {
+    files: [
+      "lib/logger.ts",
+      "features/chat/components/execution/file-panel/doc-viewer-client.tsx",
+    ],
+    rules: {
+      "no-console": "off",
     },
   },
 ]);

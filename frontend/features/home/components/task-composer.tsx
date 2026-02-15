@@ -45,7 +45,9 @@ import {
 } from "@/features/home/components/run-schedule-dialog";
 import { useSlashCommandAutocomplete } from "@/features/chat/hooks/use-slash-command-autocomplete";
 import { useAppShell } from "@/components/shared/app-shell-context";
-import { setPendingCapabilityView } from "@/features/capabilities/lib/capability-view-state";
+import { setPendingCapabilityView } from "@/lib/storage/capabilities-view";
+import { routes } from "@/lib/routes";
+import { logger } from "@/lib/logger";
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100MB
 
@@ -170,8 +172,7 @@ export function TaskComposer({
   }, [mode, scheduledName, value]);
 
   const envVarsHref = React.useMemo(() => {
-    const clean = (lng || "").trim();
-    return clean ? `/${clean}/capabilities` : "/capabilities";
+    return routes.capabilities(lng);
   }, [lng]);
 
   const handleOpenEnvVars = React.useCallback(() => {
@@ -223,7 +224,7 @@ export function TaskComposer({
           git_token_env_key: gitTokenEnvKey.trim() || null,
         });
       } catch (error) {
-        console.error("[TaskComposer] Failed to persist repo defaults", error);
+        logger.error("[TaskComposer] Failed to persist repo defaults", error);
       }
     }
     setRepoDialogOpen(false);
@@ -287,7 +288,7 @@ export function TaskComposer({
       toast.success(t("hero.toasts.uploadSuccess"));
       playFileUploadSound();
     } catch (error) {
-      console.error("Upload failed:", error);
+      logger.error("Upload failed:", error);
       toast.error(t("hero.toasts.uploadFailed"));
     } finally {
       setIsUploading(false);
@@ -339,7 +340,7 @@ export function TaskComposer({
       toast.success(t("hero.toasts.uploadSuccess"));
       playFileUploadSound();
     } catch (error) {
-      console.error("Upload failed:", error);
+      logger.error("Upload failed:", error);
       toast.error(t("hero.toasts.uploadFailed"));
     } finally {
       setIsUploading(false);

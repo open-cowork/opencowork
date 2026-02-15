@@ -1,9 +1,11 @@
 import { useState, useCallback, useEffect, useRef } from "react";
-import { getExecutionSessionAction } from "@/features/chat/actions/query-actions";
+import { getExecutionSession } from "@/features/chat/api/query";
 import { useAdaptivePolling } from "./use-adaptive-polling";
 import type { ExecutionSession } from "@/features/chat/types";
 import { playTaskCompleteSound } from "@/lib/utils/sound";
 import { getSessionPollingIntervalMs } from "@/lib/env";
+import { getSessionPrompt } from "@/lib/storage/session-prompt";
+import { logger } from "@/lib/logger";
 
 interface UseExecutionSessionOptions {
   /**
@@ -96,7 +98,7 @@ export function useExecutionSession({
 
     try {
       const currentProgress = progressRef.current;
-      const updatedSession = await getExecutionSessionAction({
+      const updatedSession = await getExecutionSession({
         sessionId,
         currentProgress,
       });
@@ -107,12 +109,8 @@ export function useExecutionSession({
       setSession((prevSession) => {
         // Handle user_prompt persistence inside the state update
         if (!prevSession) {
-          const storedPrompt = localStorage.getItem(
-            `session_prompt_${sessionId}`,
-          );
-          if (storedPrompt) {
-            updatedSession.user_prompt = storedPrompt;
-          }
+          const storedPrompt = getSessionPrompt(sessionId);
+          if (storedPrompt) updatedSession.user_prompt = storedPrompt;
         } else if (prevSession.user_prompt) {
           updatedSession.user_prompt = prevSession.user_prompt;
         }
@@ -120,7 +118,7 @@ export function useExecutionSession({
       });
       setError(null);
     } catch (err) {
-      console.error("[useExecutionSession] Failed to fetch session:", err);
+      logger.error("[useExecutionSession] Failed to fetch session:", err);
       setError(err as Error);
     } finally {
       setIsLoading(false);
@@ -161,10 +159,6 @@ export function useExecutionSession({
     ) {
       // Trigger callback only once when polling stops
       if (!hasStoppedRef.current && onPollingStop) {
-        console.log(
-          `%c[Polling] Stopped for session ${sessionId} (Status: ${session.status})`,
-          "color: #f59e0b; font-weight: bold;",
-        );
         hasStoppedRef.current = true;
 
         // Only play sound if the status actually transitioned to completed

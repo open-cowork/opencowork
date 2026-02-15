@@ -1,4 +1,5 @@
 import type { FileNode } from "@/features/chat/types";
+import { logger } from "@/lib/logger";
 
 export const DOC_VIEWER_TYPE_MAP: Record<string, string> = {
   bmp: "bmp",
@@ -107,7 +108,7 @@ export function ensureAbsoluteUrl(url?: string | null): string | undefined {
     }
     return url;
   } catch (error) {
-    console.warn("[DocumentViewer] Failed to resolve URL", error);
+    logger.warn("[DocumentViewer] Failed to resolve URL", error);
     return url;
   }
 }

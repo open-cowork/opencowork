@@ -10,6 +10,7 @@ import {
 
 import { slashCommandsService } from "@/features/capabilities/slash-commands/services/slash-commands-service";
 import type { SlashCommand } from "@/features/capabilities/slash-commands/types";
+import { logger } from "@/lib/logger";
 
 export type SlashCommandSuggestionSource = "builtin" | "custom";
 
@@ -73,7 +74,7 @@ export function useSlashCommandAutocomplete({
         setCustomCommands(list);
       } catch (error) {
         // Autocomplete should be best-effort and never break chat input showing/sending.
-        console.warn("[SlashCommands] autocomplete list failed:", error);
+        logger.warn("[SlashCommands] autocomplete list failed", error);
       }
     };
     load();

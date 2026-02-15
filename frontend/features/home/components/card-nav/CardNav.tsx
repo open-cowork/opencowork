@@ -26,7 +26,8 @@ import { useAppShell } from "@/components/shared/app-shell-context";
 import { cn } from "@/lib/utils";
 import { playMcpInstallSound } from "@/lib/utils/sound";
 import { useT } from "@/lib/i18n/client";
-import { setPendingCapabilityView } from "@/features/capabilities/lib/capability-view-state";
+import { setPendingCapabilityView } from "@/lib/storage/capabilities-view";
+import { logger } from "@/lib/logger";
 import { toast } from "sonner";
 import { AlertTriangle } from "lucide-react";
 import { SkeletonText } from "@/components/ui/skeleton-shimmer";
@@ -118,7 +119,7 @@ export function CardNav({
       setPluginInstalls(pluginInstallsData);
       setHasFetched(true);
     } catch (error) {
-      console.error("[CardNav] Failed to fetch data:", error);
+      logger.error("[CardNav] Failed to fetch data:", error);
     } finally {
       setIsLoading(false);
     }
@@ -191,7 +192,7 @@ export function CardNav({
           );
         }
       } catch (error) {
-        console.error("[CardNav] Failed to toggle MCP:", error);
+        logger.error("[CardNav] Failed to toggle MCP:", error);
       }
     },
     [mcpInstalls, t],
@@ -232,7 +233,7 @@ export function CardNav({
           );
         }
       } catch (error) {
-        console.error("[CardNav] Failed to toggle Skill:", error);
+        logger.error("[CardNav] Failed to toggle Skill:", error);
       }
     },
     [skillInstalls, t],
@@ -256,7 +257,7 @@ export function CardNav({
           playMcpInstallSound();
         }
       } catch (error) {
-        console.error("[CardNav] Failed to toggle Plugin:", error);
+        logger.error("[CardNav] Failed to toggle Plugin:", error);
       }
     },
     [],
@@ -287,7 +288,7 @@ export function CardNav({
           }
         }
       } catch (error) {
-        console.error("[CardNav] Failed to batch toggle MCPs:", error);
+        logger.error("[CardNav] Failed to batch toggle MCPs:", error);
         toast.error(t("hero.toasts.actionFailed"));
       }
     },
@@ -319,7 +320,7 @@ export function CardNav({
           }
         }
       } catch (error) {
-        console.error("[CardNav] Failed to batch toggle Skills:", error);
+        logger.error("[CardNav] Failed to batch toggle Skills:", error);
         toast.error(t("hero.toasts.actionFailed"));
       }
     },

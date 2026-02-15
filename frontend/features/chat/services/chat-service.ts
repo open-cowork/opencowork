@@ -3,6 +3,7 @@
  */
 
 import { apiClient, API_ENDPOINTS } from "@/lib/api-client";
+import { logger } from "@/lib/logger";
 import type {
   ExecutionSession,
   FileNode,
@@ -178,7 +179,7 @@ export const chatService = {
       const session = await chatService.getSessionRaw(sessionId);
       return toExecutionSession(session, currentProgress);
     } catch (error) {
-      console.error("[Chat Service] Failed to get session:", error);
+      logger.warn("[ChatService] Failed to get session", error);
       return createDefaultSession(sessionId);
     }
   },
@@ -186,16 +187,16 @@ export const chatService = {
   enqueueTask: async (
     request: TaskEnqueueRequest,
   ): Promise<TaskEnqueueResponse> => {
-    console.log("[enqueueTask] request:", JSON.stringify(request));
+    logger.debug("[ChatService] enqueueTask request", request);
     try {
       const result = await apiClient.post<TaskEnqueueResponse>(
         API_ENDPOINTS.tasks,
         request,
       );
-      console.log("[enqueueTask] result:", JSON.stringify(result));
+      logger.debug("[ChatService] enqueueTask result", result);
       return result;
     } catch (error) {
-      console.error("[enqueueTask] error:", error);
+      logger.error("[ChatService] enqueueTask error", error);
       throw error;
     }
   },
@@ -566,7 +567,7 @@ export const chatService = {
         internalContextsByUserMessageId,
       };
     } catch (error) {
-      console.error("[Chat Service] Failed to get messages:", error);
+      logger.error("[ChatService] Failed to get messages", error);
       return { messages: [], internalContextsByUserMessageId: {} };
     }
   },
@@ -581,7 +582,7 @@ export const chatService = {
           API_ENDPOINTS.sessionWorkspaceFiles(sessionId),
         );
       } catch (err) {
-        console.warn("[Chat Service] Failed to get workspace files:", err);
+        logger.warn("[ChatService] Failed to get workspace files", err);
       }
 
       // Fallback to file changes from session state if workspace is empty
@@ -597,10 +598,7 @@ export const chatService = {
             type: "file",
           }));
         } catch (err) {
-          console.error(
-            "[Chat Service] Fallback to session state failed:",
-            err,
-          );
+          logger.error("[ChatService] Fallback to session state failed", err);
         }
       }
 
@@ -717,7 +715,7 @@ export const chatService = {
 
       return tree;
     } catch (error) {
-      console.error("[Chat Service] Failed to get files:", error);
+      logger.error("[ChatService] Failed to get files", error);
       return [];
     }
   },

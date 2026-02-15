@@ -13,6 +13,7 @@ import {
 import { FileText, Folder, MessageSquare, Loader2 } from "lucide-react";
 import { useT } from "@/lib/i18n/client";
 import { useSearchData } from "@/features/search/hooks/use-search-data";
+import { routes } from "@/lib/routes";
 
 interface GlobalSearchDialogProps {
   open: boolean;
@@ -86,15 +87,14 @@ export function GlobalSearchDialog({
 
     switch (type) {
       case "task":
-        router.push(lng ? `/${lng}/chat/${id}` : `/chat/${id}`);
+        router.push(routes.chat(lng, id));
         break;
       case "project":
-        // TODO: Navigate to project page when implemented
-        router.push(lng ? `/${lng}/chat/new` : `/chat/new`);
+        router.push(routes.project(lng, id));
         break;
       case "message":
         // Navigate to chat page and scroll to message
-        router.push(lng ? `/${lng}/chat/${id}` : `/chat/${id}`);
+        router.push(routes.chat(lng, id));
         break;
     }
   };
@@ -145,7 +145,7 @@ export function GlobalSearchDialog({
                 <span className="flex-1">{project.name}</span>
                 {project.taskCount !== undefined && (
                   <span className="text-xs text-muted-foreground">
-                    {project.taskCount} tasks
+                    {t("project.subtitle", { count: project.taskCount })}
                   </span>
                 )}
               </CommandItem>

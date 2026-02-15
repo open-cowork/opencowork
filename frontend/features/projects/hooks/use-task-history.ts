@@ -1,16 +1,14 @@
 import { useCallback } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  listTaskHistoryAction,
-  moveTaskToProjectAction,
-} from "@/features/projects/actions/project-actions";
-import {
-  deleteSessionAction,
-  renameSessionTitleAction,
-} from "@/features/chat/actions/session-actions";
+  listTaskHistory,
+  moveTaskToProject,
+} from "@/features/projects/api/projects";
+import { deleteSession, renameSessionTitle } from "@/features/chat/api/session";
 import type { TaskHistoryItem } from "@/features/projects/types";
 import { useT } from "@/lib/i18n/client";
 import { toast } from "sonner";
+import { logger } from "@/lib/logger";
 
 interface UseTaskHistoryOptions {
   initialTasks?: TaskHistoryItem[];
@@ -25,7 +23,7 @@ export function useTaskHistory(options: UseTaskHistoryOptions = {}) {
 
   const taskHistoryQuery = useQuery({
     queryKey: TASK_HISTORY_QUERY_KEY,
-    queryFn: () => listTaskHistoryAction(),
+    queryFn: () => listTaskHistory(),
     initialData: initialTasks,
   });
 
@@ -105,7 +103,7 @@ export function useTaskHistory(options: UseTaskHistoryOptions = {}) {
   );
 
   const removeMutation = useMutation({
-    mutationFn: (taskId: string) => deleteSessionAction({ sessionId: taskId }),
+    mutationFn: (taskId: string) => deleteSession({ sessionId: taskId }),
     onMutate: async (taskId) => {
       await queryClient.cancelQueries({ queryKey: TASK_HISTORY_QUERY_KEY });
       const previousTasks =
@@ -118,7 +116,7 @@ export function useTaskHistory(options: UseTaskHistoryOptions = {}) {
       return { previousTasks };
     },
     onError: (error, _taskId, ctx) => {
-      console.error("Failed to delete task", error);
+      logger.error("Failed to delete task", error);
       if (ctx?.previousTasks) {
         queryClient.setQueryData<TaskHistoryItem[]>(
           TASK_HISTORY_QUERY_KEY,
@@ -144,7 +142,7 @@ export function useTaskHistory(options: UseTaskHistoryOptions = {}) {
 
   const moveMutation = useMutation({
     mutationFn: (input: { taskId: string; projectId: string | null }) =>
-      moveTaskToProjectAction({
+      moveTaskToProject({
         sessionId: input.taskId,
         projectId: input.projectId,
       }),
@@ -167,7 +165,7 @@ export function useTaskHistory(options: UseTaskHistoryOptions = {}) {
       return { previousTasks };
     },
     onError: (error, _input, ctx) => {
-      console.error("Failed to move task to project", error);
+      logger.error("Failed to move task to project", error);
       if (ctx?.previousTasks) {
         queryClient.setQueryData<TaskHistoryItem[]>(
           TASK_HISTORY_QUERY_KEY,
@@ -193,7 +191,7 @@ export function useTaskHistory(options: UseTaskHistoryOptions = {}) {
 
   const renameMutation = useMutation({
     mutationFn: (input: { taskId: string; title: string }) =>
-      renameSessionTitleAction({ sessionId: input.taskId, title: input.title }),
+      renameSessionTitle({ sessionId: input.taskId, title: input.title }),
     onMutate: async ({ taskId, title }) => {
       await queryClient.cancelQueries({ queryKey: TASK_HISTORY_QUERY_KEY });
       const previousTasks =
@@ -214,7 +212,7 @@ export function useTaskHistory(options: UseTaskHistoryOptions = {}) {
       toast.success(t("task.toasts.renamed"));
     },
     onError: (error, _input, ctx) => {
-      console.error("Failed to rename task", error);
+      logger.error("Failed to rename task", error);
       if (ctx?.previousTasks) {
         queryClient.setQueryData<TaskHistoryItem[]>(
           TASK_HISTORY_QUERY_KEY,

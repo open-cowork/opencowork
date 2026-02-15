@@ -16,6 +16,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { mcpService } from "@/features/capabilities/mcp/services/mcp-service";
 import type { McpDisplayItem } from "@/features/capabilities/mcp/hooks/use-mcp-catalog";
+import { logger } from "@/lib/logger";
 
 const MCP_LIMIT = 3;
 
@@ -93,7 +94,7 @@ export function McpSelectorDialog({
         }
         setLocalConfig(initialConfig);
       } catch (error) {
-        console.error("Failed to load MCP servers:", error);
+        logger.error("Failed to load MCP servers:", error);
       } finally {
         setIsLoading(false);
       }

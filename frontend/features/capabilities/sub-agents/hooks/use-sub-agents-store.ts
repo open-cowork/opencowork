@@ -10,6 +10,7 @@ import type {
   SubAgentCreateInput,
   SubAgentUpdateInput,
 } from "@/features/capabilities/sub-agents/types";
+import { logger } from "@/lib/logger";
 
 export function useSubAgentsStore() {
   const { t } = useT("translation");
@@ -23,7 +24,7 @@ export function useSubAgentsStore() {
       const data = await subAgentsService.list({ revalidate: 0 });
       setSubAgents(data);
     } catch (error) {
-      console.error("[SubAgents] Failed to fetch:", error);
+      logger.error("[SubAgents] Failed to fetch:", error);
       toast.error(t("library.subAgents.toasts.loadError"));
     } finally {
       setIsLoading(false);
@@ -43,7 +44,7 @@ export function useSubAgentsStore() {
         toast.success(t("library.subAgents.toasts.created"));
         return created;
       } catch (error) {
-        console.error("[SubAgents] create failed:", error);
+        logger.error("[SubAgents] create failed:", error);
         toast.error(t("library.subAgents.toasts.error"));
         return null;
       } finally {
@@ -64,7 +65,7 @@ export function useSubAgentsStore() {
         toast.success(t("library.subAgents.toasts.updated"));
         return updated;
       } catch (error) {
-        console.error("[SubAgents] update failed:", error);
+        logger.error("[SubAgents] update failed:", error);
         toast.error(t("library.subAgents.toasts.error"));
         return null;
       } finally {
@@ -82,7 +83,7 @@ export function useSubAgentsStore() {
         setSubAgents((prev) => prev.filter((a) => a.id !== subAgentId));
         toast.success(t("library.subAgents.toasts.deleted"));
       } catch (error) {
-        console.error("[SubAgents] delete failed:", error);
+        logger.error("[SubAgents] delete failed:", error);
         toast.error(t("library.subAgents.toasts.error"));
       } finally {
         setSavingId(null);

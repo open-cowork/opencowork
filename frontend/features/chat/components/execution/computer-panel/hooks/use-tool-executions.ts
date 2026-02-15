@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { getToolExecutionsAction } from "@/features/chat/actions/query-actions";
+import { getToolExecutions } from "@/features/chat/api/query";
 import type { ToolExecutionResponse } from "@/features/chat/types";
 
 interface UseToolExecutionsOptions {
@@ -39,7 +39,7 @@ export function useToolExecutions({
       const offset = replace ? 0 : executions.length;
 
       try {
-        const data = await getToolExecutionsAction({
+        const data = await getToolExecutions({
           sessionId,
           limit,
           offset,

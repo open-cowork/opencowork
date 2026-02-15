@@ -130,7 +130,7 @@ export function PaginatedGrid({
           <div className="flex flex-1 items-center justify-center gap-2 text-sm text-muted-foreground sm:justify-end">
             {totalPages > 1 && (
               <>
-                <span>{t("pagination.rowsPerPage", "Rows per page")}</span>
+                <span>{t("pagination.rowsPerPage")}</span>
                 <Select
                   value={String(pageSize)}
                   onValueChange={(value) =>

@@ -22,6 +22,7 @@ import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 import { MarkdownCode, MarkdownPre } from "@/components/shared/markdown-code";
 import { SyntaxHighlighter, oneDark, oneLight } from "@/lib/markdown/prism";
+import { logger } from "@/lib/logger";
 import {
   DOC_VIEWER_TYPE_MAP,
   DEFAULT_TEXT_LANGUAGE,
@@ -267,7 +268,7 @@ const TextDocumentViewer = ({
       setCopyState("copied");
       setTimeout(() => setCopyState("idle"), 1500);
     } catch (error) {
-      console.error("[DocumentViewer] Copy failed", error);
+      logger.error("[DocumentViewer] Copy failed", error);
     }
   }, [state]);
 
@@ -419,7 +420,7 @@ const MarkdownDocumentViewer = ({
       setCopyState("copied");
       setTimeout(() => setCopyState("idle"), 1500);
     } catch (error) {
-      console.error("[DocumentViewer] Copy markdown failed", error);
+      logger.error("[DocumentViewer] Copy markdown failed", error);
     }
   }, [state]);
 

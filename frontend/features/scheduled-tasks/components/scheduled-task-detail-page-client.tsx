@@ -7,6 +7,7 @@ import { toast } from "sonner";
 
 import { useT } from "@/lib/i18n/client";
 import { useAppShell } from "@/components/shared/app-shell-context";
+import { logger } from "@/lib/logger";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import {
@@ -124,7 +125,7 @@ export function ScheduledTaskDetailPageClient({ taskId }: { taskId: string }) {
       setTask(taskResp);
       setRuns(runsResp);
     } catch (error) {
-      console.error("[ScheduledTasks] detail refresh failed", error);
+      logger.error("[ScheduledTasks] detail refresh failed", error);
       toast.error(t("library.scheduledTasks.toasts.error"));
     } finally {
       setIsRefreshing(false);
@@ -142,7 +143,7 @@ export function ScheduledTaskDetailPageClient({ taskId }: { taskId: string }) {
         setTask(taskResp);
         setRuns(runsResp);
       } catch (error) {
-        console.error("[ScheduledTasks] detail load failed", error);
+        logger.error("[ScheduledTasks] detail load failed", error);
         toast.error(t("library.scheduledTasks.toasts.error"));
       } finally {
         setIsLoading(false);
@@ -159,7 +160,7 @@ export function ScheduledTaskDetailPageClient({ taskId }: { taskId: string }) {
         setTask(updated);
         toast.success(t("library.scheduledTasks.toasts.updated"));
       } catch (error) {
-        console.error("[ScheduledTasks] update failed", error);
+        logger.error("[ScheduledTasks] update failed", error);
         toast.error(t("library.scheduledTasks.toasts.error"));
       } finally {
         setSaving(null);
@@ -176,7 +177,7 @@ export function ScheduledTaskDetailPageClient({ taskId }: { taskId: string }) {
       await refresh();
       router.push(`/${lng}/chat/${resp.session_id}`);
     } catch (error) {
-      console.error("[ScheduledTasks] trigger failed", error);
+      logger.error("[ScheduledTasks] trigger failed", error);
       toast.error(t("library.scheduledTasks.toasts.error"));
     } finally {
       setSaving(null);
@@ -190,7 +191,7 @@ export function ScheduledTaskDetailPageClient({ taskId }: { taskId: string }) {
       toast.success(t("library.scheduledTasks.toasts.deleted"));
       router.push(`/${lng}/capabilities/scheduled-tasks`);
     } catch (error) {
-      console.error("[ScheduledTasks] delete failed", error);
+      logger.error("[ScheduledTasks] delete failed", error);
       toast.error(t("library.scheduledTasks.toasts.error"));
     } finally {
       setSaving(null);

@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef, useCallback } from "react";
 import type { ExecutionSession, InputFile } from "@/features/chat/types";
+import { logger } from "@/lib/logger";
 
 interface UsePendingMessagesOptions {
   session: ExecutionSession | null;
@@ -101,7 +102,7 @@ export function usePendingMessages({
         try {
           await sendMessage(msg.content, msg.attachments);
         } catch (error) {
-          console.error("Auto-send failed:", error);
+          logger.error("Auto-send failed:", error);
         } finally {
           isProcessingRef.current = false;
           setIsSendingPending(false);

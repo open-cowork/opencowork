@@ -16,10 +16,7 @@ import {
 import { useChatMessages } from "./hooks/use-chat-messages";
 import { usePendingMessages } from "./hooks/use-pending-messages";
 import { useUserInputRequests } from "./hooks/use-user-input-requests";
-import {
-  cancelSessionAction,
-  renameSessionTitleAction,
-} from "@/features/chat/actions/session-actions";
+import { cancelSession, renameSessionTitle } from "@/features/chat/api/session";
 import { RenameTaskDialog } from "@/features/projects/components/rename-task-dialog";
 import type {
   ExecutionSession,
@@ -29,6 +26,7 @@ import type {
 import { useT } from "@/lib/i18n/client";
 import { toast } from "sonner";
 import { useTaskHistoryContext } from "@/features/projects/contexts/task-history-context";
+import { logger } from "@/lib/logger";
 
 interface ChatPanelProps {
   session: ExecutionSession | null;
@@ -115,9 +113,9 @@ export function ChatPanel({
     updateSession({ status: "canceled" });
 
     try {
-      await cancelSessionAction({ sessionId: session.session_id });
+      await cancelSession({ sessionId: session.session_id });
     } catch (error) {
-      console.error("[ChatPanel] Failed to cancel session:", error);
+      logger.error("[ChatPanel] Failed to cancel session:", error);
       // Best-effort revert so the UI doesn't get stuck in a wrong terminal state.
       updateSession({ status: prevStatus });
     } finally {
@@ -135,7 +133,7 @@ export function ChatPanel({
     async (newTitle: string) => {
       if (!session?.session_id) return;
       try {
-        await renameSessionTitleAction({
+        await renameSessionTitle({
           sessionId: session.session_id,
           title: newTitle,
         });
@@ -143,7 +141,7 @@ export function ChatPanel({
         toast.success(t("task.toasts.renamed"));
         await refreshTasks();
       } catch (error) {
-        console.error("[ChatPanel] Failed to rename session title:", error);
+        logger.error("[ChatPanel] Failed to rename session title:", error);
         toast.error(t("task.toasts.renameFailed"));
       }
     },

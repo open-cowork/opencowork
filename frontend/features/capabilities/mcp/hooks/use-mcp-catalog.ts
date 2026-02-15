@@ -13,6 +13,7 @@ import { useEnvVarsStore } from "@/features/capabilities/env-vars/hooks/use-env-
 import { useT } from "@/lib/i18n/client";
 import { CheckCircle2, CircleOff } from "lucide-react";
 import { playMcpInstallSound } from "@/lib/utils/sound";
+import { logger } from "@/lib/logger";
 
 export interface McpDisplayItem {
   server: McpServer;
@@ -38,7 +39,7 @@ export function useMcpCatalog() {
       setServers(serversData);
       setInstalls(installsData);
     } catch (error) {
-      console.error("[MCP] Failed to fetch data:", error);
+      logger.error("[MCP] Failed to fetch data:", error);
       toast.error(t("library.mcpLibrary.toasts.error"));
     } finally {
       setIsLoading(false);
@@ -140,7 +141,7 @@ export function useMcpCatalog() {
           }
         }
       } catch (error) {
-        console.error("[MCP] toggle failed:", error);
+        logger.error("[MCP] toggle failed:", error);
         // Rollback optimistic update on error
         if (install) {
           setInstalls((prev) =>
@@ -178,7 +179,7 @@ export function useMcpCatalog() {
         toast.success(t("library.mcpLibrary.toasts.updated"));
         return updated;
       } catch (error) {
-        console.error("[MCP] update failed:", error);
+        logger.error("[MCP] update failed:", error);
         toast.error(t("library.mcpLibrary.toasts.error"));
       } finally {
         setLoadingId(null);
@@ -200,7 +201,7 @@ export function useMcpCatalog() {
         toast.success(t("library.mcpLibrary.toasts.created"));
         return created;
       } catch (error) {
-        console.error("[MCP] create failed:", error);
+        logger.error("[MCP] create failed:", error);
         toast.error(t("library.mcpLibrary.toasts.error"));
       } finally {
         setLoadingId(null);
@@ -220,7 +221,7 @@ export function useMcpCatalog() {
         const serverName = server?.name || "";
         toast.success(`${serverName} MCP ${t("common.deleted")}`);
       } catch (error) {
-        console.error("[MCP] delete failed:", error);
+        logger.error("[MCP] delete failed:", error);
         toast.error(t("library.mcpLibrary.toasts.error"));
       } finally {
         setLoadingId(null);

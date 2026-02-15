@@ -3,6 +3,8 @@
  * Generates simple tones without requiring audio files
  */
 
+import { logger } from "@/lib/logger";
+
 // Create a shared audio context
 let audioContext: AudioContext | null = null;
 
@@ -52,7 +54,7 @@ const playTone = (
     oscillator.start(now);
     oscillator.stop(now + duration / 1000);
   } catch (error) {
-    console.warn("Failed to play sound:", error);
+    logger.warn("Failed to play sound:", error);
   }
 };
 

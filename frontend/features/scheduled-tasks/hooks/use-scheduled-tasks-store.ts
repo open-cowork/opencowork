@@ -12,6 +12,7 @@ import type {
   ScheduledTaskUpdateInput,
 } from "@/features/scheduled-tasks/types";
 import type { RunResponse } from "@/features/chat/types/api/run";
+import { logger } from "@/lib/logger";
 
 const SCHEDULED_TASKS_QUERY_KEY = ["scheduledTasks"] as const;
 
@@ -39,7 +40,7 @@ export function useScheduledTasksStore() {
         toast.success(t("library.scheduledTasks.toasts.created"));
         return created;
       } catch (error) {
-        console.error("[ScheduledTasks] create failed", error);
+        logger.error("[ScheduledTasks] create failed", error);
         toast.error(t("library.scheduledTasks.toasts.error"));
         return null;
       } finally {
@@ -63,7 +64,7 @@ export function useScheduledTasksStore() {
         );
         toast.success(t("library.scheduledTasks.toasts.updated"));
       } catch (error) {
-        console.error("[ScheduledTasks] update failed", error);
+        logger.error("[ScheduledTasks] update failed", error);
         toast.error(t("library.scheduledTasks.toasts.error"));
       } finally {
         setSavingId(null);
@@ -84,7 +85,7 @@ export function useScheduledTasksStore() {
         );
         toast.success(t("library.scheduledTasks.toasts.deleted"));
       } catch (error) {
-        console.error("[ScheduledTasks] delete failed", error);
+        logger.error("[ScheduledTasks] delete failed", error);
         toast.error(t("library.scheduledTasks.toasts.error"));
       } finally {
         setSavingId(null);
@@ -104,7 +105,7 @@ export function useScheduledTasksStore() {
         });
         return resp;
       } catch (error) {
-        console.error("[ScheduledTasks] trigger failed", error);
+        logger.error("[ScheduledTasks] trigger failed", error);
         toast.error(t("library.scheduledTasks.toasts.error"));
         return null;
       } finally {
@@ -119,7 +120,7 @@ export function useScheduledTasksStore() {
       try {
         return await scheduledTasksService.listRuns(taskId);
       } catch (error) {
-        console.error("[ScheduledTasks] list runs failed", error);
+        logger.error("[ScheduledTasks] list runs failed", error);
         toast.error(t("library.scheduledTasks.toasts.error"));
         return [];
       }
@@ -131,7 +132,7 @@ export function useScheduledTasksStore() {
     try {
       await tasksQuery.refetch();
     } catch (error) {
-      console.error("[ScheduledTasks] refresh failed", error);
+      logger.error("[ScheduledTasks] refresh failed", error);
       toast.error(t("library.scheduledTasks.toasts.error"));
     }
   }, [t, tasksQuery]);

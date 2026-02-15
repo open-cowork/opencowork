@@ -8,7 +8,7 @@ import { useT } from "@/lib/i18n/client";
 import { useAutosizeTextarea } from "../hooks/use-autosize-textarea";
 
 import { HomeHeader } from "./home-header";
-import { createSessionAction } from "@/features/chat/actions/session-actions";
+import { createSession } from "@/features/chat/api/session";
 import type { ComposerMode, TaskSendOptions } from "./task-composer";
 
 import { useAppShell } from "@/components/shared/app-shell-context";
@@ -17,6 +17,9 @@ import { toast } from "sonner";
 import type { TaskConfig } from "@/features/chat/types/api/session";
 import { TaskEntrySection } from "@/features/home/components/task-entry-section";
 import { useComposerModeHotkeys } from "@/features/home/hooks/use-composer-mode-hotkeys";
+import { setSessionPrompt } from "@/lib/storage/session-prompt";
+import { routes } from "@/lib/routes";
+import { logger } from "@/lib/logger";
 
 export function HomePageClient() {
   const { t } = useT("translation");
@@ -38,6 +41,10 @@ export function HomePageClient() {
   const handleSendTask = React.useCallback(
     async (options?: TaskSendOptions) => {
       const inputFiles = options?.attachments ?? [];
+      const normalizedPrompt = inputValue.trim();
+      const prompt =
+        normalizedPrompt ||
+        (inputFiles.length > 0 ? t("common.uploadedFiles") : normalizedPrompt);
       const repoUrl = (options?.repo_url || "").trim();
       const gitBranch = (options?.git_branch || "").trim() || "main";
       const repoUsage = options?.repo_usage ?? null;
@@ -47,15 +54,14 @@ export function HomePageClient() {
       const scheduledTask = options?.scheduled_task ?? null;
       if (
         (mode === "scheduled"
-          ? inputValue.trim() === ""
-          : inputValue.trim() === "" && inputFiles.length === 0) ||
+          ? normalizedPrompt === ""
+          : normalizedPrompt === "" && inputFiles.length === 0) ||
         isSubmitting
       ) {
         return;
       }
 
       setIsSubmitting(true);
-      console.log("[Home] Sending task:", inputValue, { mode });
 
       try {
         // Build config object (shared by plan/task, and also used to pin scheduled task config)
@@ -76,8 +82,7 @@ export function HomePageClient() {
 
         if (mode === "scheduled") {
           const name =
-            (scheduledTask?.name || "").trim() ||
-            inputValue.trim().slice(0, 32);
+            (scheduledTask?.name || "").trim() || normalizedPrompt.slice(0, 32);
           const cron = (scheduledTask?.cron || "").trim() || "*/5 * * * *";
           const timezone = (scheduledTask?.timezone || "").trim() || "UTC";
           const enabled = Boolean(scheduledTask?.enabled ?? true);
@@ -87,7 +92,7 @@ export function HomePageClient() {
             name,
             cron,
             timezone,
-            prompt: inputValue,
+            prompt,
             enabled,
             reuse_session: reuseSession,
             config: Object.keys(config).length > 0 ? config : undefined,
@@ -96,7 +101,7 @@ export function HomePageClient() {
           toast.success(t("library.scheduledTasks.toasts.created"));
           setInputValue("");
           router.push(
-            `/${lng}/capabilities/scheduled-tasks/${created.scheduled_task_id}`,
+            routes.scheduledTaskDetail(lng, created.scheduled_task_id),
           );
           return;
         }
@@ -142,8 +147,8 @@ export function HomePageClient() {
         }
 
         // 1. Call create session API
-        const session = await createSessionAction({
-          prompt: inputValue,
+        const session = await createSession({
+          prompt,
           config: Object.keys(config).length > 0 ? config : undefined,
           projectId: finalProjectId,
           permission_mode: mode === "plan" ? "plan" : "default",
@@ -151,28 +156,25 @@ export function HomePageClient() {
           timezone: runSchedule?.timezone,
           scheduled_at: runSchedule?.scheduled_at,
         });
-        console.log("session", session);
         const sessionId = session.sessionId;
-        console.log("sessionId", sessionId);
 
-        // 2. Save prompt to localStorage for compatibility/fallback
-        localStorage.setItem(`session_prompt_${sessionId}`, inputValue);
+        // 2. Save prompt locally for compatibility/fallback
+        setSessionPrompt(sessionId, prompt);
 
         // 3. Add to local history (persisted via localStorage in hook)
-        addTask(inputValue, {
+        addTask(prompt, {
           id: sessionId,
           timestamp: new Date().toISOString(),
           status: "running",
           projectId: finalProjectId,
         });
 
-        console.log("[Home] Navigating to chat session:", sessionId);
         setInputValue("");
 
         // 4. Navigate to the chat page
-        router.push(`/${lng}/chat/${sessionId}`);
+        router.push(routes.chat(lng, sessionId));
       } catch (error) {
-        console.error("[Home] Failed to create session:", error);
+        logger.error("[Home] Failed to create session:", error);
       } finally {
         setIsSubmitting(false);
       }

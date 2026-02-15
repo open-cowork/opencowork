@@ -10,6 +10,7 @@ import type {
 import { pluginsService } from "@/features/capabilities/plugins/services/plugins-service";
 import { useT } from "@/lib/i18n/client";
 import { playMcpInstallSound } from "@/lib/utils/sound";
+import { logger } from "@/lib/logger";
 
 export interface PluginDisplayItem {
   plugin: Plugin;
@@ -33,7 +34,7 @@ export function usePluginCatalog() {
       setPlugins(pluginsData);
       setInstalls(installsData);
     } catch (error) {
-      console.error("[Plugins] Failed to fetch data:", error);
+      logger.error("[Plugins] Failed to fetch data:", error);
       toast.error(t("library.pluginsManager.toasts.loadError"));
     } finally {
       setIsLoading(false);
@@ -56,7 +57,7 @@ export function usePluginCatalog() {
         toast.success(t("library.pluginsManager.toasts.installed"));
         playMcpInstallSound();
       } catch (error) {
-        console.error("[Plugins] install failed:", error);
+        logger.error("[Plugins] install failed:", error);
         toast.error(t("library.pluginsManager.toasts.actionError"));
       } finally {
         setLoadingId(null);
@@ -76,7 +77,7 @@ export function usePluginCatalog() {
         );
         toast.success(t("common.deleted"));
       } catch (error) {
-        console.error("[Plugins] delete failed:", error);
+        logger.error("[Plugins] delete failed:", error);
         toast.error(t("library.pluginsManager.toasts.actionError"));
       } finally {
         setLoadingId(null);
@@ -114,7 +115,7 @@ export function usePluginCatalog() {
           playMcpInstallSound();
         }
       } catch (error) {
-        console.error("[Plugins] setEnabled failed:", error);
+        logger.error("[Plugins] setEnabled failed:", error);
         setInstalls((prev) =>
           prev.map((i) =>
             i.id === installId ? { ...i, enabled: !enabled } : i,

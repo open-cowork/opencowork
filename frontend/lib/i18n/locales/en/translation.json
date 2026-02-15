@@ -1119,6 +1119,7 @@
     }
   },
   "project": {
+    "untitled": "Untitled Project",
     "subtitle": "{{count}} tasks",
     "titleWithCount": "{{name}} · {{count}} tasks",
     "share": "Share Project",
@@ -1151,6 +1152,7 @@
     "delete": "Delete",
     "deleted": "Deleted",
     "edit": "Edit",
+    "uploadedFiles": "Uploaded files",
     "save": "Save",
     "saving": "Saving...",
     "confirm": "Confirm",

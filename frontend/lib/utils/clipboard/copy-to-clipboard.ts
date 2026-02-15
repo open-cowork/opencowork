@@ -1,6 +1,8 @@
 /**
  * Copy text to clipboard with error handling and fallback
  */
+import { logger } from "@/lib/logger";
+
 export async function copyToClipboard(
   text: string,
   options?: {
@@ -40,7 +42,7 @@ export async function copyToClipboard(
   } catch (error) {
     const err = error instanceof Error ? error : new Error(String(error));
     options?.onError?.(err);
-    console.error("[Clipboard] Failed to copy text:", err);
+    logger.error("[Clipboard] Failed to copy text:", err);
     return false;
   }
 }
@@ -57,7 +59,7 @@ export async function readFromClipboard(): Promise<string | null> {
     }
     return null;
   } catch (error) {
-    console.error("[Clipboard] Failed to read text:", error);
+    logger.error("[Clipboard] Failed to read text:", error);
     return null;
   }
 }

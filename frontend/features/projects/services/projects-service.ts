@@ -1,6 +1,7 @@
 import { apiClient, API_ENDPOINTS } from "@/lib/api-client";
 import type { SessionResponse } from "@/features/chat/types";
 import type { ProjectItem, TaskHistoryItem } from "@/features/projects/types";
+import { logger } from "@/lib/logger";
 
 interface ProjectApiResponse {
   project_id: string;
@@ -79,7 +80,7 @@ export const projectsService = {
       );
       return projects.map(mapProject);
     } catch (error) {
-      console.warn(
+      logger.warn(
         "[Projects] Failed to fetch projects, using empty list",
         error,
       );
@@ -135,7 +136,7 @@ export const tasksService = {
 
       return sessions.map(mapSessionToTask);
     } catch (error) {
-      console.warn(
+      logger.warn(
         "[Tasks] Failed to fetch task history, using empty list",
         error,
       );

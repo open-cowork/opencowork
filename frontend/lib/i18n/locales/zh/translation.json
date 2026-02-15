@@ -1119,6 +1119,7 @@
     }
   },
   "project": {
+    "untitled": "未命名项目",
     "subtitle": "{{count}} 个任务",
     "titleWithCount": "{{name}} · {{count}} 个任务",
     "share": "分享项目",
@@ -1150,6 +1151,7 @@
     "create": "创建",
     "delete": "删除",
     "deleted": "已删除",
+    "uploadedFiles": "已上传文件",
     "save": "保存",
     "confirm": "确定",
     "enabled": "已开启",

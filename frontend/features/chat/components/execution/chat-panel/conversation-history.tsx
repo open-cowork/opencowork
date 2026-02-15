@@ -4,11 +4,12 @@ import * as React from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { History, MessageSquare } from "lucide-react";
-import { listSessionsAction } from "@/features/chat/actions/query-actions";
+import { listSessions } from "@/features/chat/api/query";
 import type { SessionResponse } from "@/features/chat/types";
 import { formatDistanceToNow } from "date-fns";
 import { zhCN } from "date-fns/locale";
 import { useT } from "@/lib/i18n/client";
+import { logger } from "@/lib/logger";
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
 interface ConversationHistoryProps {
@@ -23,10 +24,10 @@ export function ConversationHistory({}: ConversationHistoryProps) {
   React.useEffect(() => {
     async function fetchHistory() {
       try {
-        const sessions = await listSessionsAction({ limit: 20 });
+        const sessions = await listSessions({ limit: 20 });
         setHistory(sessions);
       } catch (error) {
-        console.error("Failed to fetch history:", error);
+        logger.error("Failed to fetch history:", error);
       } finally {
         setLoading(false);
       }

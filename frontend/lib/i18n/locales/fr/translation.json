@@ -1005,6 +1005,7 @@
     }
   },
   "project": {
+    "untitled": "Projet sans titre",
     "subtitle": "{{count}} tâches",
     "titleWithCount": "{{name}} · {{count}} tâches",
     "share": "Partager le projet",
@@ -1036,6 +1037,7 @@
     "delete": "Supprimer",
     "deleted": "Supprimé",
     "edit": "Modifier",
+    "uploadedFiles": "Fichiers importés",
     "save": "Enregistrer",
     "saving": "Enregistrement...",
     "confirm": "Confirmer",

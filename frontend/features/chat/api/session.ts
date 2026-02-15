@@ -1,7 +1,6 @@
 import { z } from "zod";
 import { chatService } from "@/features/chat/services/chat-service";
 
-// Validation error message keys
 const VALIDATION_ERRORS = {
   taskContentRequired: "validation.taskContentRequired",
   selectExecutionTime: "validation.selectExecutionTime",
@@ -39,7 +38,7 @@ const configSchema = z
 
 const createSessionSchema = z
   .object({
-    prompt: z.string(),
+    prompt: z.string().trim().min(1, VALIDATION_ERRORS.taskContentRequired),
     config: configSchema.optional(),
     projectId: z.string().uuid().optional(),
     permission_mode: z
@@ -49,17 +48,6 @@ const createSessionSchema = z
     timezone: z.string().optional().nullable(),
     scheduled_at: z.string().optional().nullable(),
   })
-  .refine(
-    (data) => {
-      const hasPrompt = data.prompt.trim().length > 0;
-      const hasFiles = Boolean(data.config?.input_files?.length);
-      return hasPrompt || hasFiles;
-    },
-    {
-      message: VALIDATION_ERRORS.taskContentRequired,
-      path: ["prompt"],
-    },
-  )
   .refine(
     (data) => {
       if (data.schedule_mode !== "scheduled") return true;
@@ -81,26 +69,16 @@ const createSessionSchema = z
     },
   );
 
-const sendMessageSchema = z
-  .object({
-    sessionId: z.string().trim().min(1, VALIDATION_ERRORS.missingSessionId),
-    content: z.string(),
-    attachments: z.array(inputFileSchema).optional(),
-  })
-  .refine(
-    (data) =>
-      data.content.trim().length > 0 ||
-      (data.attachments && data.attachments.length > 0),
-    {
-      message: VALIDATION_ERRORS.messageContentRequired,
-      path: ["content"],
-    },
-  );
+const sendMessageSchema = z.object({
+  sessionId: z.string().trim().min(1, VALIDATION_ERRORS.missingSessionId),
+  content: z.string().trim().min(1, VALIDATION_ERRORS.messageContentRequired),
+  attachments: z.array(inputFileSchema).optional(),
+});
 
 export type CreateSessionInput = z.infer<typeof createSessionSchema>;
 export type SendMessageInput = z.infer<typeof sendMessageSchema>;
 
-export async function createSessionAction(input: CreateSessionInput) {
+export async function createSession(input: CreateSessionInput) {
   const {
     prompt,
     config,
@@ -110,11 +88,9 @@ export async function createSessionAction(input: CreateSessionInput) {
     timezone,
     scheduled_at,
   } = createSessionSchema.parse(input);
-  const hasInputFiles = Boolean(config?.input_files?.length);
-  const finalPrompt =
-    prompt.trim() || (hasInputFiles ? "Uploaded files" : prompt);
+
   const result = await chatService.createSession(
-    finalPrompt,
+    prompt,
     config,
     projectId,
     {
@@ -124,6 +100,7 @@ export async function createSessionAction(input: CreateSessionInput) {
     },
     permission_mode,
   );
+
   return {
     sessionId: result.session_id,
     runId: result.run_id,
@@ -131,16 +108,11 @@ export async function createSessionAction(input: CreateSessionInput) {
   };
 }
 
-export async function sendMessageAction(input: SendMessageInput) {
+export async function sendMessage(input: SendMessageInput) {
   const { sessionId, content, attachments } = sendMessageSchema.parse(input);
-  // Ensure we have a prompt if content is empty but attachments exist
-  const finalContent =
-    content.trim() || (attachments?.length ? "Uploaded files" : content);
-  const result = await chatService.sendMessage(
-    sessionId,
-    finalContent,
-    attachments,
-  );
+
+  const result = await chatService.sendMessage(sessionId, content, attachments);
+
   return {
     sessionId: result.session_id,
     runId: result.run_id,
@@ -155,7 +127,7 @@ const cancelSessionSchema = z.object({
 
 export type CancelSessionInput = z.infer<typeof cancelSessionSchema>;
 
-export async function cancelSessionAction(input: CancelSessionInput) {
+export async function cancelSession(input: CancelSessionInput) {
   const { sessionId, reason } = cancelSessionSchema.parse(input);
   return chatService.cancelSession(sessionId, {
     reason: reason ?? undefined,
@@ -168,7 +140,7 @@ const deleteSessionSchema = z.object({
 
 export type DeleteSessionInput = z.infer<typeof deleteSessionSchema>;
 
-export async function deleteSessionAction(input: DeleteSessionInput) {
+export async function deleteSession(input: DeleteSessionInput) {
   const { sessionId } = deleteSessionSchema.parse(input);
   await chatService.deleteSession(sessionId);
 }
@@ -184,7 +156,7 @@ const renameSessionTitleSchema = z.object({
 
 export type RenameSessionTitleInput = z.infer<typeof renameSessionTitleSchema>;
 
-export async function renameSessionTitleAction(input: RenameSessionTitleInput) {
+export async function renameSessionTitle(input: RenameSessionTitleInput) {
   const { sessionId, title } = renameSessionTitleSchema.parse(input);
   return chatService.updateSession(sessionId, { title });
 }

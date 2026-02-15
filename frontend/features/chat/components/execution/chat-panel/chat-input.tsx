@@ -20,6 +20,7 @@ import { useT } from "@/lib/i18n/client";
 import { playFileUploadSound } from "@/lib/utils/sound";
 import { useSlashCommandAutocomplete } from "@/features/chat/hooks/use-slash-command-autocomplete";
 import { cn } from "@/lib/utils";
+import { logger } from "@/lib/logger";
 
 interface ChatInputProps {
   onSend: (content: string, attachments?: InputFile[]) => void;
@@ -175,7 +176,7 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
         toast.success(t("hero.toasts.uploadSuccess"));
         playFileUploadSound(); // Play sound on successful upload
       } catch (error) {
-        console.error("Upload failed:", error);
+        logger.error("Upload failed:", error);
         toast.error(t("hero.toasts.uploadFailed"));
       } finally {
         setIsUploading(false);

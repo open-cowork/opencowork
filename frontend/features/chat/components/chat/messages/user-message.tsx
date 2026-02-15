@@ -7,6 +7,7 @@ import { RepoCard } from "@/components/shared/repo-card";
 import { Button } from "@/components/ui/button";
 import type { MessageBlock, InputFile } from "@/features/chat/types";
 import { useT } from "@/lib/i18n/client";
+import { logger } from "@/lib/logger";
 
 const MAX_LINES = 5;
 
@@ -58,7 +59,7 @@ export function UserMessage({
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000);
     } catch (err) {
-      console.error("Failed to copy message", err);
+      logger.error("Failed to copy message", err);
     }
   };
 
@@ -107,7 +108,7 @@ export function UserMessage({
                 try {
                   window.open(openUrl, "_blank", "noopener,noreferrer");
                 } catch (error) {
-                  console.warn("[UserMessage] Failed to open repo url", error);
+                  logger.warn("[UserMessage] Failed to open repo url", error);
                 }
               }}
             />

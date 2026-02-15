@@ -127,6 +127,11 @@
   --font-mono:
     ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono",
     "Courier New", monospace;
+  /* Keep compatibility with previous next/font variables while building fully offline. */
+  --font-geist-sans: var(--font-sans);
+  --font-geist-mono: var(--font-mono);
+  --font-manrope: var(--font-sans);
+  --font-space-grotesk: var(--font-sans);
   --shadow-color: oklch(0 0 0);
   --shadow-opacity: 0.1;
   --shadow-blur: 3px;

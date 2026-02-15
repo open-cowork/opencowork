@@ -7,6 +7,7 @@ import { logError } from "@/lib/errors";
 import { isDev } from "@/lib/env";
 import { fallbackLng, languages } from "@/lib/i18n/settings";
 import { useT } from "@/lib/i18n/client";
+import { routes } from "@/lib/routes";
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -148,7 +149,7 @@ export class ErrorBoundary extends Component<
   handleGoHome = () => {
     const firstSegment = window.location.pathname.split("/")[1] || "";
     const lng = languages.includes(firstSegment) ? firstSegment : fallbackLng;
-    window.location.href = `/${lng}/home`;
+    window.location.href = routes.home(lng);
   };
 
   render() {

@@ -7,6 +7,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useT } from "@/lib/i18n/client";
 import { envVarsService } from "@/features/capabilities/env-vars/services/env-vars-service";
 import type { EnvVar } from "@/features/capabilities/env-vars/types";
+import { logger } from "@/lib/logger";
 
 export interface EnvVarUpsertInput {
   key: string;
@@ -100,7 +101,7 @@ export function useEnvVarsStore() {
           toast.success(t("library.envVars.toasts.created"));
         }
       } catch (error) {
-        console.error("[EnvVars] upsert failed", error);
+        logger.error("[EnvVars] upsert failed", error);
         toast.error(t("library.envVars.toasts.error"));
       } finally {
         setSavingEnvKey(null);
@@ -115,7 +116,7 @@ export function useEnvVarsStore() {
         await removeMutation.mutateAsync(envVarId);
         toast.success(t("library.envVars.toasts.deleted"));
       } catch (error) {
-        console.error("[EnvVars] remove failed", error);
+        logger.error("[EnvVars] remove failed", error);
         toast.error(t("library.envVars.toasts.error"));
       }
     },
@@ -127,7 +128,7 @@ export function useEnvVarsStore() {
       await envVarsQuery.refetch();
       toast.success(t("library.envVars.toasts.refreshed"));
     } catch (error) {
-      console.error("[EnvVars] refresh failed", error);
+      logger.error("[EnvVars] refresh failed", error);
       toast.error(t("library.envVars.toasts.error"));
     }
   }, [envVarsQuery, t]);

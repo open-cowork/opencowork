@@ -4,6 +4,7 @@
 
 import { AppError, NetworkError, ApiError, RateLimitError } from "./app-error";
 import { isDev } from "@/lib/env";
+import { logger } from "@/lib/logger";
 
 /**
  * Parse API error response and create appropriate error
@@ -75,7 +76,7 @@ export function logError(
   };
 
   if (isDev) {
-    console.error("[Error]", errorInfo);
+    logger.error("[Error]", errorInfo);
   }
 
   // TODO: Send to error tracking service (e.g., Sentry)

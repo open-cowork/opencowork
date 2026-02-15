@@ -5,6 +5,7 @@ import { useTheme } from "next-themes";
 import { Check, Copy } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { logger } from "@/lib/logger";
 import {
   SyntaxHighlighter,
   getPrismLanguage,
@@ -83,7 +84,7 @@ export const MarkdownPre = ({ node, children, ...props }: MarkdownPreProps) => {
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch (error) {
-      console.error("[MarkdownPre] Copy failed", error);
+      logger.error("[MarkdownPre] Copy failed", error);
     }
   };
 

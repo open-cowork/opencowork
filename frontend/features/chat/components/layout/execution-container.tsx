@@ -75,9 +75,9 @@ export function ExecutionContainer({ sessionId }: ExecutionContainerProps) {
     return (
       <div className="flex items-center justify-center h-dvh bg-background select-text">
         <div className="text-center">
-          <p className="text-destructive mb-2">Error loading session</p>
+          <p className="text-destructive mb-2">{t("errors.boundary.title")}</p>
           <p className="text-muted-foreground text-sm">
-            {error.message || "Unknown error"}
+            {error.message || t("errors.boundary.description")}
           </p>
         </div>
       </div>

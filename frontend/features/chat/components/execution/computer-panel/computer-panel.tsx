@@ -26,7 +26,7 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { useT } from "@/lib/i18n/client";
-import { getBrowserScreenshotAction } from "@/features/chat/actions/query-actions";
+import { getBrowserScreenshot } from "@/features/chat/api/query";
 import type { ToolExecutionResponse } from "@/features/chat/types";
 import { useToolExecutions } from "./hooks/use-tool-executions";
 import { ApiError } from "@/lib/errors";
@@ -197,7 +197,7 @@ export function ComputerPanel({
 
       const fetchWithRetry = async (attempts = 0): Promise<void> => {
         try {
-          const res = await getBrowserScreenshotAction({
+          const res = await getBrowserScreenshot({
             sessionId,
             toolUseId: id,
           });

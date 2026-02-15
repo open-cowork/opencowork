@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
-import { getFilesAction } from "@/features/chat/actions/query-actions";
+import { getFiles } from "@/features/chat/api/query";
 import type { FileNode } from "@/features/chat/types";
+import { logger } from "@/lib/logger";
 
 export type ViewMode = "artifacts" | "document";
 
@@ -139,11 +140,11 @@ export function useArtifacts({
     const promise = (async () => {
       setIsRefreshing(true);
       try {
-        const data = await getFilesAction({ sessionId });
+        const data = await getFiles({ sessionId });
         setFiles(data);
         return data;
       } catch (error) {
-        console.error("[Artifacts] Failed to fetch workspace files:", error);
+        logger.error("[Artifacts] Failed to fetch workspace files:", error);
         return [];
       } finally {
         setIsRefreshing(false);

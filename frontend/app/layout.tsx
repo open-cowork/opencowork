@@ -1,30 +1,9 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono, Manrope, Space_Grotesk } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/shared/theme-provider";
 import { ReactQueryProvider } from "@/components/shared/react-query-provider";
 import { fallbackLng } from "@/lib/i18n/settings";
 import { Toaster } from "@/components/ui/sonner";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-const manrope = Manrope({
-  variable: "--font-manrope",
-  subsets: ["latin"],
-});
-
-const spaceGrotesk = Space_Grotesk({
-  variable: "--font-space-grotesk",
-  subsets: ["latin"],
-});
 
 export const viewport: Viewport = {
   width: "device-width",
@@ -45,9 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang={fallbackLng} suppressHydrationWarning className="h-full">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} ${manrope.variable} ${spaceGrotesk.variable} antialiased h-full`}
-      >
+      <body className="antialiased h-full font-sans">
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

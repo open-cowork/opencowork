@@ -10,6 +10,7 @@ import type {
 import { skillsService } from "@/features/capabilities/skills/services/skills-service";
 import { useT } from "@/lib/i18n/client";
 import { playMcpInstallSound } from "@/lib/utils/sound";
+import { logger } from "@/lib/logger";
 
 export interface SkillDisplayItem {
   skill: Skill;
@@ -33,7 +34,7 @@ export function useSkillCatalog() {
       setSkills(skillsData);
       setInstalls(installsData);
     } catch (error) {
-      console.error("[Skills] Failed to fetch data:", error);
+      logger.error("[Skills] Failed to fetch data:", error);
       toast.error(t("library.skillsManager.toasts.loadError"));
     } finally {
       setIsLoading(false);
@@ -56,7 +57,7 @@ export function useSkillCatalog() {
         toast.success(t("library.skillsManager.toasts.installed"));
         playMcpInstallSound();
       } catch (error) {
-        console.error("[Skills] install failed:", error);
+        logger.error("[Skills] install failed:", error);
         toast.error(t("library.skillsManager.toasts.actionError"));
       } finally {
         setLoadingId(null);
@@ -76,7 +77,7 @@ export function useSkillCatalog() {
         );
         toast.success(t("common.deleted"));
       } catch (error) {
-        console.error("[Skills] delete failed:", error);
+        logger.error("[Skills] delete failed:", error);
         toast.error(t("library.skillsManager.toasts.actionError"));
       } finally {
         setLoadingId(null);
@@ -115,7 +116,7 @@ export function useSkillCatalog() {
           playMcpInstallSound();
         }
       } catch (error) {
-        console.error("[Skills] setEnabled failed:", error);
+        logger.error("[Skills] setEnabled failed:", error);
         // Rollback
         setInstalls((prev) =>
           prev.map((i) =>

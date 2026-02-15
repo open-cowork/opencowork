@@ -11,6 +11,7 @@ import type {
 } from "@/features/chat/types";
 import { Button } from "@/components/ui/button";
 import { useT } from "@/lib/i18n/client";
+import { logger } from "@/lib/logger";
 
 interface AssistantMessageProps {
   message: ChatMessage;
@@ -73,7 +74,7 @@ export function AssistantMessage({
       setIsCopied(true);
       setTimeout(() => setIsCopied(false), 2000);
     } catch (err) {
-      console.error("Failed to copy message", err);
+      logger.error("Failed to copy message", err);
     }
   };
 

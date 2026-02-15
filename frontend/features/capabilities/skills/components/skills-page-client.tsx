@@ -15,6 +15,7 @@ import { CapabilityContentShell } from "@/features/capabilities/components/capab
 import { HeaderSearchInput } from "@/components/shared/header-search-input";
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
+import { logger } from "@/lib/logger";
 
 const PAGE_SIZE = 10;
 
@@ -57,7 +58,7 @@ export function SkillsPageClient() {
         // Refresh the installs list
         refresh();
       } catch (error) {
-        console.error("[SkillsPageClient] Failed to batch toggle:", error);
+        logger.error("[SkillsPageClient] Failed to batch toggle:", error);
         toast.error(t("library.skillsManager.toasts.actionFailed"));
       }
     },

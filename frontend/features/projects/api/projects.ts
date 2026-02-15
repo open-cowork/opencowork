@@ -4,8 +4,6 @@ import {
   tasksService,
 } from "@/features/projects/services/projects-service";
 
-// Validation error messages - these will be replaced with proper i18n when the action is called
-// The actual error messages will come from the translation file
 const VALIDATION_ERRORS = {
   projectNameRequired: "validation.projectNameRequired",
   selectProject: "validation.selectProject",
@@ -55,7 +53,7 @@ export type UpdateProjectInput = z.infer<typeof updateProjectSchema>;
 export type DeleteProjectInput = z.infer<typeof deleteProjectSchema>;
 export type MoveTaskToProjectInput = z.infer<typeof moveTaskToProjectSchema>;
 
-export async function createProjectAction(input: CreateProjectInput) {
+export async function createProject(input: CreateProjectInput) {
   const { name, repo_url, git_branch, git_token_env_key } =
     createProjectSchema.parse(input);
   return projectsService.createProject({
@@ -66,17 +64,17 @@ export async function createProjectAction(input: CreateProjectInput) {
   });
 }
 
-export async function listProjectsAction(input?: ListProjectsInput) {
+export async function listProjects(input?: ListProjectsInput) {
   const { revalidate } = listProjectsSchema.parse(input ?? {});
   return projectsService.listProjects({ revalidate });
 }
 
-export async function listTaskHistoryAction(input?: ListTasksInput) {
+export async function listTaskHistory(input?: ListTasksInput) {
   const { revalidate } = listTasksSchema.parse(input ?? {});
   return tasksService.listHistory({ revalidate });
 }
 
-export async function updateProjectAction(input: UpdateProjectInput) {
+export async function updateProject(input: UpdateProjectInput) {
   const { projectId, name, repo_url, git_branch, git_token_env_key } =
     updateProjectSchema.parse(input);
   return projectsService.updateProject(projectId, {
@@ -87,12 +85,12 @@ export async function updateProjectAction(input: UpdateProjectInput) {
   });
 }
 
-export async function deleteProjectAction(input: DeleteProjectInput) {
+export async function deleteProject(input: DeleteProjectInput) {
   const { projectId } = deleteProjectSchema.parse(input);
   await projectsService.deleteProject(projectId);
 }
 
-export async function moveTaskToProjectAction(input: MoveTaskToProjectInput) {
+export async function moveTaskToProject(input: MoveTaskToProjectInput) {
   const { sessionId, projectId } = moveTaskToProjectSchema.parse(input);
   await tasksService.updateTaskProject(sessionId, projectId ?? null);
 }

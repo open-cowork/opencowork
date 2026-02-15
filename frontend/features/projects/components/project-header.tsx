@@ -68,7 +68,7 @@ export function ProjectHeader({
           <div className="flex min-w-0 flex-1 items-center gap-2">
             <div className="flex flex-col min-w-0">
               <p className="truncate text-base font-semibold text-foreground">
-                {project?.name ?? t("project.untitled", "Untitled Project")}
+                {project?.name ?? t("project.untitled")}
               </p>
               {project?.description ? (
                 <p className="truncate text-xs text-muted-foreground">
@@ -134,14 +134,14 @@ export function ProjectHeader({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isDeleting}>
-              {t("common.cancel", "Cancel")}
+              {t("common.cancel")}
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={handleDelete}
               disabled={isDeleting}
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
-              {t("project.deleteConfirm", "Delete")}
+              {t("project.deleteConfirm")}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

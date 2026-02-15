@@ -6,7 +6,6 @@ import type {
   SearchResultProject,
   SearchResultMessage,
 } from "@/features/search/types";
-// import { listSessionsAction } from "@/features/chat/actions/query-actions";
 
 /**
  * Hook for fetching and aggregating search data

@@ -25,7 +25,7 @@ export function HeaderSearchInput({
       <Search className="absolute left-2.5 top-2.5 size-4 text-muted-foreground" />
       <Input
         type="search"
-        placeholder={placeholder || t("sidebar.search", "Search")}
+        placeholder={placeholder || t("sidebar.search")}
         className="w-full bg-background/50 pl-9 border-border/50 focus-visible:bg-background transition-colors"
         value={value}
         onChange={(e) => onChange(e.target.value)}

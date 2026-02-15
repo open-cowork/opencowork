@@ -10,6 +10,7 @@ import type {
   SlashCommandCreateInput,
   SlashCommandUpdateInput,
 } from "@/features/capabilities/slash-commands/types";
+import { logger } from "@/lib/logger";
 
 export function useSlashCommandsStore() {
   const { t } = useT("translation");
@@ -23,7 +24,7 @@ export function useSlashCommandsStore() {
       const data = await slashCommandsService.list({ revalidate: 0 });
       setCommands(data);
     } catch (error) {
-      console.error("[SlashCommands] Failed to fetch:", error);
+      logger.error("[SlashCommands] Failed to fetch:", error);
       toast.error(t("library.slashCommands.toasts.loadError"));
     } finally {
       setIsLoading(false);
@@ -43,7 +44,7 @@ export function useSlashCommandsStore() {
         toast.success(t("library.slashCommands.toasts.created"));
         return created;
       } catch (error) {
-        console.error("[SlashCommands] create failed:", error);
+        logger.error("[SlashCommands] create failed:", error);
         toast.error(t("library.slashCommands.toasts.error"));
         return null;
       } finally {
@@ -64,7 +65,7 @@ export function useSlashCommandsStore() {
         toast.success(t("library.slashCommands.toasts.updated"));
         return updated;
       } catch (error) {
-        console.error("[SlashCommands] update failed:", error);
+        logger.error("[SlashCommands] update failed:", error);
         toast.error(t("library.slashCommands.toasts.error"));
         return null;
       } finally {
@@ -82,7 +83,7 @@ export function useSlashCommandsStore() {
         setCommands((prev) => prev.filter((c) => c.id !== commandId));
         toast.success(t("library.slashCommands.toasts.deleted"));
       } catch (error) {
-        console.error("[SlashCommands] delete failed:", error);
+        logger.error("[SlashCommands] delete failed:", error);
         toast.error(t("library.slashCommands.toasts.error"));
       } finally {
         setSavingId(null);

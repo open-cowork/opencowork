@@ -9,6 +9,7 @@ import type {
   CustomInstructionsSettings,
   CustomInstructionsUpsertInput,
 } from "@/features/capabilities/personalization/types";
+import { logger } from "@/lib/logger";
 
 export function useCustomInstructionsStore() {
   const { t } = useT("translation");
@@ -25,7 +26,7 @@ export function useCustomInstructionsStore() {
         const data = await customInstructionsService.get();
         setSettings(data);
       } catch (error) {
-        console.error(
+        logger.error(
           "[Personalization] Failed to fetch custom instructions:",
           error,
         );
@@ -43,7 +44,7 @@ export function useCustomInstructionsStore() {
       setSettings(data);
       toast.success(t("library.personalization.toasts.refreshed"));
     } catch (error) {
-      console.error("[Personalization] refresh failed:", error);
+      logger.error("[Personalization] refresh failed:", error);
       toast.error(t("library.personalization.toasts.error"));
     }
   }, [t]);
@@ -57,7 +58,7 @@ export function useCustomInstructionsStore() {
         toast.success(t("library.personalization.toasts.saved"));
         return updated;
       } catch (error) {
-        console.error("[Personalization] save failed:", error);
+        logger.error("[Personalization] save failed:", error);
         toast.error(t("library.personalization.toasts.error"));
         return null;
       } finally {
@@ -74,7 +75,7 @@ export function useCustomInstructionsStore() {
       setSettings({ enabled: false, content: "", updated_at: null });
       toast.success(t("library.personalization.toasts.cleared"));
     } catch (error) {
-      console.error("[Personalization] clear failed:", error);
+      logger.error("[Personalization] clear failed:", error);
       toast.error(t("library.personalization.toasts.error"));
     } finally {
       setIsSaving(false);

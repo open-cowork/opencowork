@@ -36,6 +36,7 @@ import type {
 } from "@/features/chat/types";
 import { useT } from "@/lib/i18n/client";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { logger } from "@/lib/logger";
 
 interface StatusBarProps {
   // Runtime execution data (deprecated, now using configSnapshot)
@@ -105,7 +106,7 @@ export function StatusBar({
         setAllSkills(skillsData);
         setAllPresets(pluginsData);
       } catch (error) {
-        console.error("[StatusBar] Failed to load config data:", error);
+        logger.error("[StatusBar] Failed to load config data:", error);
       }
     };
 

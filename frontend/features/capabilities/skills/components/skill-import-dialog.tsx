@@ -19,6 +19,7 @@ import type {
   SkillImportCommitResponse,
 } from "@/features/capabilities/skills/types";
 import { CapabilityDialogContent } from "@/features/capabilities/components/capability-dialog-content";
+import { logger } from "@/lib/logger";
 
 type SourceTab = "zip" | "github";
 
@@ -174,7 +175,7 @@ export function SkillImportDialog({
 
       toast.success(t("library.skillsImport.toasts.discovered"));
     } catch (error) {
-      console.error("[SkillsImport] discover failed:", error);
+      logger.error("[SkillsImport] discover failed:", error);
       toast.error(t("library.skillsImport.toasts.discoverError"));
     } finally {
       setIsDiscovering(false);
@@ -258,7 +259,7 @@ export function SkillImportDialog({
       await onImported?.();
       handleClose();
     } catch (error) {
-      console.error("[SkillsImport] commit failed:", error);
+      logger.error("[SkillsImport] commit failed:", error);
       toast.error(t("library.skillsImport.toasts.commitError"));
     } finally {
       setIsCommitting(false);

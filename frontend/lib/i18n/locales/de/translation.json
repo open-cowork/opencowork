@@ -1009,6 +1009,7 @@
     }
   },
   "project": {
+    "untitled": "Unbenanntes Projekt",
     "subtitle": "{{count}} Aufgaben",
     "titleWithCount": "{{name}} · {{count}} Aufgaben",
     "share": "Projekt teilen",
@@ -1040,6 +1041,7 @@
     "delete": "Löschen",
     "deleted": "Gelöscht",
     "edit": "Bearbeiten",
+    "uploadedFiles": "Hochgeladene Dateien",
     "save": "Speichern",
     "saving": "Speichern...",
     "confirm": "Bestätigen",

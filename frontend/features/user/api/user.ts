@@ -1,9 +1,9 @@
 import { userService } from "@/features/user/services/user-service";
 
-export async function getUserProfileAction() {
+export async function getUserProfile() {
   return userService.getProfile();
 }
 
-export async function getUserCreditsAction() {
+export async function getUserCredits() {
   return userService.getCredits();
 }

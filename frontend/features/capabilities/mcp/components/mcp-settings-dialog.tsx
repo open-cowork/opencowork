@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useT } from "@/lib/i18n/client";
+import { logger } from "@/lib/logger";
 
 import type { McpDisplayItem } from "@/features/capabilities/mcp/hooks/use-mcp-catalog";
 import { CapabilityDialogContent } from "@/features/capabilities/components/capability-dialog-content";
@@ -81,7 +82,7 @@ export function McpSettingsDialog({
                   });
                   onClose();
                 } catch {
-                  console.error("Invalid JSON or name");
+                  logger.warn("[MCP] Invalid JSON or name");
                 }
               }}
             >

@@ -309,14 +309,14 @@ export function CollapsibleProjectItem({
             </AlertDialogHeader>
             <AlertDialogFooter>
               <AlertDialogCancel disabled={isDeleting}>
-                {t("common.cancel", "Cancel")}
+                {t("common.cancel")}
               </AlertDialogCancel>
               <AlertDialogAction
                 onClick={handleDelete}
                 disabled={isDeleting}
                 className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
               >
-                {t("project.deleteConfirm", "Delete")}
+                {t("project.deleteConfirm")}
               </AlertDialogAction>
             </AlertDialogFooter>
           </AlertDialogContent>

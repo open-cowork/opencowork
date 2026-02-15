@@ -19,6 +19,7 @@ import type {
   PluginImportCommitResponse,
 } from "@/features/capabilities/plugins/types";
 import { CapabilityDialogContent } from "@/features/capabilities/components/capability-dialog-content";
+import { logger } from "@/lib/logger";
 
 type SourceTab = "zip" | "github";
 
@@ -173,7 +174,7 @@ export function PluginImportDialog({
 
       toast.success(t("library.pluginsImport.toasts.discovered"));
     } catch (error) {
-      console.error("[PluginsImport] discover failed:", error);
+      logger.error("[PluginsImport] discover failed:", error);
       toast.error(t("library.pluginsImport.toasts.discoverError"));
     } finally {
       setIsDiscovering(false);
@@ -258,7 +259,7 @@ export function PluginImportDialog({
       await onImported?.();
       handleClose();
     } catch (error) {
-      console.error("[PluginsImport] commit failed:", error);
+      logger.error("[PluginsImport] commit failed:", error);
       toast.error(t("library.pluginsImport.toasts.commitError"));
     } finally {
       setIsCommitting(false);

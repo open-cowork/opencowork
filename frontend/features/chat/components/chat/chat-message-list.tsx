@@ -8,6 +8,7 @@ import { AssistantMessage } from "./messages/assistant-message";
 import { UserMessage } from "./messages/user-message";
 import type { ChatMessage, UsageResponse } from "@/features/chat/types";
 import { useT } from "@/lib/i18n/client";
+import { logger } from "@/lib/logger";
 
 export interface ChatMessageListProps {
   messages: ChatMessage[];
@@ -63,7 +64,7 @@ export function ChatMessageList({
     try {
       await navigator.clipboard.writeText(joined);
     } catch (err) {
-      console.error("Failed to copy internal context", err);
+      logger.error("Failed to copy internal context", err);
     }
   }, []);
 

@@ -1,13 +1,15 @@
 "use client";
 
 import * as React from "react";
+import { getItem, setItem } from "@/lib/storage/core";
 
 export type BackendOption = "claude-code";
 
 const BACKEND_STORAGE_KEY = "poco.settings.backend";
 
 function readStoredBackend(): BackendOption {
-  return "claude-code";
+  const stored = getItem("local", BACKEND_STORAGE_KEY);
+  return stored === "claude-code" ? "claude-code" : "claude-code";
 }
 
 export function useBackendPreference() {
@@ -20,14 +22,7 @@ export function useBackendPreference() {
 
   const setBackend = React.useCallback((nextBackend: BackendOption) => {
     setBackendState(nextBackend);
-
-    if (typeof window === "undefined") return;
-
-    try {
-      window.localStorage.setItem(BACKEND_STORAGE_KEY, nextBackend);
-    } catch {
-      // Ignore storage failures.
-    }
+    setItem("local", BACKEND_STORAGE_KEY, nextBackend);
   }, []);
 
   return {

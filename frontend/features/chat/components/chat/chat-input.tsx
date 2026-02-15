@@ -20,6 +20,7 @@ import { FileCard } from "@/components/shared/file-card";
 import { playFileUploadSound } from "@/lib/utils/sound";
 import { useSlashCommandAutocomplete } from "@/features/chat/hooks/use-slash-command-autocomplete";
 import { cn } from "@/lib/utils";
+import { logger } from "@/lib/logger";
 
 interface ChatInputProps {
   value: string;
@@ -117,7 +118,7 @@ export function ChatInput({
       toast.success(t("hero.toasts.uploadSuccess"));
       playFileUploadSound();
     } catch (error) {
-      console.error("Upload failed:", error);
+      logger.error("Upload failed:", error);
       toast.error(t("hero.toasts.uploadFailed"));
     } finally {
       setIsUploading(false);
@@ -163,7 +164,7 @@ export function ChatInput({
       toast.success(t("hero.toasts.uploadSuccess"));
       playFileUploadSound();
     } catch (error) {
-      console.error("Upload failed:", error);
+      logger.error("Upload failed:", error);
       toast.error(t("hero.toasts.uploadFailed"));
     } finally {
       setIsUploading(false);

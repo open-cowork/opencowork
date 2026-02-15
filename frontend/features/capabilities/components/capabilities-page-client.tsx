@@ -13,7 +13,7 @@ import {
   consumePendingCapabilityView,
   getLastCapabilityView,
   setLastCapabilityView,
-} from "@/features/capabilities/lib/capability-view-state";
+} from "@/lib/storage/capabilities-view";
 import { useT } from "@/lib/i18n/client";
 
 export function CapabilitiesPageClient() {

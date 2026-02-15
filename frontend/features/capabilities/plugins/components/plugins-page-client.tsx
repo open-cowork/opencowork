@@ -15,6 +15,7 @@ import { useT } from "@/lib/i18n/client";
 import { CapabilityContentShell } from "@/features/capabilities/components/capability-content-shell";
 import { HeaderSearchInput } from "@/components/shared/header-search-input";
 import { Button } from "@/components/ui/button";
+import { logger } from "@/lib/logger";
 
 const PAGE_SIZE = 10;
 
@@ -55,7 +56,7 @@ export function PluginsPageClient() {
         );
         refresh();
       } catch (error) {
-        console.error("[PluginsPageClient] Failed to batch toggle:", error);
+        logger.error("[PluginsPageClient] Failed to batch toggle:", error);
         toast.error(t("library.pluginsManager.toasts.actionFailed"));
       }
     },
