@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel
@@ -13,6 +14,9 @@ class TaskEnqueueRequest(BaseModel):
     config: TaskConfig | None = None
     session_id: UUID | None = None
     project_id: UUID | None = None
+    # Workspace reuse scope when creating a new session (session_id is None).
+    # "project" requires project_id to be set.
+    workspace_scope: Literal["session", "project"] = "session"
     # Claude Code permission mode for this run (stored on agent_runs).
     # "plan" enables planning-only mode until ExitPlanMode is approved.
     permission_mode: str = "default"

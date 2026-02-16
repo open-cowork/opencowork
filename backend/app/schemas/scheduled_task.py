@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -12,7 +13,8 @@ class ScheduledTaskCreateRequest(BaseModel):
     timezone: str = "UTC"
     prompt: str
     enabled: bool = True
-    reuse_session: bool = True
+    reuse_session: bool = False
+    workspace_scope: Literal["session", "scheduled_task", "project"] = "session"
     project_id: UUID | None = None
     config: TaskConfig | None = None
 
@@ -23,6 +25,8 @@ class ScheduledTaskUpdateRequest(BaseModel):
     timezone: str | None = None
     prompt: str | None = None
     enabled: bool | None = None
+    reuse_session: bool | None = None
+    workspace_scope: Literal["session", "scheduled_task", "project"] | None = None
 
 
 class ScheduledTaskResponse(BaseModel):
@@ -34,6 +38,8 @@ class ScheduledTaskResponse(BaseModel):
     prompt: str
     enabled: bool
     reuse_session: bool
+    workspace_scope: Literal["session", "scheduled_task", "project"]
+    project_id: UUID | None
     session_id: UUID | None
     next_run_at: datetime
     last_run_id: UUID | None

@@ -46,6 +46,23 @@ class AgentSession(Base, TimestampMixin):
         nullable=False,
         index=True,
     )
+
+    # Workspace scoping:
+    # - "session": workspace is unique per session (legacy default)
+    # - "scheduled_task": workspace is shared across sessions for the same scheduled task
+    # - "project": workspace is shared across sessions for the same project
+    workspace_scope: Mapped[str] = mapped_column(
+        String(50),
+        default="session",
+        server_default=text("'session'"),
+        nullable=False,
+        index=True,
+    )
+    # UUID of the scope entity (session_id / scheduled_task_id / project_id).
+    # Kept nullable for backward compatibility; services should always populate it.
+    workspace_ref_id: Mapped[uuid.UUID | None] = mapped_column(
+        nullable=True, index=True
+    )
     status: Mapped[str] = mapped_column(String(50), default="running", nullable=False)
     is_deleted: Mapped[bool] = mapped_column(
         Boolean, default=False, server_default=text("false"), nullable=False

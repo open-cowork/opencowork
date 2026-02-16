@@ -169,6 +169,20 @@ class TaskService:
             )
             merged_config = self._apply_project_repo_defaults(merged_config, project)
         else:
+            requested_scope = (
+                request.workspace_scope or "session"
+            ).strip() or "session"
+            if requested_scope not in {"session", "project"}:
+                raise AppException(
+                    error_code=ErrorCode.BAD_REQUEST,
+                    message=f"Invalid workspace_scope: {requested_scope}",
+                )
+            if requested_scope == "project" and project_id is None:
+                raise AppException(
+                    error_code=ErrorCode.BAD_REQUEST,
+                    message="workspace_scope=project requires project_id",
+                )
+
             base_config = {}
             merged_config = self._build_config_snapshot(
                 db, user_id, request.config, base_config=base_config
@@ -184,8 +198,13 @@ class TaskService:
                 config=config_dict,
                 project_id=project_id,
                 kind="chat",
+                workspace_scope=requested_scope,
+                workspace_ref_id=project_id if requested_scope == "project" else None,
             )
             db.flush()
+            # Default per-session workspace ref: self id.
+            if requested_scope == "session" and db_session.workspace_ref_id is None:
+                db_session.workspace_ref_id = db_session.id
         if merged_config is not None:
             db_session.config_snapshot = merged_config
 
@@ -234,6 +253,9 @@ class TaskService:
 
         schedule_mode, scheduled_at = self._resolve_schedule(request)
 
+        workspace_scope = (db_session.workspace_scope or "session").strip() or "session"
+        workspace_ref_id = db_session.workspace_ref_id or db_session.id
+
         db_run = RunRepository.create(
             session_db=db,
             session_id=db_session.id,
@@ -241,6 +263,8 @@ class TaskService:
             permission_mode=permission_mode,
             schedule_mode=schedule_mode,
             scheduled_at=scheduled_at,
+            workspace_scope=workspace_scope,
+            workspace_ref_id=workspace_ref_id,
             config_snapshot=run_config_snapshot,
         )
 

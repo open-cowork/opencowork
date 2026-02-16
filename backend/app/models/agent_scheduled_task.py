@@ -23,6 +23,12 @@ class AgentScheduledTask(Base, TimestampMixin):
     user_id: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     name: Mapped[str] = mapped_column(String(255), nullable=False)
 
+    project_id: Mapped[uuid.UUID | None] = mapped_column(
+        ForeignKey("projects.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+
     enabled: Mapped[bool] = mapped_column(
         Boolean,
         default=True,
@@ -31,12 +37,25 @@ class AgentScheduledTask(Base, TimestampMixin):
         index=True,
     )
 
-    # If true, all runs reuse the same session/workspace.
+    # If true, all runs reuse the same session (messages append in the UI) and
+    # therefore the same session-scoped workspace.
     reuse_session: Mapped[bool] = mapped_column(
         Boolean,
-        default=True,
-        server_default=text("true"),
+        default=False,
+        server_default=text("false"),
         nullable=False,
+    )
+
+    # When reuse_session=false, controls which workspace is reused across runs.
+    # "session" (default): new workspace per run (legacy behavior)
+    # "scheduled_task": reuse workspace for the scheduled task
+    # "project": reuse workspace for the project (requires project_id)
+    workspace_scope: Mapped[str] = mapped_column(
+        String(50),
+        default="session",
+        server_default=text("'session'"),
+        nullable=False,
+        index=True,
     )
 
     session_id: Mapped[uuid.UUID | None] = mapped_column(

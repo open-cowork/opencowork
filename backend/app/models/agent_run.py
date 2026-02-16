@@ -59,6 +59,20 @@ class AgentRun(Base, TimestampMixin):
         nullable=True,
         index=True,
     )
+    # Workspace scoping for execution routing/mounting.
+    # Note: The run queue currently does not enforce mutual exclusion by workspace key.
+    workspace_scope: Mapped[str] = mapped_column(
+        String(50),
+        default="session",
+        server_default=text("'session'"),
+        nullable=False,
+        index=True,
+    )
+    # UUID of the scope entity (session_id / scheduled_task_id / project_id).
+    # Nullable for backward compatibility; services should always populate it.
+    workspace_ref_id: Mapped[uuid.UUID | None] = mapped_column(
+        nullable=True, index=True
+    )
     config_snapshot: Mapped[dict | None] = mapped_column(JSON, nullable=True)
     scheduled_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

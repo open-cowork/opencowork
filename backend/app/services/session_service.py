@@ -42,6 +42,9 @@ class SessionService:
             project_id=project_id,
             kind="chat",
         )
+        db.flush()
+        if db_session.workspace_ref_id is None:
+            db_session.workspace_ref_id = db_session.id
 
         db.commit()
         db.refresh(db_session)

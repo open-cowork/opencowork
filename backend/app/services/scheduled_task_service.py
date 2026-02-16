@@ -116,6 +116,7 @@ class ScheduledTaskService:
         prompt = self._normalize_prompt(request.prompt)
         cron_expr = self._validate_cron(request.cron)
         tz_name = self._validate_timezone(request.timezone)
+        workspace_scope = (request.workspace_scope or "session").strip() or "session"
 
         # Build a pinned config snapshot using existing TaskService merge logic
         config_snapshot = (
@@ -142,17 +143,46 @@ class ScheduledTaskService:
                     message=f"Project not found: {project_id}",
                 )
 
+        # If caller didn't specify workspace_scope, pick sensible defaults:
+        # - for project tasks, reuse project workspace by default
+        # - otherwise, reuse per-task workspace by default
+        if (
+            not request.reuse_session
+            and "workspace_scope" not in request.model_fields_set
+        ):
+            workspace_scope = "project" if project_id is not None else "scheduled_task"
+
+        if workspace_scope not in {"session", "scheduled_task", "project"}:
+            raise AppException(
+                error_code=ErrorCode.BAD_REQUEST,
+                message=f"Invalid workspace_scope: {workspace_scope}",
+            )
+
         session_id: uuid.UUID | None = None
         if request.reuse_session:
+            if workspace_scope != "session":
+                raise AppException(
+                    error_code=ErrorCode.BAD_REQUEST,
+                    message="workspace_scope must be 'session' when reuse_session=true",
+                )
             db_session = SessionRepository.create(
                 session_db=db,
                 user_id=user_id,
                 config=config_snapshot,
                 project_id=project_id,
                 kind="scheduled",
+                workspace_scope="session",
             )
             db.flush()
             session_id = db_session.id
+            if db_session.workspace_ref_id is None:
+                db_session.workspace_ref_id = db_session.id
+        else:
+            if workspace_scope == "project" and project_id is None:
+                raise AppException(
+                    error_code=ErrorCode.BAD_REQUEST,
+                    message="workspace_scope=project requires project_id",
+                )
 
         now_utc = datetime.now(timezone.utc)
         next_run_at = self._compute_next_run_at(
@@ -163,11 +193,13 @@ class ScheduledTaskService:
             db,
             user_id=user_id,
             name=name,
+            project_id=project_id,
             cron=cron_expr,
             timezone_name=tz_name,
             prompt=prompt,
             enabled=bool(request.enabled),
             reuse_session=bool(request.reuse_session),
+            workspace_scope=workspace_scope,
             session_id=session_id,
             config_snapshot=config_snapshot,
             input_files=input_files or None,
@@ -183,6 +215,8 @@ class ScheduledTaskService:
                 "scheduled_task_id": str(db_task.id),
                 "user_id": user_id,
                 "reuse_session": bool(db_task.reuse_session),
+                "workspace_scope": db_task.workspace_scope,
+                "project_id": str(db_task.project_id) if db_task.project_id else None,
                 "session_id": str(db_task.session_id) if db_task.session_id else None,
             },
         )
@@ -244,6 +278,71 @@ class ScheduledTaskService:
         if request.timezone is not None:
             db_task.timezone = self._validate_timezone(request.timezone)
             recompute = True
+
+        if request.reuse_session is not None:
+            next_reuse = bool(request.reuse_session)
+            if next_reuse:
+                if (
+                    request.workspace_scope is not None
+                    and request.workspace_scope != "session"
+                ):
+                    raise AppException(
+                        error_code=ErrorCode.BAD_REQUEST,
+                        message="workspace_scope must be 'session' when reuse_session=true",
+                    )
+                db_task.reuse_session = True
+                db_task.workspace_scope = "session"
+
+                db_session = (
+                    SessionRepository.get_by_id(db, db_task.session_id)
+                    if db_task.session_id is not None
+                    else None
+                )
+                if not db_session:
+                    db_session = SessionRepository.create(
+                        session_db=db,
+                        user_id=db_task.user_id,
+                        config=db_task.config_snapshot or {},
+                        project_id=db_task.project_id,
+                        kind="scheduled",
+                        workspace_scope="session",
+                    )
+                    db.flush()
+                    if db_session.workspace_ref_id is None:
+                        db_session.workspace_ref_id = db_session.id
+                    db_task.session_id = db_session.id
+            else:
+                db_task.reuse_session = False
+                # Detach pinned session (keep history, but future runs create fresh sessions).
+                db_task.session_id = None
+                next_scope = (
+                    request.workspace_scope
+                    if request.workspace_scope is not None
+                    else (
+                        "project"
+                        if db_task.project_id is not None
+                        else "scheduled_task"
+                    )
+                )
+                if next_scope == "project" and db_task.project_id is None:
+                    raise AppException(
+                        error_code=ErrorCode.BAD_REQUEST,
+                        message="workspace_scope=project requires project_id",
+                    )
+                db_task.workspace_scope = next_scope
+        elif request.workspace_scope is not None:
+            next_scope = request.workspace_scope
+            if db_task.reuse_session and next_scope != "session":
+                raise AppException(
+                    error_code=ErrorCode.BAD_REQUEST,
+                    message="workspace_scope must be 'session' when reuse_session=true",
+                )
+            if next_scope == "project" and db_task.project_id is None:
+                raise AppException(
+                    error_code=ErrorCode.BAD_REQUEST,
+                    message="workspace_scope=project requires project_id",
+                )
+            db_task.workspace_scope = next_scope
 
         if recompute:
             now_utc = datetime.now(timezone.utc)
@@ -389,6 +488,24 @@ class ScheduledTaskService:
             scheduled_at = scheduled_at.replace(tzinfo=timezone.utc)
         scheduled_at = scheduled_at.astimezone(timezone.utc)
 
+        # Skip if an unfinished run already exists (avoid unbounded queue growth).
+        # This is keyed by scheduled_task_id (not session_id) so "new session per run"
+        # tasks still get coalesced.
+        if not force:
+            existing_run = (
+                db.query(AgentRun)
+                .filter(AgentRun.scheduled_task_id == task.id)
+                .filter(AgentRun.status.in_(["queued", "claimed", "running"]))
+                .order_by(AgentRun.created_at.desc())
+                .first()
+            )
+            if existing_run:
+                return None
+
+        workspace_scope = (task.workspace_scope or "session").strip() or "session"
+        if workspace_scope not in {"session", "scheduled_task", "project"}:
+            workspace_scope = "session"
+
         session_id: uuid.UUID
         if task.reuse_session:
             if not task.session_id:
@@ -403,29 +520,36 @@ class ScheduledTaskService:
                     message=f"Session not found: {task.session_id}",
                 )
             session_id = db_session.id
+            workspace_scope = "session"
+            if db_session.workspace_ref_id is None:
+                db_session.workspace_ref_id = db_session.id
         else:
+            workspace_ref_id: uuid.UUID | None = None
+            if workspace_scope == "project":
+                if task.project_id is None:
+                    raise AppException(
+                        error_code=ErrorCode.BAD_REQUEST,
+                        message="workspace_scope=project requires project_id",
+                    )
+                workspace_ref_id = task.project_id
+            elif workspace_scope == "scheduled_task":
+                workspace_ref_id = task.id
+
             # Create a fresh session/workspace for this run.
             db_session = SessionRepository.create(
                 session_db=db,
                 user_id=task.user_id,
                 config=task.config_snapshot or {},
-                project_id=None,
+                project_id=task.project_id,
                 kind="scheduled",
+                workspace_scope=workspace_scope,
+                workspace_ref_id=workspace_ref_id,
             )
             db.flush()
             session_id = db_session.id
-
-        # Skip if an unfinished run already exists (avoid unbounded queue growth).
-        if not force:
-            existing_run = (
-                db.query(AgentRun)
-                .filter(AgentRun.session_id == session_id)
-                .filter(AgentRun.status.in_(["queued", "claimed", "running"]))
-                .order_by(AgentRun.created_at.desc())
-                .first()
-            )
-            if existing_run:
-                return None
+            # Default per-session workspace ref: self id.
+            if workspace_scope == "session" and db_session.workspace_ref_id is None:
+                db_session.workspace_ref_id = db_session.id
 
         # Clear previous execution state so the UI doesn't show stale file changes.
         db_session.state_patch = {}
@@ -452,6 +576,9 @@ class ScheduledTaskService:
             permission_mode="default",
             schedule_mode="scheduled",
             scheduled_at=scheduled_at,
+            workspace_scope=(db_session.workspace_scope or "session").strip()
+            or "session",
+            workspace_ref_id=db_session.workspace_ref_id or db_session.id,
             config_snapshot=run_snapshot or None,
         )
         db_run.scheduled_task_id = task.id

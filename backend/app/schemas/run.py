@@ -1,5 +1,6 @@
 from datetime import datetime
 from enum import Enum
+from typing import Literal
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -29,6 +30,8 @@ class RunResponse(BaseModel):
     progress: int
     schedule_mode: str
     scheduled_task_id: UUID | None = None
+    workspace_scope: Literal["session", "scheduled_task", "project"] | None = None
+    workspace_ref_id: UUID | None = None
     scheduled_at: datetime
     config_snapshot: dict | None = None
     claimed_by: str | None

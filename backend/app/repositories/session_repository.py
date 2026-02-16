@@ -15,6 +15,8 @@ class SessionRepository:
         user_id: str,
         config: dict[str, Any] | None = None,
         project_id: uuid.UUID | None = None,
+        workspace_scope: str = "session",
+        workspace_ref_id: uuid.UUID | None = None,
         *,
         kind: str = "chat",
     ) -> AgentSession:
@@ -27,6 +29,8 @@ class SessionRepository:
             config_snapshot=config,
             project_id=project_id,
             kind=kind,
+            workspace_scope=workspace_scope,
+            workspace_ref_id=workspace_ref_id,
             status="pending",
         )
         session_db.add(db_session)

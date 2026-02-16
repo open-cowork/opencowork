@@ -19,6 +19,8 @@ class RunRepository:
         permission_mode: str = "default",
         schedule_mode: str = "immediate",
         scheduled_at: datetime | None = None,
+        workspace_scope: str = "session",
+        workspace_ref_id: uuid.UUID | None = None,
         config_snapshot: dict | None = None,
     ) -> AgentRun:
         """Creates a new run.
@@ -33,6 +35,8 @@ class RunRepository:
             progress=0,
             schedule_mode=schedule_mode,
             attempts=0,
+            workspace_scope=workspace_scope,
+            workspace_ref_id=workspace_ref_id,
             config_snapshot=config_snapshot,
         )
         if scheduled_at is not None:
