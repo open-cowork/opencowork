@@ -15,6 +15,7 @@ export interface TaskEnqueueRequest {
   timezone?: string | null;
   scheduled_at?: string | null; // ISO datetime
   project_id?: string | null;
+  workspace_scope?: "session" | "project";
 }
 
 export interface TaskEnqueueResponse {
@@ -32,6 +33,8 @@ export interface RunResponse {
   progress: number;
   schedule_mode: string;
   scheduled_task_id?: string | null;
+  workspace_scope?: "session" | "scheduled_task" | "project" | null;
+  workspace_ref_id?: string | null;
   scheduled_at: string; // ISO datetime
   usage?: UsageResponse | null;
   claimed_by: string | null;

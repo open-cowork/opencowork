@@ -15,6 +15,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type {
   ScheduledTask,
   ScheduledTaskUpdateInput,
@@ -44,6 +51,10 @@ export function ScheduledTaskEditDialog({
   const [timezone, setTimezone] = useState("UTC");
   const [prompt, setPrompt] = useState("");
   const [enabled, setEnabled] = useState(true);
+  const [reuseSession, setReuseSession] = useState(false);
+  const [workspaceScope, setWorkspaceScope] = useState<
+    "session" | "scheduled_task" | "project"
+  >("scheduled_task");
 
   const resetFromTask = () => {
     if (!task) return;
@@ -52,6 +63,8 @@ export function ScheduledTaskEditDialog({
     setTimezone(task.timezone);
     setPrompt(task.prompt);
     setEnabled(task.enabled);
+    setReuseSession(task.reuse_session);
+    setWorkspaceScope(task.reuse_session ? "session" : task.workspace_scope);
   };
 
   const scheduleSummary = useMemo(() => {
@@ -154,17 +167,71 @@ export function ScheduledTaskEditDialog({
               <Switch checked={enabled} onCheckedChange={setEnabled} />
             </div>
 
-            <div className="flex items-center justify-between rounded-md border border-border p-3 opacity-70">
+            <div className="flex items-center justify-between rounded-md border border-border p-3">
               <div className="space-y-1">
                 <div className="text-sm font-medium">
                   {t("library.scheduledTasks.fields.reuseSession")}
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  {t("library.scheduledTasks.detail.reuseSessionImmutable")}
+                  {t("library.scheduledTasks.fields.reuseSessionHelp")}
                 </div>
               </div>
-              <Switch checked={task.reuse_session} disabled />
+              <Switch
+                checked={reuseSession}
+                onCheckedChange={(next) => {
+                  setReuseSession(next);
+                  if (next) {
+                    setWorkspaceScope("session");
+                    return;
+                  }
+                  if (workspaceScope === "session") {
+                    setWorkspaceScope(
+                      task?.project_id ? "project" : "scheduled_task",
+                    );
+                  }
+                }}
+              />
             </div>
+
+            {!reuseSession ? (
+              <div className="space-y-2">
+                <Label>
+                  {t("library.scheduledTasks.fields.workspaceScope")}
+                </Label>
+                <Select
+                  value={workspaceScope}
+                  onValueChange={(v) =>
+                    setWorkspaceScope(
+                      v as "session" | "scheduled_task" | "project",
+                    )
+                  }
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="session">
+                      {t("library.scheduledTasks.fields.workspaceScopeSession")}
+                    </SelectItem>
+                    <SelectItem value="scheduled_task">
+                      {t(
+                        "library.scheduledTasks.fields.workspaceScopeScheduledTask",
+                      )}
+                    </SelectItem>
+                    <SelectItem value="project" disabled={!task.project_id}>
+                      {t("library.scheduledTasks.fields.workspaceScopeProject")}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <div className="text-xs text-muted-foreground">
+                  {task.project_id
+                    ? t("library.scheduledTasks.fields.workspaceScopeHelp")
+                    : t(
+                        "library.scheduledTasks.fields.workspaceScopeProjectDisabledHelp",
+                      )}
+                </div>
+              </div>
+            ) : null}
           </div>
         )}
 
@@ -186,6 +253,8 @@ export function ScheduledTaskEditDialog({
                 timezone: (timezone || "").trim() || "UTC",
                 prompt: (prompt || "").trim(),
                 enabled,
+                reuse_session: reuseSession,
+                workspace_scope: reuseSession ? "session" : workspaceScope,
               });
               onOpenChange(false);
             }}

@@ -42,6 +42,7 @@ const createSessionSchema = z
     prompt: z.string(),
     config: configSchema.optional(),
     projectId: z.string().uuid().optional(),
+    workspace_scope: z.enum(["session", "project"]).optional(),
     permission_mode: z
       .enum(["default", "acceptEdits", "plan", "bypassPermissions"])
       .optional(),
@@ -105,6 +106,7 @@ export async function createSessionAction(input: CreateSessionInput) {
     prompt,
     config,
     projectId,
+    workspace_scope,
     permission_mode,
     schedule_mode,
     timezone,
@@ -113,6 +115,8 @@ export async function createSessionAction(input: CreateSessionInput) {
   const hasInputFiles = Boolean(config?.input_files?.length);
   const finalPrompt =
     prompt.trim() || (hasInputFiles ? "Uploaded files" : prompt);
+  const finalWorkspaceScope =
+    workspace_scope || (projectId ? "project" : "session");
   const result = await chatService.createSession(
     finalPrompt,
     config,
@@ -123,6 +127,7 @@ export async function createSessionAction(input: CreateSessionInput) {
       scheduled_at: scheduled_at || undefined,
     },
     permission_mode,
+    finalWorkspaceScope,
   );
   return {
     sessionId: result.session_id,

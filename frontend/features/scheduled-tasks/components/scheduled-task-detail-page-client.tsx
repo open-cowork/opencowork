@@ -369,6 +369,20 @@ export function ScheduledTaskDetailPageClient({ taskId }: { taskId: string }) {
                           ? t("library.scheduledTasks.detail.reuseSessionOn")
                           : t("library.scheduledTasks.detail.reuseSessionOff")}
                       </div>
+                      <div className="text-xs text-muted-foreground">
+                        {t("library.scheduledTasks.fields.workspaceScope")}:{" "}
+                        {task.workspace_scope === "project"
+                          ? t(
+                              "library.scheduledTasks.fields.workspaceScopeProject",
+                            )
+                          : task.workspace_scope === "scheduled_task"
+                            ? t(
+                                "library.scheduledTasks.fields.workspaceScopeScheduledTask",
+                              )
+                            : t(
+                                "library.scheduledTasks.fields.workspaceScopeSession",
+                              )}
+                      </div>
                       {task.session_id ? (
                         <Button
                           size="sm"
@@ -376,6 +390,17 @@ export function ScheduledTaskDetailPageClient({ taskId }: { taskId: string }) {
                           className="px-0 h-auto"
                           onClick={() =>
                             router.push(`/${lng}/chat/${task.session_id}`)
+                          }
+                        >
+                          {t("library.scheduledTasks.detail.openWorkspace")}
+                        </Button>
+                      ) : runs.length > 0 ? (
+                        <Button
+                          size="sm"
+                          variant="link"
+                          className="px-0 h-auto"
+                          onClick={() =>
+                            router.push(`/${lng}/chat/${runs[0].session_id}`)
                           }
                         >
                           {t("library.scheduledTasks.detail.openWorkspace")}

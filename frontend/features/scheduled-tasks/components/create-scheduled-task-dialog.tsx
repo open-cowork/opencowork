@@ -14,6 +14,13 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { ScheduledTaskCreateInput } from "@/features/scheduled-tasks/types";
 
 interface CreateScheduledTaskDialogProps {
@@ -42,7 +49,10 @@ export function CreateScheduledTaskDialog({
   const [timezone, setTimezone] = useState(defaultTimezone);
   const [prompt, setPrompt] = useState("");
   const [enabled, setEnabled] = useState(true);
-  const [reuseSession, setReuseSession] = useState(true);
+  const [reuseSession, setReuseSession] = useState(false);
+  const [workspaceScope, setWorkspaceScope] = useState<
+    "session" | "scheduled_task" | "project"
+  >("scheduled_task");
 
   useEffect(() => {
     // Keep timezone aligned with the current environment without exposing it in the UI.
@@ -63,7 +73,8 @@ export function CreateScheduledTaskDialog({
     setTimezone(defaultTimezone);
     setPrompt("");
     setEnabled(true);
-    setReuseSession(true);
+    setReuseSession(false);
+    setWorkspaceScope("scheduled_task");
   };
 
   return (
@@ -140,8 +151,56 @@ export function CreateScheduledTaskDialog({
                 {t("library.scheduledTasks.fields.reuseSessionHelp")}
               </div>
             </div>
-            <Switch checked={reuseSession} onCheckedChange={setReuseSession} />
+            <Switch
+              checked={reuseSession}
+              onCheckedChange={(next) => {
+                setReuseSession(next);
+                if (next) {
+                  setWorkspaceScope("session");
+                  return;
+                }
+                if (workspaceScope === "session") {
+                  setWorkspaceScope("scheduled_task");
+                }
+              }}
+            />
           </div>
+
+          {!reuseSession ? (
+            <div className="space-y-2">
+              <Label>{t("library.scheduledTasks.fields.workspaceScope")}</Label>
+              <Select
+                value={workspaceScope}
+                onValueChange={(v) =>
+                  setWorkspaceScope(
+                    v as "session" | "scheduled_task" | "project",
+                  )
+                }
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="session">
+                    {t("library.scheduledTasks.fields.workspaceScopeSession")}
+                  </SelectItem>
+                  <SelectItem value="scheduled_task">
+                    {t(
+                      "library.scheduledTasks.fields.workspaceScopeScheduledTask",
+                    )}
+                  </SelectItem>
+                  <SelectItem value="project" disabled>
+                    {t("library.scheduledTasks.fields.workspaceScopeProject")}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+              <div className="text-xs text-muted-foreground">
+                {t(
+                  "library.scheduledTasks.fields.workspaceScopeProjectDisabledHelp",
+                )}
+              </div>
+            </div>
+          ) : null}
 
           <div className="flex justify-end gap-2 pt-2">
             <Button variant="outline" onClick={() => onOpenChange(false)}>
@@ -157,6 +216,7 @@ export function CreateScheduledTaskDialog({
                   prompt: prompt.trim(),
                   enabled,
                   reuse_session: reuseSession,
+                  workspace_scope: reuseSession ? "session" : workspaceScope,
                 });
                 onOpenChange(false);
               }}

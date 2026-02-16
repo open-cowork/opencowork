@@ -44,6 +44,7 @@ export interface ScheduledTaskSettingsValue {
   timezone: string;
   enabled: boolean;
   reuse_session: boolean;
+  workspace_scope: "session" | "scheduled_task" | "project";
 }
 
 export function ScheduledTaskSettingsDialog({
@@ -51,11 +52,13 @@ export function ScheduledTaskSettingsDialog({
   onOpenChange,
   value,
   onSave,
+  allowProjectWorkspace = false,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   value: ScheduledTaskSettingsValue;
   onSave: (next: ScheduledTaskSettingsValue) => void;
+  allowProjectWorkspace?: boolean;
 }) {
   const { t } = useT("translation");
 
@@ -65,6 +68,9 @@ export function ScheduledTaskSettingsDialog({
   const [draftReuseSession, setDraftReuseSession] = React.useState(
     value.reuse_session,
   );
+  const [draftWorkspaceScope, setDraftWorkspaceScope] = React.useState<
+    "session" | "scheduled_task" | "project"
+  >(value.workspace_scope);
 
   const [preset, setPreset] = React.useState<FriendlyPreset>("interval");
   const [intervalValue, setIntervalValue] = React.useState(5);
@@ -84,6 +90,7 @@ export function ScheduledTaskSettingsDialog({
     setDraftTimezone(value.timezone);
     setDraftEnabled(value.enabled);
     setDraftReuseSession(value.reuse_session);
+    setDraftWorkspaceScope(value.workspace_scope);
 
     const inferred = inferScheduleFromCron(value.cron);
     if (inferred.preset === "cron") {
@@ -425,9 +432,71 @@ export function ScheduledTaskSettingsDialog({
                     </div>
                     <Switch
                       checked={draftReuseSession}
-                      onCheckedChange={setDraftReuseSession}
+                      onCheckedChange={(next) => {
+                        setDraftReuseSession(next);
+                        if (next) {
+                          setDraftWorkspaceScope("session");
+                          return;
+                        }
+                        if (draftWorkspaceScope === "session") {
+                          setDraftWorkspaceScope(
+                            allowProjectWorkspace
+                              ? "project"
+                              : "scheduled_task",
+                          );
+                        }
+                      }}
                     />
                   </div>
+
+                  {!draftReuseSession ? (
+                    <div className="space-y-2">
+                      <Label>
+                        {t("library.scheduledTasks.fields.workspaceScope")}
+                      </Label>
+                      <Select
+                        value={draftWorkspaceScope}
+                        onValueChange={(v) =>
+                          setDraftWorkspaceScope(
+                            v as "session" | "scheduled_task" | "project",
+                          )
+                        }
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="session">
+                            {t(
+                              "library.scheduledTasks.fields.workspaceScopeSession",
+                            )}
+                          </SelectItem>
+                          <SelectItem value="scheduled_task">
+                            {t(
+                              "library.scheduledTasks.fields.workspaceScopeScheduledTask",
+                            )}
+                          </SelectItem>
+                          <SelectItem
+                            value="project"
+                            disabled={!allowProjectWorkspace}
+                          >
+                            {t(
+                              "library.scheduledTasks.fields.workspaceScopeProject",
+                            )}
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <div className="text-xs text-muted-foreground">
+                        {allowProjectWorkspace
+                          ? t(
+                              "library.scheduledTasks.fields.workspaceScopeHelp",
+                            )
+                          : t(
+                              "library.scheduledTasks.fields.workspaceScopeProjectDisabledHelp",
+                            )}
+                      </div>
+                    </div>
+                  ) : null}
                 </div>
               </AccordionContent>
             </AccordionItem>
@@ -452,6 +521,9 @@ export function ScheduledTaskSettingsDialog({
                 timezone: (draftTimezone || "").trim() || "UTC",
                 enabled: draftEnabled,
                 reuse_session: draftReuseSession,
+                workspace_scope: draftReuseSession
+                  ? "session"
+                  : draftWorkspaceScope,
               });
               onOpenChange(false);
             }}

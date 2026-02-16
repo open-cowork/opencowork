@@ -148,7 +148,10 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
           const cron = (scheduledTask?.cron || "").trim() || "*/5 * * * *";
           const timezone = (scheduledTask?.timezone || "").trim() || "UTC";
           const enabled = Boolean(scheduledTask?.enabled ?? true);
-          const reuseSession = Boolean(scheduledTask?.reuse_session ?? true);
+          const reuseSession = Boolean(scheduledTask?.reuse_session ?? false);
+          const workspaceScope =
+            scheduledTask?.workspace_scope ||
+            (reuseSession ? "session" : "project");
 
           await scheduledTasksService.create({
             name,
@@ -157,6 +160,7 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
             prompt: inputValue,
             enabled,
             reuse_session: reuseSession,
+            workspace_scope: reuseSession ? "session" : workspaceScope,
             project_id: projectId,
             config: Object.keys(config).length > 0 ? config : undefined,
           });
@@ -248,6 +252,7 @@ export function ProjectPageClient({ projectId }: ProjectPageClientProps) {
           onFocus: () => setIsInputFocused(true),
           onBlur: () => setIsInputFocused(false),
           allowProjectize: false,
+          allowProjectWorkspace: true,
           onRepoDefaultsSave: async (payload) => {
             await updateProject(projectId, payload);
           },

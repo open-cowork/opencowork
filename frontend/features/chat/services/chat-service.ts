@@ -210,6 +210,7 @@ export const chatService = {
       scheduled_at?: string;
     },
     permission_mode?: string,
+    workspace_scope?: "session" | "project",
   ): Promise<TaskEnqueueResponse> => {
     return chatService.enqueueTask({
       prompt,
@@ -219,6 +220,7 @@ export const chatService = {
       timezone: schedule?.timezone,
       scheduled_at: schedule?.scheduled_at,
       project_id: projectId,
+      workspace_scope,
     });
   },
 

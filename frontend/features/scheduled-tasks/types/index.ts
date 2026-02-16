@@ -9,6 +9,8 @@ export interface ScheduledTask {
   prompt: string;
   enabled: boolean;
   reuse_session: boolean;
+  workspace_scope: "session" | "scheduled_task" | "project";
+  project_id: string | null;
   session_id: string | null;
   next_run_at: string; // ISO datetime
   last_run_id: string | null;
@@ -25,6 +27,7 @@ export interface ScheduledTaskCreateInput {
   prompt: string;
   enabled?: boolean;
   reuse_session?: boolean;
+  workspace_scope?: "session" | "scheduled_task" | "project";
   project_id?: string | null;
   config?: TaskConfig | null;
 }
@@ -35,6 +38,8 @@ export interface ScheduledTaskUpdateInput {
   timezone?: string | null;
   prompt?: string | null;
   enabled?: boolean | null;
+  reuse_session?: boolean | null;
+  workspace_scope?: "session" | "scheduled_task" | "project" | null;
 }
 
 export interface ScheduledTaskTriggerResponse {

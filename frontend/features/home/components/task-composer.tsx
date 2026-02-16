@@ -72,6 +72,7 @@ export interface TaskSendOptions {
     timezone: string;
     enabled: boolean;
     reuse_session: boolean;
+    workspace_scope: "session" | "scheduled_task" | "project";
   } | null;
 }
 
@@ -83,6 +84,7 @@ export function TaskComposer({
   onSend,
   isSubmitting,
   allowProjectize = true,
+  allowProjectWorkspace = false,
   onRepoDefaultsSave,
   onFocus,
   onBlur,
@@ -96,6 +98,7 @@ export function TaskComposer({
   onSend: (options?: TaskSendOptions) => void | Promise<void>;
   isSubmitting?: boolean;
   allowProjectize?: boolean;
+  allowProjectWorkspace?: boolean;
   onRepoDefaultsSave?: (payload: {
     repo_url: string;
     git_branch: string | null;
@@ -142,7 +145,10 @@ export function TaskComposer({
   const [scheduledTimezone, setScheduledTimezone] = React.useState("UTC");
   const [scheduledEnabled, setScheduledEnabled] = React.useState(true);
   const [scheduledReuseSession, setScheduledReuseSession] =
-    React.useState(true);
+    React.useState(false);
+  const [scheduledWorkspaceScope, setScheduledWorkspaceScope] = React.useState<
+    "session" | "scheduled_task" | "project"
+  >(allowProjectWorkspace ? "project" : "scheduled_task");
 
   const placeholderText =
     mode === "scheduled"
@@ -391,6 +397,9 @@ export function TaskComposer({
               timezone: scheduledTimezone.trim() || "UTC",
               enabled: scheduledEnabled,
               reuse_session: scheduledReuseSession,
+              workspace_scope: scheduledReuseSession
+                ? "session"
+                : scheduledWorkspaceScope,
             }
           : null,
     };
@@ -420,6 +429,7 @@ export function TaskComposer({
     scheduledEnabled,
     scheduledName,
     scheduledReuseSession,
+    scheduledWorkspaceScope,
     scheduledTimezone,
     value,
   ]);
@@ -586,13 +596,18 @@ export function TaskComposer({
           timezone: scheduledTimezone,
           enabled: scheduledEnabled,
           reuse_session: scheduledReuseSession,
+          workspace_scope: scheduledReuseSession
+            ? "session"
+            : scheduledWorkspaceScope,
         }}
+        allowProjectWorkspace={allowProjectWorkspace}
         onSave={(next) => {
           setScheduledName(next.name);
           setScheduledCron(next.cron);
           setScheduledTimezone(next.timezone);
           setScheduledEnabled(next.enabled);
           setScheduledReuseSession(next.reuse_session);
+          setScheduledWorkspaceScope(next.workspace_scope);
         }}
       />
 
