@@ -263,6 +263,10 @@ class AgentExecutor:
 
             plugins = self._discover_plugins()
 
+            selected_model = (config.model or "").strip()
+            if not selected_model:
+                selected_model = os.environ["DEFAULT_MODEL"]
+
             options = ClaudeAgentOptions(
                 cwd=ctx.cwd,
                 resume=self.sdk_session_id,
@@ -282,7 +286,7 @@ class AgentExecutor:
                 ],
                 mcp_servers=mcp_servers,
                 permission_mode=normalized_permission_mode,
-                model=os.environ["DEFAULT_MODEL"],
+                model=selected_model,
                 can_use_tool=can_use_tool,
                 hooks={"PreToolUse": [HookMatcher(matcher=None, hooks=[dummy_hook])]},
                 agents=agents,

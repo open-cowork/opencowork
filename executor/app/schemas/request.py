@@ -32,6 +32,8 @@ class TaskConfig(BaseModel):
     git_branch: str = "main"
     # Optional env var key holding a GitHub token (non-secret; used by manager).
     git_token_env_key: str | None = None
+    # Optional explicit model override for this run.
+    model: str | None = None
     # Resolved GitHub token (secret) injected by Executor Manager at runtime.
     git_token: str | None = None
     # Built-in browser capability toggle (Playwright MCP is injected internally by the executor).
