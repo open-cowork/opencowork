@@ -38,7 +38,7 @@ export function ComposerAttachments({
           branch={gitBranch.trim() || null}
           onOpen={onOpenRepoDialog}
           onRemove={onRemoveRepo}
-          className="w-48 bg-background border-dashed"
+          className="w-48 bg-background"
         />
       )}
       {attachments.map((file, i) => (
