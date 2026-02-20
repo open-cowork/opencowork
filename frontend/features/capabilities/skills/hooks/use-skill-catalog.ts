@@ -9,7 +9,7 @@ import type {
 } from "@/features/capabilities/skills/types";
 import { skillsService } from "@/features/capabilities/skills/services/skills-service";
 import { useT } from "@/lib/i18n/client";
-import { playMcpInstallSound } from "@/lib/utils/sound";
+import { playInstallSound } from "@/lib/utils/sound";
 
 export interface SkillDisplayItem {
   skill: Skill;
@@ -54,7 +54,7 @@ export function useSkillCatalog() {
         });
         setInstalls((prev) => [created, ...prev]);
         toast.success(t("library.skillsManager.toasts.installed"));
-        playMcpInstallSound();
+        playInstallSound();
       } catch (error) {
         console.error("[Skills] install failed:", error);
         toast.error(t("library.skillsManager.toasts.actionError"));
@@ -112,7 +112,7 @@ export function useSkillCatalog() {
             : `${skillName} ${t("library.skillsManager.toasts.disabled")}`,
         );
         if (enabled) {
-          playMcpInstallSound();
+          playInstallSound();
         }
       } catch (error) {
         console.error("[Skills] setEnabled failed:", error);

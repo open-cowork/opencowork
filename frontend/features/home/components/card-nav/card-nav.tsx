@@ -24,7 +24,7 @@ import type {
 } from "@/features/capabilities/plugins/types";
 import { useAppShell } from "@/components/shared/app-shell-context";
 import { cn } from "@/lib/utils";
-import { playMcpInstallSound } from "@/lib/utils/sound";
+import { playInstallSound } from "@/lib/utils/sound";
 import { useT } from "@/lib/i18n/client";
 import { toast } from "sonner";
 import { AlertTriangle } from "lucide-react";
@@ -177,7 +177,7 @@ export function CardNav({
           ),
         );
         if (!currentEnabled) {
-          playMcpInstallSound();
+          playInstallSound();
         }
 
         // Check if we've exceeded the limit after enabling
@@ -218,7 +218,7 @@ export function CardNav({
           ),
         );
         if (!currentEnabled) {
-          playMcpInstallSound();
+          playInstallSound();
         }
 
         // Check if we've exceeded the limit after enabling
@@ -252,7 +252,7 @@ export function CardNav({
           ),
         );
         if (!currentEnabled) {
-          playMcpInstallSound();
+          playInstallSound();
         }
       } catch (error) {
         console.error("[CardNav] Failed to toggle Plugin:", error);
@@ -282,7 +282,7 @@ export function CardNav({
           if (count > MCP_LIMIT) {
             toast.warning(t("hero.warnings.tooManyMcps", { count }));
           } else {
-            playMcpInstallSound();
+            playInstallSound();
           }
         }
       } catch (error) {
@@ -314,7 +314,7 @@ export function CardNav({
           if (count > SKILL_LIMIT) {
             toast.warning(t("hero.warnings.tooManySkills", { count }));
           } else {
-            playMcpInstallSound();
+            playInstallSound();
           }
         }
       } catch (error) {

@@ -19,6 +19,7 @@ import type {
   SkillImportCommitResponse,
 } from "@/features/capabilities/skills/types";
 import { CapabilityDialogContent } from "@/features/capabilities/components/capability-dialog-content";
+import { playInstallSound } from "@/lib/utils/sound";
 
 type SourceTab = "zip" | "github";
 
@@ -255,6 +256,7 @@ export function SkillImportDialog({
       }
 
       toast.success(t("library.skillsImport.toasts.committed"));
+      playInstallSound();
       await onImported?.();
       handleClose();
     } catch (error) {

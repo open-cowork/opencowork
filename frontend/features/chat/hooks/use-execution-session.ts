@@ -2,7 +2,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { getExecutionSessionAction } from "@/features/chat/actions/query-actions";
 import { useAdaptivePolling } from "./use-adaptive-polling";
 import type { ExecutionSession } from "@/features/chat/types";
-import { playTaskCompleteSound } from "@/lib/utils/sound";
+import { playCompletionSound } from "@/lib/utils/sound";
 
 interface UseExecutionSessionOptions {
   /**
@@ -174,7 +174,7 @@ export function useExecutionSession({
           prevStatusRef.current !== null &&
           ["accepted", "running"].includes(prevStatusRef.current)
         ) {
-          playTaskCompleteSound();
+          playCompletionSound();
         }
 
         onPollingStop();

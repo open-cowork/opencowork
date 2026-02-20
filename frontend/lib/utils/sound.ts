@@ -68,9 +68,9 @@ const playSequence = (
 };
 
 /**
- * Task completion sound - ascending two-tone chime
+ * Completion sound - for task/operation completed (e.g. task done)
  */
-export const playTaskCompleteSound = (): void => {
+export const playCompletionSound = (): void => {
   playSequence([
     { frequency: 523.25, duration: 120, delay: 0 }, // C5
     { frequency: 659.25, duration: 150, delay: 100 }, // E5
@@ -78,9 +78,9 @@ export const playTaskCompleteSound = (): void => {
 };
 
 /**
- * File upload success sound - quick rising beep
+ * Upload sound - for successful upload (e.g. file upload)
  */
-export const playFileUploadSound = (): void => {
+export const playUploadSound = (): void => {
   playSequence([
     { frequency: 440, duration: 80, delay: 0 }, // A4
     { frequency: 554.37, duration: 80, delay: 70 }, // C#5
@@ -89,9 +89,9 @@ export const playFileUploadSound = (): void => {
 };
 
 /**
- * MCP skill installation sound - confirmation beep
+ * Install sound - for install/import success (e.g. preset, skill, MCP)
  */
-export const playMcpInstallSound = (): void => {
+export const playInstallSound = (): void => {
   playSequence([
     { frequency: 659.25, duration: 100, delay: 0 }, // E5
     { frequency: 523.25, duration: 100, delay: 90 }, // C5

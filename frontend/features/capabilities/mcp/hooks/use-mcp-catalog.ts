@@ -12,7 +12,7 @@ import { mcpService } from "@/features/capabilities/mcp/services/mcp-service";
 import { useEnvVarsStore } from "@/features/capabilities/env-vars/hooks/use-env-vars-store";
 import { useT } from "@/lib/i18n/client";
 import { CheckCircle2, CircleOff } from "lucide-react";
-import { playMcpInstallSound } from "@/lib/utils/sound";
+import { playInstallSound } from "@/lib/utils/sound";
 
 export interface McpDisplayItem {
   server: McpServer;
@@ -107,7 +107,7 @@ export function useMcpCatalog() {
           );
           // Play sound on enable
           if (updated.enabled) {
-            playMcpInstallSound();
+            playInstallSound();
           }
           // Trigger success haptic feedback
           if (typeof window !== "undefined" && "vibrate" in navigator) {
@@ -133,7 +133,7 @@ export function useMcpCatalog() {
             },
           );
           // Play sound on installation
-          playMcpInstallSound();
+          playInstallSound();
           // Trigger success haptic feedback
           if (typeof window !== "undefined" && "vibrate" in navigator) {
             navigator.vibrate(50);
@@ -176,6 +176,7 @@ export function useMcpCatalog() {
           prev.map((item) => (item.id === serverId ? updated : item)),
         );
         toast.success(t("library.mcpLibrary.toasts.updated"));
+        playInstallSound();
         return updated;
       } catch (error) {
         console.error("[MCP] update failed:", error);
@@ -198,6 +199,7 @@ export function useMcpCatalog() {
         });
         setServers((prev) => [created, ...prev]);
         toast.success(t("library.mcpLibrary.toasts.created"));
+        playInstallSound();
         return created;
       } catch (error) {
         console.error("[MCP] create failed:", error);

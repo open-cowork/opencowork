@@ -9,7 +9,7 @@ import type {
 } from "@/features/capabilities/plugins/types";
 import { pluginsService } from "@/features/capabilities/plugins/services/plugins-service";
 import { useT } from "@/lib/i18n/client";
-import { playMcpInstallSound } from "@/lib/utils/sound";
+import { playInstallSound } from "@/lib/utils/sound";
 
 export interface PluginDisplayItem {
   plugin: Plugin;
@@ -54,7 +54,7 @@ export function usePluginCatalog() {
         });
         setInstalls((prev) => [created, ...prev]);
         toast.success(t("library.pluginsManager.toasts.installed"));
-        playMcpInstallSound();
+        playInstallSound();
       } catch (error) {
         console.error("[Plugins] install failed:", error);
         toast.error(t("library.pluginsManager.toasts.actionError"));
@@ -111,7 +111,7 @@ export function usePluginCatalog() {
             : `${pluginName} ${t("library.pluginsManager.toasts.disabled")}`,
         );
         if (enabled) {
-          playMcpInstallSound();
+          playInstallSound();
         }
       } catch (error) {
         console.error("[Plugins] setEnabled failed:", error);

@@ -2,7 +2,7 @@ import * as React from "react";
 import { toast } from "sonner";
 import { uploadAttachment } from "@/features/attachments/services/attachment-service";
 import type { InputFile } from "@/features/chat/types/api/session";
-import { playFileUploadSound } from "@/lib/utils/sound";
+import { playUploadSound } from "@/lib/utils/sound";
 
 const MAX_FILE_SIZE = 100 * 1024 * 1024; // 100 MB
 
@@ -50,7 +50,7 @@ export function useFileUpload({ t }: UseFileUploadOptions) {
         const uploaded = await uploadAttachment(file);
         setAttachments((prev) => [...prev, uploaded]);
         toast.success(t("hero.toasts.uploadSuccess"));
-        playFileUploadSound();
+        playUploadSound();
       } catch (error) {
         console.error("[useFileUpload] Upload failed:", error);
         toast.error(t("hero.toasts.uploadFailed"));

@@ -17,7 +17,7 @@ import { toast } from "sonner";
 import { uploadAttachment } from "@/features/attachments/services/attachment-service";
 import type { InputFile } from "@/features/chat/types";
 import { FileCard } from "@/components/shared/file-card";
-import { playFileUploadSound } from "@/lib/utils/sound";
+import { playUploadSound } from "@/lib/utils/sound";
 import { useSlashCommandAutocomplete } from "@/features/chat/hooks/use-slash-command-autocomplete";
 import { cn } from "@/lib/utils";
 
@@ -115,7 +115,7 @@ export function ChatInput({
       const uploadedFile = await uploadAttachment(file);
       setAttachments((prev) => [...prev, uploadedFile]);
       toast.success(t("hero.toasts.uploadSuccess"));
-      playFileUploadSound();
+      playUploadSound();
     } catch (error) {
       console.error("Upload failed:", error);
       toast.error(t("hero.toasts.uploadFailed"));
@@ -161,7 +161,7 @@ export function ChatInput({
       const uploadedFile = await uploadAttachment(file);
       setAttachments((prev) => [...prev, uploadedFile]);
       toast.success(t("hero.toasts.uploadSuccess"));
-      playFileUploadSound();
+      playUploadSound();
     } catch (error) {
       console.error("Upload failed:", error);
       toast.error(t("hero.toasts.uploadFailed"));

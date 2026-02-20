@@ -17,7 +17,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useT } from "@/lib/i18n/client";
-import { playFileUploadSound } from "@/lib/utils/sound";
+import { playUploadSound } from "@/lib/utils/sound";
 import { useSlashCommandAutocomplete } from "@/features/chat/hooks/use-slash-command-autocomplete";
 import { cn } from "@/lib/utils";
 
@@ -173,7 +173,7 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
         const uploadedFile = await uploadAttachment(file);
         setAttachments((prev) => [...prev, uploadedFile]);
         toast.success(t("hero.toasts.uploadSuccess"));
-        playFileUploadSound(); // Play sound on successful upload
+        playUploadSound();
       } catch (error) {
         console.error("Upload failed:", error);
         toast.error(t("hero.toasts.uploadFailed"));

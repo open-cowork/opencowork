@@ -19,6 +19,7 @@ import type {
   PluginImportCommitResponse,
 } from "@/features/capabilities/plugins/types";
 import { CapabilityDialogContent } from "@/features/capabilities/components/capability-dialog-content";
+import { playInstallSound } from "@/lib/utils/sound";
 
 type SourceTab = "zip" | "github";
 
@@ -255,6 +256,7 @@ export function PluginImportDialog({
       }
 
       toast.success(t("library.pluginsImport.toasts.committed"));
+      playInstallSound();
       await onImported?.();
       handleClose();
     } catch (error) {
