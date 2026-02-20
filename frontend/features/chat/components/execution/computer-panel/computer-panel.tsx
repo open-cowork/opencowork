@@ -32,6 +32,8 @@ import { ApiError } from "@/lib/errors";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { motion } from "motion/react";
+import { BrowserViewer } from "./browser-viewer";
+import { TerminalViewer } from "./terminal-viewer";
 
 const POCO_PLAYWRIGHT_MCP_PREFIX = "mcp____poco_playwright__";
 
@@ -56,34 +58,6 @@ interface ReplayFrame {
   kind: ReplayKind;
   execution: ToolExecutionResponse;
   label: string;
-}
-
-function ViewerSkeleton({
-  label,
-  className,
-}: {
-  label: string;
-  className?: string;
-}) {
-  return (
-    <div
-      className={cn(
-        "flex h-full w-full items-center justify-center p-4",
-        className,
-      )}
-    >
-      <div className="h-full w-full max-w-[960px] rounded-lg skeleton-shimmer" />
-      <span className="sr-only">{label}</span>
-    </div>
-  );
-}
-
-function TerminalOutputSkeleton({ label }: { label: string }) {
-  return (
-    <SkeletonItem className="h-20 min-h-0 w-full">
-      <span className="sr-only">{label}</span>
-    </SkeletonItem>
-  );
 }
 
 function truncateMiddle(value: string, maxLen: number): string {
@@ -146,36 +120,6 @@ function getBrowserStepLabel(execution: ToolExecutionResponse): string {
 
   const meta = summary ? ` - ${truncateMiddle(summary, 80)}` : "";
   return `${action}${meta}`;
-}
-
-function parseBashResult(execution: ToolExecutionResponse): {
-  output: string;
-  exitCode?: number;
-  killed?: boolean;
-  shellId?: string | null;
-} {
-  const raw = execution.tool_output?.["content"];
-  if (typeof raw === "string") {
-    try {
-      const parsed = JSON.parse(raw) as unknown;
-      if (parsed && typeof parsed === "object") {
-        const obj = parsed as Record<string, unknown>;
-        const output = typeof obj["output"] === "string" ? obj["output"] : raw;
-        const exitCode =
-          typeof obj["exitCode"] === "number" ? obj["exitCode"] : undefined;
-        const killed =
-          typeof obj["killed"] === "boolean" ? obj["killed"] : undefined;
-        const shellId =
-          typeof obj["shellId"] === "string" ? obj["shellId"] : null;
-        return { output, exitCode, killed, shellId };
-      }
-    } catch {
-      // fall back to raw
-    }
-    return { output: raw };
-  }
-  if (raw === undefined || raw === null) return { output: "" };
-  return { output: JSON.stringify(raw) };
 }
 
 function clampIndex(value: number, min: number, max: number): number {
@@ -445,104 +389,15 @@ export function ComputerPanel({
     }
 
     if (selectedFrame.kind === "browser") {
-      if (!selectedBrowserIsDone) {
-        return (
-          <ViewerSkeleton
-            label={t("computer.terminal.running")}
-            className="bg-muted/30"
-          />
-        );
-      }
-
-      if (!selectedBrowserToolUseId) {
-        return (
-          <div className="h-full w-full bg-muted/30 flex items-center justify-center">
-            <div className="text-sm text-muted-foreground">
-              {t("computer.browser.screenshotUnavailable")}
-            </div>
-          </div>
-        );
-      }
-
       return (
-        <div className="flex h-full w-full min-h-0 min-w-0 items-center justify-center overflow-hidden bg-muted/30">
-          {selectedBrowserUrl ? (
-            <div className="flex h-full w-full min-h-0 min-w-0 items-center justify-center p-2 sm:p-3">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={selectedBrowserUrl}
-                alt={t("computer.browser.screenshotAlt")}
-                className="block max-h-full max-w-full min-h-0 min-w-0 object-contain"
-              />
-            </div>
-          ) : selectedBrowserUrl === null ? (
-            <div className="text-sm text-muted-foreground">
-              {t("computer.browser.screenshotUnavailable")}
-            </div>
-          ) : (
-            <ViewerSkeleton label={t("computer.browser.screenshotLoading")} />
-          )}
-        </div>
+        <BrowserViewer
+          isDone={selectedBrowserIsDone}
+          toolUseId={selectedBrowserToolUseId}
+          screenshotUrl={selectedBrowserUrl}
+        />
       );
     }
-
-    const cmd =
-      typeof selectedFrame.execution.tool_input?.["command"] === "string"
-        ? (selectedFrame.execution.tool_input?.["command"] as string)
-        : "";
-    const isDone = Boolean(selectedFrame.execution.tool_output);
-    const isError = selectedFrame.execution.is_error;
-    const result = parseBashResult(selectedFrame.execution);
-
-    return (
-      <div className="h-full w-full bg-card">
-        <ScrollArea className="h-full">
-          <div className="p-4 font-mono text-xs space-y-3">
-            <div className="flex items-start gap-2">
-              <span className="select-none text-muted-foreground">$</span>
-              <span className="whitespace-pre-wrap break-all flex-1">
-                {cmd || t("computer.terminal.unknownCommand")}
-              </span>
-              <span className="shrink-0">
-                {!isDone ? (
-                  <SkeletonCircle className="size-3.5" />
-                ) : isError ? (
-                  <XCircle className="size-3.5 text-destructive" />
-                ) : (
-                  <CheckCircle2 className="size-3.5 text-success" />
-                )}
-              </span>
-            </div>
-            {isDone ? (
-              <div className="whitespace-pre-wrap break-words text-foreground/90 rounded-md border bg-background p-3">
-                {result.output || (
-                  <span className="text-muted-foreground">
-                    {t("computer.terminal.noOutput")}
-                  </span>
-                )}
-              </div>
-            ) : (
-              <TerminalOutputSkeleton label={t("computer.terminal.running")} />
-            )}
-            {isDone && typeof result.exitCode === "number" ? (
-              <div
-                className={cn(
-                  "text-[11px]",
-                  result.exitCode === 0
-                    ? "text-muted-foreground"
-                    : "text-destructive",
-                )}
-              >
-                {t("computer.terminal.exitCode", {
-                  code: String(result.exitCode),
-                })}
-                {result.killed ? ` · ${t("computer.terminal.killed")}` : ""}
-              </div>
-            ) : null}
-          </div>
-        </ScrollArea>
-      </div>
-    );
+    return <TerminalViewer execution={selectedFrame.execution} />;
   })();
 
   const canGoPrev = replayFrames.length > 0 && selectedIndex > 0;
