@@ -270,6 +270,8 @@ export function TaskHistoryList({
   onRenameTask,
   onMoveTaskToProject,
   projects,
+  showDropIndicator = false,
+  dropIndicatorLabel,
   isSelectionMode = false,
   selectedTaskIds = new Set(),
   onToggleTaskSelection,
@@ -281,6 +283,8 @@ export function TaskHistoryList({
   onRenameTask?: (taskId: string, newName: string) => Promise<void> | void;
   onMoveTaskToProject?: (taskId: string, projectId: string | null) => void;
   projects?: Project[];
+  showDropIndicator?: boolean;
+  dropIndicatorLabel?: string;
   isSelectionMode?: boolean;
   selectedTaskIds?: Set<string>;
   onToggleTaskSelection?: (taskId: string) => void;
@@ -313,6 +317,26 @@ export function TaskHistoryList({
   return (
     <>
       <SidebarMenu className="gap-0.5 overflow-hidden">
+        {showDropIndicator && (
+          <SidebarMenuItem aria-hidden="true">
+            <div
+              className={cn(
+                "flex min-w-0 w-full items-center justify-center border border-dashed border-primary/40 bg-primary/10 text-primary",
+                SIDEBAR_CARD_BASE_CLASS,
+                isNested && SIDEBAR_CARD_NESTED_INSET_CLASS,
+              )}
+            >
+              <span
+                className={cn(
+                  SIDEBAR_CARD_TEXT_CLASS,
+                  "flex-none text-xs font-medium",
+                )}
+              >
+                {dropIndicatorLabel}
+              </span>
+            </div>
+          </SidebarMenuItem>
+        )}
         {tasks.map((task) => (
           <DraggableTask
             key={task.id}

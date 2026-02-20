@@ -8,6 +8,9 @@ import {
   useSensor,
   useSensors,
   closestCorners,
+  pointerWithin,
+  rectIntersection,
+  type CollisionDetection,
 } from "@dnd-kit/core";
 
 import { Sidebar, SidebarRail } from "@/components/ui/sidebar";
@@ -78,6 +81,15 @@ export function MainSidebar({
     }),
   );
 
+  const collisionDetection = React.useCallback<CollisionDetection>((args) => {
+    if (args.active?.data.current?.type === "task") {
+      const pointerCollisions = pointerWithin(args);
+      if (pointerCollisions.length > 0) return pointerCollisions;
+      return rectIntersection(args);
+    }
+    return closestCorners(args);
+  }, []);
+
   const handleDragEnd = React.useCallback(
     (event: DragEndEvent) => {
       const { active, over } = event;
@@ -108,7 +120,7 @@ export function MainSidebar({
   return (
     <DndContext
       sensors={sensors}
-      collisionDetection={closestCorners}
+      collisionDetection={collisionDetection}
       onDragEnd={handleDragEnd}
     >
       <Sidebar

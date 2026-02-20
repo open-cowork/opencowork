@@ -187,16 +187,13 @@ function DroppableAllTasksGroup({
               onRenameTask={onRenameTask}
               onMoveTaskToProject={onMoveTaskToProject}
               projects={projects}
+              showDropIndicator={isOver}
+              dropIndicatorLabel={t("sidebar.moveToHere")}
               isSelectionMode={isSelectionMode}
               selectedTaskIds={selectedTaskIds}
               onToggleTaskSelection={onToggleTaskSelection}
               onNavigate={onTaskNavigate}
             />
-            {isOver && (
-              <div className="flex items-center justify-center p-2 text-xs text-primary bg-primary/5 rounded border border-dashed border-primary/20 mt-1">
-                {t("sidebar.removeFromProject")}
-              </div>
-            )}
           </SidebarGroupContent>
         </CollapsibleContent>
       </SidebarGroup>
