@@ -348,11 +348,36 @@ export function PluginImportDialog({
               <Button
                 onClick={onCommit}
                 disabled={!canCommit || isCommitting}
-                className="w-full"
+                className={
+                  isCommitting
+                    ? "relative w-full overflow-hidden !bg-primary/50 text-primary-foreground hover:!bg-primary/50"
+                    : "w-full"
+                }
+                aria-busy={isCommitting}
+                aria-valuenow={isCommitting ? (commitProgress ?? 0) : undefined}
+                aria-valuemin={isCommitting ? 0 : undefined}
+                aria-valuemax={isCommitting ? 100 : undefined}
               >
-                {isCommitting
-                  ? t("library.pluginsImport.actions.committing")
-                  : t("library.pluginsImport.actions.commit")}
+                {isCommitting && (
+                  <span
+                    className="absolute inset-y-0 left-0 bg-primary transition-[width] duration-300 ease-out"
+                    style={{
+                      width: `${typeof commitProgress === "number" ? commitProgress : 0}%`,
+                    }}
+                    aria-hidden
+                  />
+                )}
+                <span
+                  className={
+                    isCommitting
+                      ? "relative z-10 text-primary-foreground"
+                      : undefined
+                  }
+                >
+                  {isCommitting
+                    ? t("library.pluginsImport.actions.committing")
+                    : t("library.pluginsImport.actions.commit")}
+                </span>
               </Button>
             )}
           </DialogFooter>
@@ -599,25 +624,6 @@ export function PluginImportDialog({
                       </div>
                     ))}
                   </div>
-                </div>
-              )}
-
-              {isCommitting && (
-                <div className="rounded-xl border border-border/50 bg-muted/5 px-4 py-3 space-y-2">
-                  <div className="text-sm font-medium">
-                    {t("library.pluginsImport.progress.title")}
-                  </div>
-                  {typeof commitProgress === "number" && (
-                    <div className="text-xs text-muted-foreground">
-                      {t("library.pluginsImport.progress.value")}:{" "}
-                      {commitProgress}%
-                    </div>
-                  )}
-                  {commitJobId && (
-                    <div className="text-xs text-muted-foreground font-mono">
-                      {t("library.pluginsImport.progress.jobId")}: {commitJobId}
-                    </div>
-                  )}
                 </div>
               )}
 
