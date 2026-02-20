@@ -80,7 +80,7 @@ export function MobileExecutionView({
           <div className="relative min-w-0 flex-1 rounded-full border border-border/60 bg-muted/60 p-1 font-serif">
             <div
               className={cn(
-                "pointer-events-none absolute inset-y-1 left-1 w-[calc((100%-0.5rem)/3)] rounded-full border border-border/70 bg-background shadow-sm transition-[transform,opacity] duration-300 ease-out",
+                "pointer-events-none absolute inset-y-1 left-1 w-[calc((100%-0.5rem)/3)] rounded-full border border-primary/30 bg-primary shadow-sm transition-[transform,opacity] duration-300 ease-out",
                 hasFooterSelection ? "opacity-100" : "opacity-0",
               )}
               style={{ transform: `translateX(${activeIndex * 100}%)` }}
@@ -102,7 +102,7 @@ export function MobileExecutionView({
                     className={cn(
                       "z-10 flex h-8 flex-row items-center justify-center gap-1.5 rounded-full px-2 transition-colors",
                       isActive
-                        ? "font-semibold text-foreground"
+                        ? "font-semibold text-primary-foreground"
                         : "text-muted-foreground",
                     )}
                   >

@@ -30,12 +30,12 @@ function getStatusConfig(status: FileChange["status"]) {
     case "added":
       return {
         icon: FilePlus,
-        color: "text-success",
+        color: "text-primary",
       };
     case "modified":
       return {
         icon: FileEdit,
-        color: "text-info",
+        color: "text-chart-2",
       };
     case "deleted":
       return {
@@ -45,7 +45,7 @@ function getStatusConfig(status: FileChange["status"]) {
     case "renamed":
       return {
         icon: GitCompare,
-        color: "text-renamed",
+        color: "text-chart-3",
       };
     default:
       return {
@@ -97,10 +97,10 @@ export function FileChangeCard({
       return "text-muted-foreground";
     }
     if (line.startsWith("@@")) {
-      return "text-info";
+      return "text-chart-2";
     }
     if (line.startsWith("+")) {
-      return "text-success bg-success/10";
+      return "text-primary bg-primary/10";
     }
     if (line.startsWith("-")) {
       return "text-destructive bg-destructive/10";
@@ -194,8 +194,8 @@ export function FileChangeCard({
             {(addedLines > 0 || deletedLines > 0) && (
               <div className="flex gap-3 min-w-0 overflow-hidden">
                 <span className="flex items-center gap-1.5 min-w-0">
-                  <Plus className="size-3 shrink-0 text-success" />
-                  <span className="font-medium shrink-0 text-success">
+                  <Plus className="size-3 shrink-0 text-primary" />
+                  <span className="font-medium shrink-0 text-primary">
                     {addedLines}
                   </span>
                   <span className="text-muted-foreground shrink-0">

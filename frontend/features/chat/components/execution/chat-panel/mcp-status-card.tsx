@@ -18,11 +18,11 @@ export function McpStatusCard({ mcpStatuses }: McpStatusCardProps) {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "connected":
-        return <Check className="size-3 text-success" />;
+        return <Check className="size-3 text-primary" />;
       case "disconnected":
         return <X className="size-3 text-muted-foreground" />;
       default:
-        return <AlertTriangle className="size-3 text-warning" />;
+        return <AlertTriangle className="size-3 text-chart-4" />;
     }
   };
 

@@ -105,7 +105,7 @@ export function ProjectHeader({
                     className="text-destructive focus:bg-destructive/10 focus:text-destructive"
                     onClick={() => setIsDeleteDialogOpen(true)}
                   >
-                    <Trash2 className="size-4" />
+                    <Trash2 className="size-4 text-destructive" />
                     <span>{t("project.delete")}</span>
                   </DropdownMenuItem>
                 </>

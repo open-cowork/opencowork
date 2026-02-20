@@ -65,7 +65,7 @@ interface DraggableTaskProps {
 
 // 颜色点状态：
 // 1. 转圈：pending、running
-// 2. 成功色 completed → bg-success（成功色点）
+// 2. 主题色 completed → bg-primary（主题色点）
 // 3. 失败色 failed → bg-destructive（失败色点）
 // 4. 取消色 canceled → bg-muted-foreground/60（偏深灰点）
 
@@ -162,7 +162,7 @@ function DraggableTask({
               {task.status === "running" || task.status === "pending" ? (
                 <Loader2
                   className={cn(
-                    "size-3 shrink-0 animate-spin text-info transition-opacity",
+                    "size-3 shrink-0 animate-spin text-primary transition-opacity",
                     "group-hover/task-card:opacity-0",
                   )}
                 />
@@ -255,12 +255,13 @@ function DraggableTask({
                 </DropdownMenuItem>
               )}
               <DropdownMenuItem
+                variant="destructive"
                 onClick={(e) => {
                   e.stopPropagation();
                   onDeleteTask(task.id);
                 }}
               >
-                <Trash2 className="size-4" />
+                <Trash2 className="size-4 text-destructive" />
                 <span>{t("sidebar.delete")}</span>
               </DropdownMenuItem>
             </DropdownMenuContent>

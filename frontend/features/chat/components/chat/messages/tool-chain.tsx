@@ -175,7 +175,7 @@ function ToolStep({ toolUse, toolResult, isOpen, onToggle }: ToolStepProps) {
             ) : isError ? (
               <XCircle className="size-4 text-destructive" />
             ) : (
-              <CheckCircle2 className="size-4 text-success" />
+              <CheckCircle2 className="size-4 text-primary" />
             )}
           </div>
 
@@ -394,7 +394,7 @@ export function ToolChain({
               ) : hasError ? (
                 <XCircle className="size-3 text-destructive" />
               ) : (
-                <CheckCircle2 className="size-3 text-success" />
+                <CheckCircle2 className="size-3 text-primary" />
               )}
             </div>
           )}

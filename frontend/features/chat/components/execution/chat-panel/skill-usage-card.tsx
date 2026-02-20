@@ -18,7 +18,7 @@ export function SkillUsageCard({ skills }: SkillUsageCardProps) {
   const getStatusIcon = (status: string) => {
     switch (status) {
       case "completed":
-        return <CheckCircle2 className="size-3 text-success" />;
+        return <CheckCircle2 className="size-3 text-primary" />;
       case "failed":
         return <XCircle className="size-3 text-destructive" />;
       case "running":

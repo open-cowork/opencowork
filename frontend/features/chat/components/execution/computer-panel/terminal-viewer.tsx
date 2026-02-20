@@ -37,13 +37,13 @@ const terminalSyntaxTheme: Record<string, React.CSSProperties> = {
     color: "var(--primary)",
   },
   string: {
-    color: "var(--success)",
+    color: "var(--primary)",
   },
   number: {
-    color: "var(--warning)",
+    color: "var(--chart-4)",
   },
   function: {
-    color: "var(--info)",
+    color: "var(--chart-2)",
   },
   operator: {
     color: "var(--muted-foreground)",
@@ -146,7 +146,7 @@ export function TerminalViewer({ execution }: TerminalViewerProps) {
               ) : isError ? (
                 <XCircle className="size-3.5 text-destructive" />
               ) : (
-                <CheckCircle2 className="size-3.5 text-success" />
+                <CheckCircle2 className="size-3.5 text-primary" />
               )}
             </span>
           </div>

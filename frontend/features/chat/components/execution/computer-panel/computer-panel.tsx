@@ -659,7 +659,7 @@ export function ComputerPanel({
               ) : isError ? (
                 <XCircle className="size-4 text-destructive" />
               ) : (
-                <CheckCircle2 className="size-4 text-success" />
+                <CheckCircle2 className="size-4 text-primary" />
               );
               const durationSec = frame.execution.duration_ms
                 ? (frame.execution.duration_ms / 1000).toFixed(1)

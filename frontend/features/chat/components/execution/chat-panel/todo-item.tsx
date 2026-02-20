@@ -13,7 +13,7 @@ export function TodoItem({ todo, index }: TodoItemProps) {
   const getStatusIcon = () => {
     switch (todo.status) {
       case "completed":
-        return <CheckCircle2 className="size-4 text-success flex-shrink-0" />;
+        return <CheckCircle2 className="size-4 text-primary flex-shrink-0" />;
       case "in_progress":
         return (
           <Loader2 className="size-4 text-primary flex-shrink-0 animate-spin" />

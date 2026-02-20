@@ -242,7 +242,7 @@ export function CollapsibleProjectItem({
                         setIsDeleteDialogOpen(true);
                       }}
                     >
-                      <Trash2 className="size-4" />
+                      <Trash2 className="size-4 text-destructive" />
                       <span>{t("project.delete")}</span>
                     </DropdownMenuItem>
                   </>

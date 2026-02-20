@@ -63,14 +63,14 @@ export function ConnectorDetail({ connector, onBack }: ConnectorDetailProps) {
                   isGithub
                     ? "bg-gradient-to-br from-muted to-background border border-border"
                     : "bg-muted/50 border border-border",
-                  isConnected && "ring-2 ring-success/40",
+                  isConnected && "ring-2 ring-primary/40",
                 )}
               >
                 <connector.icon
                   className={cn(
                     "size-8 transition-all duration-500",
                     isConnected
-                      ? "text-success"
+                      ? "text-primary"
                       : isGithub
                         ? "text-foreground"
                         : "text-muted-foreground",
@@ -83,7 +83,7 @@ export function ConnectorDetail({ connector, onBack }: ConnectorDetailProps) {
                     {connector.title}
                   </h3>
                   {isConnected && (
-                    <Badge className="bg-success/10 text-success border-success/20 px-1.5 py-0 h-4 rounded-full text-[8px] font-bold uppercase">
+                    <Badge className="bg-primary/10 text-primary border-primary/20 px-1.5 py-0 h-4 rounded-full text-[8px] font-bold uppercase">
                       {t("connectors.connected")}
                     </Badge>
                   )}
@@ -100,7 +100,7 @@ export function ConnectorDetail({ connector, onBack }: ConnectorDetailProps) {
               className={cn(
                 "h-10 px-6 rounded-full transition-all duration-300 font-bold text-sm",
                 isConnected
-                  ? "bg-success/10 text-success border border-success/30"
+                  ? "bg-primary/10 text-primary border border-primary/30"
                   : "bg-primary text-primary-foreground hover:bg-primary/90",
               )}
             >

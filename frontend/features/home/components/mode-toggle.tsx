@@ -72,20 +72,20 @@ export function ModeToggle({
               "relative flex flex-1 items-center justify-center rounded-full transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 focus-visible:ring-offset-background",
               showLabels ? "gap-2 px-3 py-2 text-sm font-medium" : "px-2 py-2",
               disabled && "cursor-not-allowed opacity-50",
-              isActive ? "text-primary" : "text-muted-foreground",
+              isActive ? "text-primary-foreground" : "text-muted-foreground",
             )}
           >
             {isActive ? (
               <motion.div
                 layoutId={`mode-toggle-highlight-${highlightId}`}
-                className="absolute inset-0 rounded-full bg-primary/15 shadow-sm"
+                className="absolute inset-0 rounded-full bg-primary shadow-sm"
                 transition={{ type: "spring", stiffness: 440, damping: 40 }}
               />
             ) : null}
             <Icon
               className={cn(
                 "relative z-10 size-4",
-                isActive ? "text-primary" : "text-muted-foreground",
+                isActive ? "text-primary-foreground" : "text-muted-foreground",
               )}
             />
             {showLabels ? (

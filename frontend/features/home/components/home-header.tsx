@@ -129,7 +129,7 @@ export function HomeHeader({
               <Button
                 variant="ghost"
                 size="sm"
-                className="mx-1 flex size-8 items-center justify-center rounded-full border border-primary/10 bg-primary/5 p-0 text-sm font-medium text-primary hover:bg-primary/10 hover:text-primary"
+                className="mx-1 flex size-8 items-center justify-center rounded-full border-0 bg-primary p-0 text-sm font-medium text-primary-foreground shadow-sm hover:bg-primary/90 hover:text-primary-foreground"
               >
                 <Coins className="size-3.5" />
               </Button>

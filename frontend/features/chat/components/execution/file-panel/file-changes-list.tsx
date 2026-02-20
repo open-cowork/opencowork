@@ -49,7 +49,7 @@ function ArtifactsSummaryBar({ summary, t }: ArtifactsSummaryBarProps) {
       <div className="flex flex-nowrap gap-2 min-w-0 overflow-hidden">
         {summary.added > 0 && (
           <Badge
-            color="success"
+            color="added"
             prefix="+"
             value={summary.added}
             label={t("artifacts.summary.added")}
@@ -58,7 +58,7 @@ function ArtifactsSummaryBar({ summary, t }: ArtifactsSummaryBarProps) {
 
         {summary.modified > 0 && (
           <Badge
-            color="info"
+            color="modified"
             value={summary.modified}
             label={t("artifacts.summary.modified")}
           />
@@ -66,7 +66,7 @@ function ArtifactsSummaryBar({ summary, t }: ArtifactsSummaryBarProps) {
 
         {summary.deleted > 0 && (
           <Badge
-            color="destructive"
+            color="deleted"
             prefix="-"
             value={summary.deleted}
             label={t("artifacts.summary.deleted")}
@@ -89,15 +89,15 @@ interface BadgeProps {
   value: number;
   label: string;
   prefix?: string;
-  color: "success" | "info" | "destructive" | "renamed";
+  color: "added" | "modified" | "deleted" | "renamed";
 }
 
 function Badge({ value, label, prefix = "", color }: BadgeProps) {
   const colorMap = {
-    success: "bg-success/10 text-success",
-    info: "bg-info/10 text-info",
-    destructive: "bg-destructive/10 text-destructive",
-    renamed: "bg-renamed/10 text-renamed",
+    added: "bg-primary/10 text-primary",
+    modified: "bg-chart-2/10 text-chart-2",
+    deleted: "bg-destructive/10 text-destructive",
+    renamed: "bg-chart-3/10 text-chart-3",
   };
 
   return (

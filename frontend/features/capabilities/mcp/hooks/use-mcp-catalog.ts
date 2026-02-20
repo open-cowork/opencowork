@@ -128,7 +128,7 @@ export function useMcpCatalog() {
             `${serverName} MCP ${t("library.mcpLibrary.toasts.enabled")}`,
             {
               icon: React.createElement(CheckCircle2, {
-                className: "size-4 text-success",
+                className: "size-4 text-primary",
               }),
             },
           );

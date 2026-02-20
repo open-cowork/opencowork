@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { motion } from "motion/react";
 import { ChatPanel } from "../execution/chat-panel/chat-panel";
 import { ArtifactsPanel } from "../execution/file-panel/artifacts-panel";
 import { ComputerPanel } from "../execution/computer-panel/computer-panel";
@@ -19,6 +20,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PanelHeader } from "@/components/shared/panel-header";
 import { ChatInput } from "../execution/chat-panel/chat-input";
 import { useT } from "@/lib/i18n/client";
+import { cn } from "@/lib/utils";
 import { SkeletonCircle, SkeletonItem } from "@/components/ui/skeleton-shimmer";
 
 interface ExecutionContainerProps {
@@ -140,6 +142,7 @@ export function ExecutionContainer({ sessionId }: ExecutionContainerProps) {
   const didManualSwitchRef = React.useRef(false);
   const prevDefaultRef = React.useRef<string>(defaultRightTab);
   const lastSessionIdRef = React.useRef<string | null>(null);
+  const executionTabsHighlightId = React.useId();
 
   // Reset right panel tab when session changes.
   React.useEffect(() => {
@@ -211,28 +214,72 @@ export function ExecutionContainer({ sessionId }: ExecutionContainerProps) {
     );
   }
 
-  // Desktop resizable layout
+  // Desktop resizable layout — sliding pill animation (same as home ModeToggle)
   const tabsSwitch = (
     <TabsList className="min-w-0 max-w-full overflow-hidden font-serif">
-      <TabsTrigger value="computer" className="!flex-none min-w-0 px-2">
-        <Monitor className="size-4" />
-        <span className="whitespace-nowrap">{t("mobile.computer")}</span>
-        {session?.status && isSessionActive ? (
-          <span
-            className="ml-1 inline-flex items-center"
-            aria-label={t("computer.status.live")}
-            title={t("computer.status.live")}
-          >
-            <span
-              aria-hidden
-              className="size-2 shrink-0 rounded-full bg-primary motion-safe:animate-pulse"
+      <TabsTrigger
+        value="computer"
+        asChild
+        className="!flex-none min-w-0 border-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-transparent"
+      >
+        <button
+          type="button"
+          className={cn(
+            "relative inline-flex h-[calc(100%-1px)] flex-1 min-w-0 items-center justify-center gap-1.5 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-offset-1",
+            rightTab === "computer"
+              ? "text-primary-foreground"
+              : "text-muted-foreground",
+          )}
+        >
+          {rightTab === "computer" ? (
+            <motion.div
+              layoutId={`execution-tabs-${executionTabsHighlightId}`}
+              className="absolute inset-0 rounded-md bg-primary shadow-sm"
+              transition={{ type: "spring", stiffness: 440, damping: 40 }}
             />
-          </span>
-        ) : null}
+          ) : null}
+          <Monitor className="relative z-10 size-4 shrink-0" />
+          <span className="relative z-10 truncate">{t("mobile.computer")}</span>
+          {session?.status && isSessionActive ? (
+            <span
+              className="relative z-10 ml-1 inline-flex shrink-0"
+              aria-label={t("computer.status.live")}
+              title={t("computer.status.live")}
+            >
+              <span
+                aria-hidden
+                className="size-2 rounded-full bg-primary-foreground/80 motion-safe:animate-pulse"
+              />
+            </span>
+          ) : null}
+        </button>
       </TabsTrigger>
-      <TabsTrigger value="artifacts" className="!flex-none min-w-0 px-2">
-        <Layers className="size-4" />
-        <span className="whitespace-nowrap">{t("mobile.artifacts")}</span>
+      <TabsTrigger
+        value="artifacts"
+        asChild
+        className="!flex-none min-w-0 border-transparent data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-transparent"
+      >
+        <button
+          type="button"
+          className={cn(
+            "relative inline-flex h-[calc(100%-1px)] flex-1 min-w-0 items-center justify-center gap-1.5 rounded-md px-2 py-1 text-sm font-medium whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:ring-offset-1",
+            rightTab === "artifacts"
+              ? "text-primary-foreground"
+              : "text-muted-foreground",
+          )}
+        >
+          {rightTab === "artifacts" ? (
+            <motion.div
+              layoutId={`execution-tabs-${executionTabsHighlightId}`}
+              className="absolute inset-0 rounded-md bg-primary shadow-sm"
+              transition={{ type: "spring", stiffness: 440, damping: 40 }}
+            />
+          ) : null}
+          <Layers className="relative z-10 size-4 shrink-0" />
+          <span className="relative z-10 truncate">
+            {t("mobile.artifacts")}
+          </span>
+        </button>
       </TabsTrigger>
     </TabsList>
   );
@@ -274,6 +321,13 @@ export function ExecutionContainer({ sessionId }: ExecutionContainerProps) {
               }}
               className="h-full min-h-0 flex flex-col"
             >
+              <PanelHeader
+                content={
+                  <div className="flex min-w-0 items-center overflow-hidden">
+                    {tabsSwitch}
+                  </div>
+                }
+              />
               <div className="flex-1 min-h-0 overflow-hidden">
                 <TabsContent
                   value="computer"
@@ -283,7 +337,7 @@ export function ExecutionContainer({ sessionId }: ExecutionContainerProps) {
                     sessionId={sessionId}
                     sessionStatus={session?.status}
                     browserEnabled={browserEnabled}
-                    headerAction={tabsSwitch}
+                    hideHeader
                   />
                 </TabsContent>
                 <TabsContent
@@ -296,7 +350,7 @@ export function ExecutionContainer({ sessionId }: ExecutionContainerProps) {
                     }
                     sessionId={sessionId}
                     sessionStatus={session?.status}
-                    headerAction={tabsSwitch}
+                    hideHeader
                   />
                 </TabsContent>
               </div>
