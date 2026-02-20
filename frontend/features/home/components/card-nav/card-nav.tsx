@@ -244,6 +244,17 @@ export function CardNav({
       const otherEnabledInstalls = pluginInstalls.filter(
         (install) => install.enabled && install.id !== installId,
       );
+      const targetInstall = pluginInstalls.find(
+        (install) => install.id === installId,
+      );
+      const targetPlugin = targetInstall
+        ? plugins.find((plugin) => plugin.id === targetInstall.plugin_id)
+        : null;
+      const targetName =
+        targetPlugin?.name ||
+        t("cardNav.fallbackPreset", {
+          id: targetInstall?.plugin_id ?? installId,
+        });
       const previousInstalls = pluginInstalls;
       try {
         if (shouldEnable && otherEnabledInstalls.length > 0) {
@@ -273,9 +284,13 @@ export function CardNav({
         );
         if (shouldEnable) {
           playInstallSound();
-          if (otherEnabledInstalls.length > 0) {
-            toast.warning(t("library.pluginsManager.toasts.exclusiveEnabled"));
-          }
+          const extraNote =
+            otherEnabledInstalls.length > 0
+              ? ` ${t("library.pluginsManager.toasts.exclusiveEnabled")}`
+              : "";
+          toast.success(
+            `${targetName} ${t("library.pluginsManager.toasts.enabled")}${extraNote}`,
+          );
         }
       } catch (error) {
         console.error("[CardNav] Failed to toggle Plugin:", error);
@@ -295,7 +310,7 @@ export function CardNav({
         setPluginInstalls(previousInstalls);
       }
     },
-    [pluginInstalls, t],
+    [pluginInstalls, plugins, t],
   );
 
   // Batch toggle all MCPs

@@ -67,10 +67,13 @@ export function usePluginCatalog() {
               : install,
           ),
         ]);
-        toast.success(t("library.pluginsManager.toasts.installed"));
-        if (previouslyEnabled.length > 0) {
-          toast.warning(t("library.pluginsManager.toasts.exclusiveEnabled"));
-        }
+        const installNote =
+          previouslyEnabled.length > 0
+            ? ` ${t("library.pluginsManager.toasts.exclusiveEnabled")}`
+            : "";
+        toast.success(
+          `${t("library.pluginsManager.toasts.installed")}${installNote}`,
+        );
         playInstallSound();
       } catch (error) {
         console.error("[Plugins] install failed:", error);
@@ -160,14 +163,15 @@ export function usePluginCatalog() {
         );
         toast.success(
           enabled
-            ? `${pluginName} ${t("library.pluginsManager.toasts.enabled")}`
+            ? `${pluginName} ${t("library.pluginsManager.toasts.enabled")}${
+                otherEnabled.length > 0
+                  ? ` ${t("library.pluginsManager.toasts.exclusiveEnabled")}`
+                  : ""
+              }`
             : `${pluginName} ${t("library.pluginsManager.toasts.disabled")}`,
         );
         if (enabled) {
           playInstallSound();
-          if (otherEnabled.length > 0) {
-            toast.warning(t("library.pluginsManager.toasts.exclusiveEnabled"));
-          }
         }
       } catch (error) {
         console.error("[Plugins] setEnabled failed:", error);
