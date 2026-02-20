@@ -12,10 +12,17 @@ import { CapabilitiesLibraryHeader } from "@/features/capabilities/components/ca
 import { useCapabilityViews } from "@/features/capabilities/hooks/use-capability-views";
 import {
   consumePendingCapabilityView,
-  getLastCapabilityView,
   setLastCapabilityView,
 } from "@/features/capabilities/lib/capability-view-state";
 import { useT } from "@/lib/i18n/client";
+
+// TODO: 清理无用代码，对这个路由方法进行重构；
+
+// 需要验证：
+// 1. 从首页的卡片点击进入详情页，再从详情页返回首页，是否能正确显示列表页；
+// 2. 从侧边栏进入能力页面，再进入详情页，点击返回按钮，是否能正确显示列表页；
+
+// 参数解释：view=list 是 mobile 下的能力选择界面，view=xxxx 是具体的能力详情页；
 
 export function CapabilitiesPageClient() {
   const { t } = useT("translation");
@@ -24,6 +31,7 @@ export function CapabilitiesPageClient() {
   const pathname = usePathname();
   const router = useRouter();
   const viewFromUrl = searchParams.get("view");
+  const fromHome = searchParams.get("from") === "home";
   const [activeViewId, setActiveViewId] = React.useState<string>("skills");
   const [isDesktop, setIsDesktop] = React.useState(false);
   const [isMobileDetailVisible, setIsMobileDetailVisible] =
@@ -37,11 +45,18 @@ export function CapabilitiesPageClient() {
       typeof window !== "undefined" &&
       !window.matchMedia("(min-width: 768px)").matches;
 
+    if (viewFromUrl === "list") {
+      setActiveViewId("list");
+      setEnteredDetailViaView(false);
+      if (isMobile) setIsMobileDetailVisible(false);
+      return;
+    }
+
     if (viewFromUrl && views.some((view) => view.id === viewFromUrl)) {
       setActiveViewId(viewFromUrl);
       if (isMobile) {
         setIsMobileDetailVisible(true);
-        setEnteredDetailViaView(true);
+        setEnteredDetailViaView(fromHome); // back goes to home only when ?from=home
       }
       return;
     }
@@ -51,38 +66,33 @@ export function CapabilitiesPageClient() {
       setActiveViewId(pendingViewId);
       if (isMobile) {
         setIsMobileDetailVisible(true);
-        setEnteredDetailViaView(true);
+        setEnteredDetailViaView(false); // pending used by other entry points (e.g. repo-dialog), not home
       }
       return;
     }
 
-    const lastViewId = getLastCapabilityView();
-    if (lastViewId && views.some((view) => view.id === lastViewId)) {
-      setActiveViewId(lastViewId);
-      return;
-    }
-
-    const defaultViewId =
-      views.find((view) => view.id === "skills")?.id ??
-      views[0]?.id ??
-      "skills";
-    setActiveViewId(defaultViewId);
-  }, [views, viewFromUrl]);
+    // No view in URL and no pending: from sidebar → go to options list (?view=list)
+    setActiveViewId("list");
+    setEnteredDetailViaView(false);
+    if (isMobile) setIsMobileDetailVisible(false);
+  }, [views, viewFromUrl, fromHome]);
 
   React.useEffect(() => {
-    if (!activeViewId) return;
+    if (!activeViewId || activeViewId === "list") return;
     setLastCapabilityView(activeViewId);
   }, [activeViewId]);
 
   // Only sync URL when there was no valid view in URL (we used pending/last/default).
-  // Do not overwrite an existing ?view= — that causes flicker (URL gets overwritten before state updates).
+  // Strip from=home on internal nav so back-from-list stays correct.
   React.useEffect(() => {
     if (!activeViewId || !views.length) return;
     const urlHasValidView =
-      viewFromUrl && views.some((v) => v.id === viewFromUrl);
+      viewFromUrl === "list" ||
+      (viewFromUrl && views.some((v) => v.id === viewFromUrl));
     if (urlHasValidView) return;
     const params = new URLSearchParams(searchParams.toString());
     params.set("view", activeViewId);
+    params.delete("from");
     router.replace(`${pathname}?${params.toString()}`, { scroll: false });
   }, [activeViewId, pathname, router, searchParams, viewFromUrl, views]);
 
@@ -112,7 +122,9 @@ export function CapabilitiesPageClient() {
     return () => mediaQuery.removeListener(handleChange);
   }, []);
 
+  const isListView = activeViewId === "list";
   const activeView = React.useMemo(() => {
+    if (activeViewId === "list") return undefined;
     return views.find((view) => view.id === activeViewId) ?? views[0];
   }, [views, activeViewId]);
 
@@ -124,6 +136,7 @@ export function CapabilitiesPageClient() {
       setActiveViewId(viewId);
       const params = new URLSearchParams(searchParams.toString());
       params.set("view", viewId);
+      params.delete("from");
       router.replace(`${pathname}?${params.toString()}`, { scroll: false });
       if (!isDesktop) {
         setIsMobileDetailVisible(true);
@@ -154,15 +167,25 @@ export function CapabilitiesPageClient() {
     : t("library.title");
   const headerSubtitle = showMobileBack
     ? (activeView?.description ?? undefined)
-    : t("library.subtitle");
+    : isListView
+      ? undefined
+      : t("library.subtitle");
   const backLabel = t("library.mobile.back");
   const handleMobileBack = React.useCallback(() => {
     if (enteredDetailViaView) {
+      // Came from home (card click): back goes to home
       router.back();
     } else {
+      // Default: back goes to options list (?view=list)
       setIsMobileDetailVisible(false);
+      setEnteredDetailViaView(false);
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("view", "list");
+      params.delete("from");
+      router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+      setActiveViewId("list");
     }
-  }, [router, enteredDetailViaView]);
+  }, [pathname, router, searchParams, enteredDetailViaView]);
   const mobileBackButton = showMobileBack ? (
     <Button
       type="button"
@@ -188,12 +211,12 @@ export function CapabilitiesPageClient() {
       <div className="hidden min-h-0 flex-1 md:grid md:grid-cols-[240px_minmax(0,1fr)]">
         <CapabilitiesSidebar
           views={views}
-          activeViewId={activeView?.id}
+          activeViewId={isListView ? undefined : activeView?.id}
           onSelect={handleSelectView}
         />
 
         <main className="min-h-0 overflow-hidden">
-          {isDesktop
+          {isDesktop && !isListView
             ? renderActiveView("desktop", { isMobileDetail: false })
             : null}
         </main>
@@ -214,7 +237,7 @@ export function CapabilitiesPageClient() {
           <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
             <CapabilitiesSidebar
               views={views}
-              activeViewId={activeView?.id}
+              activeViewId={isListView ? undefined : activeView?.id}
               onSelect={handleSelectView}
               variant="mobile"
             />

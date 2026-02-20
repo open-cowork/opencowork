@@ -26,7 +26,6 @@ import { useAppShell } from "@/components/shared/app-shell-context";
 import { cn } from "@/lib/utils";
 import { playMcpInstallSound } from "@/lib/utils/sound";
 import { useT } from "@/lib/i18n/client";
-import { setPendingCapabilityView } from "@/features/capabilities/lib/capability-view-state";
 import { toast } from "sonner";
 import { AlertTriangle } from "lucide-react";
 import { SkeletonText } from "@/components/ui/skeleton-shimmer";
@@ -428,8 +427,7 @@ export function CardNav({
 
   const navigateToCapabilityView = useCallback(
     (viewId: CapabilityViewId) => {
-      setPendingCapabilityView(viewId);
-      router.push(`/${lng}/capabilities?view=${viewId}`);
+      router.push(`/${lng}/capabilities?view=${viewId}&from=home`);
     },
     [lng, router],
   );
