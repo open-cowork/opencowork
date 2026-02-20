@@ -98,6 +98,7 @@ export function ChatPanel({
 
   // Message management hook
   const {
+    messages,
     displayMessages,
     isLoadingHistory,
     showTypingIndicator,
@@ -235,6 +236,18 @@ export function ChatPanel({
       }
     },
     [refreshTasks, session?.session_id, t, updateSession],
+  );
+
+  const userPromptHistory = React.useMemo(
+    () =>
+      messages
+        .filter(
+          (message) =>
+            message.role === "user" && typeof message.content === "string",
+        )
+        .map((message) => (message.content as string).trim())
+        .filter((content) => content.length > 0),
+    [messages],
   );
 
   // Handle edit message - load content into input
@@ -400,6 +413,7 @@ export function ChatPanel({
         canCancel={isSessionCancelable || isCancelling}
         isCancelling={isCancelling}
         disabled={!session?.session_id || hasActiveUserInput || isCancelling}
+        history={userPromptHistory}
       />
 
       <RenameTaskDialog

@@ -27,6 +27,7 @@ interface ChatInputProps {
   canCancel?: boolean;
   isCancelling?: boolean;
   disabled?: boolean;
+  history?: string[];
 }
 
 export interface ChatInputRef {
@@ -46,6 +47,7 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
       canCancel = false,
       isCancelling = false,
       disabled = false,
+      history = [],
     },
     ref,
   ) => {
@@ -53,26 +55,34 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
     const [value, setValue] = useState("");
     const [attachments, setAttachments] = useState<InputFile[]>([]);
     const [isUploading, setIsUploading] = useState(false);
+    const [historyIndex, setHistoryIndex] = useState(-1);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+    const syncTextareaValue = useCallback((nextValue: string) => {
+      const textarea = textareaRef.current;
+      if (!textarea) return;
+      textarea.focus();
+      textarea.setSelectionRange(nextValue.length, nextValue.length);
+      textarea.style.height = "auto";
+      textarea.style.height = `${Math.min(textarea.scrollHeight, 160)}px`;
+    }, []);
+
+    const applyValue = useCallback(
+      (nextValue: string) => {
+        setValue(nextValue);
+        requestAnimationFrame(() => {
+          syncTextareaValue(nextValue);
+        });
+      },
+      [syncTextareaValue],
+    );
 
     // Expose methods to parent component
     useImperativeHandle(ref, () => ({
       setValueAndFocus: (newValue: string) => {
-        setValue(newValue);
-        // Focus textarea, set cursor to end, and adjust height
-        setTimeout(() => {
-          if (textareaRef.current) {
-            textareaRef.current.focus();
-            textareaRef.current.setSelectionRange(
-              newValue.length,
-              newValue.length,
-            );
-            // Auto-resize textarea for new content
-            textareaRef.current.style.height = "auto";
-            textareaRef.current.style.height = `${Math.min(textareaRef.current.scrollHeight, 160)}px`;
-          }
-        }, 0);
+        setHistoryIndex(-1);
+        applyValue(newValue);
       },
     }));
 
@@ -90,6 +100,7 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
 
       const content = value;
       const currentAttachments = [...attachments];
+      setHistoryIndex(-1);
       setValue(""); // Clear immediately
       setAttachments([]);
       // Reset textarea height
@@ -106,9 +117,48 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
       }
     }, [value]);
 
+    useEffect(() => {
+      if (historyIndex !== -1 && historyIndex >= history.length) {
+        setHistoryIndex(-1);
+      }
+    }, [history, historyIndex]);
+
     const handleKeyDown = useCallback(
       (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (slashAutocomplete.handleKeyDown(e)) return;
+        if (
+          disabled ||
+          isComposingRef.current ||
+          e.nativeEvent.isComposing ||
+          e.altKey ||
+          e.ctrlKey ||
+          e.metaKey ||
+          e.shiftKey
+        ) {
+          return;
+        }
+        if (e.key === "ArrowUp" || e.key === "ArrowDown") {
+          if (history.length === 0) return;
+          if (e.key === "ArrowUp") {
+            e.preventDefault();
+            const nextIndex =
+              historyIndex === -1
+                ? history.length - 1
+                : Math.max(0, historyIndex - 1);
+            setHistoryIndex(nextIndex);
+            applyValue(history[nextIndex] ?? "");
+            return;
+          }
+          if (e.key === "ArrowDown") {
+            if (historyIndex === -1) return;
+            e.preventDefault();
+            const nextIndex =
+              historyIndex >= history.length - 1 ? -1 : historyIndex + 1;
+            setHistoryIndex(nextIndex);
+            applyValue(nextIndex === -1 ? "" : (history[nextIndex] ?? ""));
+            return;
+          }
+        }
         // Only send on Enter if not composing (IME input in progress)
         if (e.key === "Enter") {
           if (e.shiftKey) {
@@ -126,7 +176,16 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
           }
         }
       },
-      [value, attachments, handleSend, slashAutocomplete],
+      [
+        value,
+        attachments,
+        handleSend,
+        slashAutocomplete,
+        disabled,
+        historyIndex,
+        history,
+        applyValue,
+      ],
     );
 
     const handleCompositionStart = useCallback(() => {
@@ -279,7 +338,12 @@ export const ChatInput = forwardRef<ChatInputRef, ChatInputProps>(
           <textarea
             ref={textareaRef}
             value={value}
-            onChange={(e) => setValue(e.target.value)}
+            onChange={(e) => {
+              setValue(e.target.value);
+              if (historyIndex !== -1) {
+                setHistoryIndex(-1);
+              }
+            }}
             onKeyDown={handleKeyDown}
             onCompositionStart={handleCompositionStart}
             onCompositionEnd={handleCompositionEnd}
