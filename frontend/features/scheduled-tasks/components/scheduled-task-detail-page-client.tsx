@@ -199,7 +199,7 @@ export function ScheduledTaskDetailPageClient({ taskId }: { taskId: string }) {
 
   return (
     <>
-      <header className="flex h-16 shrink-0 items-center justify-between border-b border-border/50 bg-background/50 px-6 backdrop-blur-sm sticky top-0 z-10">
+      <header className="flex h-16 shrink-0 items-center justify-between border-b border-border/50 bg-background/50 px-6 backdrop-blur-sm sticky top-0 z-10 font-serif">
         <div className="flex items-center gap-3 min-w-0">
           <Button
             variant="ghost"

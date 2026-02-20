@@ -71,7 +71,7 @@ export function HomeHeader({
                 title={t("header.switchModel")}
                 disabled={!isSelectorReady}
               >
-                <span className="min-w-0 max-w-[220px] truncate text-sm font-medium">
+                <span className="min-w-0 max-w-[220px] truncate text-sm font-medium font-serif">
                   {effectiveModel || t("status.loading")}
                 </span>
                 <ChevronDown className="size-3.5 text-muted-foreground" />

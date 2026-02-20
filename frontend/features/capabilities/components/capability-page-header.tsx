@@ -25,7 +25,7 @@ export function CapabilityPageHeader({
   return (
     <header
       className={cn(
-        "sticky top-0 z-10 flex h-16 items-center justify-between border-b border-border/50 bg-background/80 px-4 backdrop-blur-sm sm:px-6",
+        "sticky top-0 z-10 flex h-16 items-center justify-between border-b border-border/50 bg-background/80 px-4 backdrop-blur-sm sm:px-6 font-serif",
         className,
       )}
     >

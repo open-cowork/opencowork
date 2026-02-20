@@ -71,7 +71,7 @@ function RightPanelSkeleton() {
       <PanelHeader
         content={
           <Tabs defaultValue="computer" className="min-w-0">
-            <TabsList className="min-w-0 max-w-full overflow-hidden">
+            <TabsList className="min-w-0 max-w-full overflow-hidden font-serif">
               <TabsTrigger value="computer" className="!flex-none min-w-0 px-2">
                 <Monitor className="size-4" />
                 <span className="whitespace-nowrap">
@@ -213,7 +213,7 @@ export function ExecutionContainer({ sessionId }: ExecutionContainerProps) {
 
   // Desktop resizable layout
   const tabsSwitch = (
-    <TabsList className="min-w-0 max-w-full overflow-hidden">
+    <TabsList className="min-w-0 max-w-full overflow-hidden font-serif">
       <TabsTrigger value="computer" className="!flex-none min-w-0 px-2">
         <Monitor className="size-4" />
         <span className="whitespace-nowrap">{t("mobile.computer")}</span>

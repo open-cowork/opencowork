@@ -35,7 +35,7 @@ export function ChatHeader({ model, onModelChange, title }: ChatHeaderProps) {
           {title ? (
             <>
               <div className="hidden h-4 w-px bg-border sm:block" />
-              <h1 className="max-w-[140px] truncate text-sm font-medium sm:max-w-md sm:text-base">
+              <h1 className="max-w-[140px] truncate text-sm font-medium sm:max-w-md sm:text-base font-serif">
                 {title}
               </h1>
             </>

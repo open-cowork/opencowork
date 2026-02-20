@@ -28,7 +28,7 @@ export function PageHeaderShell({
   return (
     <header
       className={cn(
-        "flex h-14 min-h-14 shrink-0 items-center justify-between border-b border-border/60 bg-background/90 px-4 sm:px-6",
+        "flex h-14 min-h-14 shrink-0 items-center justify-between border-b border-border/60 bg-background/90 px-4 sm:px-6 font-serif",
         sticky && "sticky top-0 z-20 backdrop-blur-sm",
         className,
       )}

@@ -53,8 +53,8 @@ export function CapabilitiesSidebar({
         onClick={() => handleClick(view.id)}
         className={cn(
           mobile
-            ? "flex items-center gap-1.5 whitespace-nowrap rounded-md px-2 py-2 text-sm"
-            : "flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-left text-sm",
+            ? "flex items-center gap-1.5 whitespace-nowrap rounded-md px-2 py-2 text-sm font-serif"
+            : "flex w-full items-center gap-2.5 rounded-md px-3 py-2 text-left text-sm font-serif",
           isActive
             ? "bg-muted text-foreground"
             : "text-muted-foreground hover:bg-muted/60 hover:text-foreground",

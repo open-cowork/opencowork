@@ -25,7 +25,7 @@ export function ModelSelector({ model, onChange }: ModelSelectorProps) {
       <DropdownMenuTrigger asChild>
         <Button variant="ghost" className="gap-2">
           <span className="text-base">{model.icon}</span>
-          <span className="font-medium">{model.name}</span>
+          <span className="font-medium font-serif">{model.name}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-72">

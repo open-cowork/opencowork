@@ -77,7 +77,7 @@ export function MobileExecutionView({
             <PanelLeft className="size-4" />
           </button>
 
-          <div className="relative min-w-0 flex-1 rounded-full border border-border/60 bg-muted/60 p-1">
+          <div className="relative min-w-0 flex-1 rounded-full border border-border/60 bg-muted/60 p-1 font-serif">
             <div
               className={cn(
                 "pointer-events-none absolute inset-y-1 left-1 w-[calc((100%-0.5rem)/3)] rounded-full border border-border/70 bg-background shadow-sm transition-[transform,opacity] duration-300 ease-out",
