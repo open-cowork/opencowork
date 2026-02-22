@@ -400,10 +400,11 @@
     "viewer": {
       "loadingEngine": "Chargement du moteur de prévisualisation...",
       "loadingDoc": "Lecture du document...",
+      "parseError": "Impossible d'analyser le fichier Excalidraw",
       "fetchError": "Échec de la récupération du contenu du document",
       "retry": "Réessayer",
       "selectFile": "Veuillez sélectionner un fichier à droite pour la prévisualisation",
-      "supportedFormats": "Supporte PDF, documents Office, formats d'image courants et fichiers XMind",
+      "supportedFormats": "Supporte les PDF, documents Office, formats d'image courants, fichiers XMind et fichiers .excalidraw",
       "processing": "Traitement du fichier",
       "notSupported": "Prévisualisation non supportée pour ce format",
       "openInNewWindow": "Ouvrir dans une nouvelle fenêtre",

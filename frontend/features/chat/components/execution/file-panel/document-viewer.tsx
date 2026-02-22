@@ -24,6 +24,8 @@ import { MarkdownCode, MarkdownPre } from "@/components/shared/markdown-code";
 import { SyntaxHighlighter, oneDark, oneLight } from "@/lib/markdown/prism";
 import { SkeletonItem } from "@/components/ui/skeleton-shimmer";
 import rehypeKatex from "rehype-katex";
+import type { ExcalidrawInitialDataState } from "@excalidraw/excalidraw/types";
+import type { ExcalidrawViewerClientProps } from "./excalidraw-viewer-client";
 
 const dispatchCloseViewer = () => {
   if (typeof window === "undefined") return;
@@ -32,6 +34,21 @@ const dispatchCloseViewer = () => {
 
 const DocViewer = dynamic<DocViewerProps>(
   () => import("./doc-viewer-client").then((m) => m.DocViewerClient),
+  {
+    ssr: false,
+    loading: () => {
+      // eslint-disable-next-line react-hooks/rules-of-hooks
+      const { t } = useT("translation");
+      return (
+        <DocumentViewerSkeleton label={t("artifacts.viewer.loadingEngine")} />
+      );
+    },
+  },
+);
+
+const ExcalidrawViewer = dynamic<ExcalidrawViewerClientProps>(
+  () =>
+    import("./excalidraw-viewer-client").then((m) => m.ExcalidrawViewerClient),
   {
     ssr: false,
     loading: () => {
@@ -198,6 +215,7 @@ function DocumentViewerOverlaySkeleton({ label }: { label: string }) {
 
 const DEFAULT_TEXT_LANGUAGE = "text";
 const NO_SOURCE_ERROR = "NO_SOURCE";
+const EXCALIDRAW_PARSE_ERROR = "EXCALIDRAW_PARSE_ERROR";
 const XMIND_SCRIPT_SRC =
   "https://unpkg.com/xmind-embed-viewer/dist/umd/xmind-embed-viewer.js";
 
@@ -352,6 +370,41 @@ const isSameOriginUrl = (url: string) => {
   }
 };
 
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === "object" && value !== null;
+
+const parseExcalidrawScene = (content: string): ExcalidrawInitialDataState => {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(content);
+  } catch {
+    throw new Error(EXCALIDRAW_PARSE_ERROR);
+  }
+
+  if (!isRecord(parsed) || !Array.isArray(parsed.elements)) {
+    throw new Error(EXCALIDRAW_PARSE_ERROR);
+  }
+
+  const scene: ExcalidrawInitialDataState = {
+    elements: parsed.elements as ExcalidrawInitialDataState["elements"],
+  };
+
+  if (isRecord(parsed.appState)) {
+    scene.appState = parsed.appState as ExcalidrawInitialDataState["appState"];
+  }
+
+  if (isRecord(parsed.files)) {
+    scene.files = parsed.files as ExcalidrawInitialDataState["files"];
+  }
+
+  if (Array.isArray(parsed.libraryItems)) {
+    scene.libraryItems =
+      parsed.libraryItems as ExcalidrawInitialDataState["libraryItems"];
+  }
+
+  return scene;
+};
+
 const extractExtension = (file?: FileNode) => {
   if (!file) return "";
   const sources = [file.name, file.path, file.url].filter(Boolean) as string[];
@@ -375,6 +428,9 @@ const getTextLanguage = (ext: string, mime?: string | null) => {
   }
   return undefined;
 };
+
+const isExcalidrawFile = (ext: string, mime?: string | null) =>
+  ext === "excalidraw" || /excalidraw/i.test(mime ?? "");
 
 interface ViewerToolbarProps {
   file: FileNode;
@@ -781,6 +837,146 @@ const MarkdownDocumentViewer = ({
   );
 };
 
+const ExcalidrawDocumentViewer = ({
+  file,
+  resolvedUrl,
+  ensureFreshFile,
+}: {
+  file: FileNode;
+  resolvedUrl?: string;
+  ensureFreshFile?: (file: FileNode) => Promise<FileNode | undefined>;
+}) => {
+  const { t } = useT("translation");
+  const { resolvedTheme } = useTheme();
+  const { state, refetch } = useFileTextContent({
+    file,
+    fallbackUrl: resolvedUrl,
+  });
+
+  const parsedSceneState = React.useMemo(() => {
+    if (state.status !== "success") {
+      return { status: "idle" as const };
+    }
+
+    try {
+      return {
+        status: "success" as const,
+        scene: parseExcalidrawScene(state.content),
+      };
+    } catch (error) {
+      return {
+        status: "error" as const,
+        message: error instanceof Error ? error.message : undefined,
+      };
+    }
+  }, [state]);
+
+  const handleDownload = async () => {
+    const refreshed = ensureFreshFile ? await ensureFreshFile(file) : file;
+    const url = ensureAbsoluteUrl(refreshed?.url ?? resolvedUrl);
+    if (!url) return;
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = refreshed?.name || refreshed?.path || "document";
+    link.click();
+  };
+
+  if (state.status === "idle" || state.status === "loading") {
+    return <DocumentViewerSkeleton label={t("artifacts.viewer.loadingDoc")} />;
+  }
+
+  if (state.status === "error") {
+    const isSourceError = state.code === "NO_SOURCE";
+    return (
+      <div className={VIEW_CLASSNAME}>
+        <StatusLayout
+          icon={File}
+          title={
+            isSourceError
+              ? t("artifacts.viewer.notSupported")
+              : t("artifacts.viewer.fetchError")
+          }
+          desc={isSourceError ? file.name : state.message}
+          action={
+            !isSourceError && (
+              <Button
+                variant="outline"
+                size="sm"
+                className="mt-4"
+                onClick={() => {
+                  if (ensureFreshFile) {
+                    void ensureFreshFile(file);
+                    return;
+                  }
+                  refetch();
+                }}
+              >
+                {t("artifacts.viewer.retry")}
+              </Button>
+            )
+          }
+        />
+      </div>
+    );
+  }
+
+  if (parsedSceneState.status === "error") {
+    const isParseError = parsedSceneState.message === EXCALIDRAW_PARSE_ERROR;
+
+    return (
+      <div className={VIEW_CLASSNAME}>
+        <StatusLayout
+          icon={File}
+          title={
+            isParseError
+              ? t("artifacts.viewer.parseError")
+              : t("artifacts.viewer.fetchError")
+          }
+          desc={file.name}
+          action={
+            <Button
+              variant="outline"
+              size="sm"
+              className="mt-4"
+              onClick={() => {
+                refetch();
+              }}
+            >
+              {t("artifacts.viewer.retry")}
+            </Button>
+          }
+        />
+      </div>
+    );
+  }
+
+  if (parsedSceneState.status !== "success") {
+    return null;
+  }
+
+  return (
+    <div
+      className={cn(
+        VIEW_CLASSNAME,
+        "flex min-w-0 flex-col rounded-xl border bg-card shadow-sm",
+      )}
+    >
+      <DocumentViewerToolbar
+        file={file}
+        subtitle="EXCALIDRAW"
+        resolvedUrl={resolvedUrl}
+        onDownload={handleDownload}
+      />
+      <div className="flex-1 min-h-0 overflow-hidden bg-background">
+        <ExcalidrawViewer
+          initialData={parsedSceneState.scene}
+          theme={resolvedTheme === "dark" ? "dark" : "light"}
+        />
+      </div>
+    </div>
+  );
+};
+
 const XMindDocumentViewer = ({
   file,
   resolvedUrl,
@@ -979,6 +1175,7 @@ const DocumentViewerComponent = ({
   const extension = extractExtension(file);
   const docType = DOC_VIEWER_TYPE_MAP[extension];
   const textLanguage = getTextLanguage(extension, file.mimeType);
+  const excalidrawFile = isExcalidrawFile(extension, file.mimeType);
 
   const handleDownload = async () => {
     const refreshed = ensureFreshFile ? await ensureFreshFile(file) : file;
@@ -1017,6 +1214,16 @@ const DocumentViewerComponent = ({
   if (extension === "xmind") {
     return (
       <XMindDocumentViewer
+        file={file}
+        resolvedUrl={resolvedUrl}
+        ensureFreshFile={ensureFreshFile}
+      />
+    );
+  }
+
+  if (excalidrawFile) {
+    return (
+      <ExcalidrawDocumentViewer
         file={file}
         resolvedUrl={resolvedUrl}
         ensureFreshFile={ensureFreshFile}

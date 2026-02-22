@@ -401,10 +401,11 @@
     "viewer": {
       "loadingEngine": "Vorschau-Engine wird geladen...",
       "loadingDoc": "Dokument wird gelesen...",
+      "parseError": "Excalidraw-Datei konnte nicht geparst werden",
       "fetchError": "Dokumentinhalt konnte nicht abgerufen werden",
       "retry": "Wiederholen",
       "selectFile": "Bitte wähle eine Datei rechts zur Vorschau",
-      "supportedFormats": "Unterstützt PDF, Office-Dokumente, gängige Bildformate und XMind-Dateien",
+      "supportedFormats": "Unterstützt PDF, Office-Dokumente, gängige Bildformate, XMind-Dateien und .excalidraw-Dateien",
       "processing": "Dateiverarbeitung",
       "notSupported": "Vorschau für dieses Format nicht unterstützt",
       "openInNewWindow": "In neuem Fenster öffnen",
