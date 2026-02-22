@@ -180,6 +180,18 @@ export function ChatPanel({
     touchTask,
   ]);
 
+  React.useEffect(() => {
+    if (!session?.session_id) return;
+    const syncedTitle = session.title?.trim();
+    if (!syncedTitle) return;
+
+    // Keep sidebar task title in sync with panel subtitle timing.
+    touchTask(session.session_id, {
+      title: syncedTitle,
+      bumpToTop: false,
+    });
+  }, [session?.session_id, session?.title, touchTask]);
+
   const isSessionCancelable =
     session?.status === "running" || session?.status === "pending";
 
@@ -312,6 +324,11 @@ export function ChatPanel({
   const hasBrowser = Boolean(
     session?.config_snapshot?.browser_enabled || statePatch?.browser?.enabled,
   );
+  const headerTitle =
+    session?.task_name?.trim() ||
+    session?.new_message?.title?.trim() ||
+    t("chat.executionTitle");
+  const headerDescription = session?.title?.trim() || t("chat.emptyStateDesc");
   const contentPaddingClass = isRightPanelCollapsed ? "px-[20%]" : "px-4";
 
   return (
@@ -320,12 +337,8 @@ export function ChatPanel({
       {!hideHeader ? (
         <PanelHeader
           icon={MessageSquare}
-          title={
-            session?.task_name ||
-            session?.new_message?.title ||
-            t("chat.executionTitle")
-          }
-          description={session?.title || t("chat.emptyStateDesc")}
+          title={headerTitle}
+          description={headerDescription}
           onIconClick={onIconClick}
           action={
             session?.session_id || onToggleRightPanel ? (
