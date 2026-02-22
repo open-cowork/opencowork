@@ -36,6 +36,7 @@ const TOUR_STEPS: TourStep[] = [
     titleKey: "onboarding.steps.newTask.title",
     descriptionKey: "onboarding.steps.newTask.description",
     selector: '[data-onboarding="sidebar-new-task"]',
+    path: "/home",
     confineToSidebar: true,
     padding: 6,
   },
@@ -58,6 +59,8 @@ const TOUR_STEPS: TourStep[] = [
     titleKey: "onboarding.steps.capabilities.title",
     descriptionKey: "onboarding.steps.capabilities.description",
     selector: '[data-onboarding="sidebar-capabilities"]',
+    path: "/capabilities",
+    viewId: "skills",
     confineToSidebar: true,
     padding: 6,
   },
@@ -89,9 +92,9 @@ const TOUR_STEPS: TourStep[] = [
     id: "quick-menu",
     titleKey: "onboarding.steps.quickMenu.title",
     descriptionKey: "onboarding.steps.quickMenu.description",
-    selector: '[data-onboarding="sidebar-quick-menu"]',
+    selector: '[data-onboarding="sidebar-footer-bottom"]',
     confineToSidebar: true,
-    padding: 6,
+    padding: 0,
   },
 ];
 
@@ -148,6 +151,19 @@ export function OnboardingTour({
     if (!open) return;
     setStepIndex(0);
   }, [open, runId]);
+
+  const goPrev = React.useCallback(() => {
+    setStepIndex((current) => Math.max(0, current - 1));
+  }, []);
+
+  const goNext = React.useCallback(() => {
+    if (isLastStep) {
+      onClose(true);
+      return;
+    }
+
+    setStepIndex((current) => Math.min(current + 1, TOUR_STEPS.length - 1));
+  }, [isLastStep, onClose]);
 
   React.useEffect(() => {
     if (!open || !expectedPath || !expectedHref) return;
@@ -235,25 +251,19 @@ export function OnboardingTour({
 
       if (event.key === "ArrowLeft") {
         event.preventDefault();
-        setStepIndex((current) => Math.max(0, current - 1));
+        goPrev();
         return;
       }
 
       if (event.key === "ArrowRight") {
         event.preventDefault();
-        setStepIndex((current) => {
-          if (current >= TOUR_STEPS.length - 1) {
-            onClose(true);
-            return current;
-          }
-          return current + 1;
-        });
+        goNext();
       }
     };
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [onClose, open]);
+  }, [goNext, goPrev, onClose, open]);
 
   const spotlightStyle = React.useMemo<React.CSSProperties | undefined>(() => {
     if (!targetRect || !viewport.width || !viewport.height) return undefined;
@@ -342,20 +352,6 @@ export function OnboardingTour({
       top,
     };
   }, [targetRect, viewport.height, viewport.width]);
-
-  const goPrev = React.useCallback(() => {
-    setStepIndex((current) => Math.max(0, current - 1));
-  }, []);
-
-  const goNext = React.useCallback(() => {
-    setStepIndex((current) => {
-      if (current >= TOUR_STEPS.length - 1) {
-        onClose(true);
-        return current;
-      }
-      return current + 1;
-    });
-  }, [onClose]);
 
   const maskedOverlayStyle = React.useMemo<
     React.CSSProperties | undefined

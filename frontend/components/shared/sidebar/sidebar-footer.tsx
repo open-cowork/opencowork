@@ -305,7 +305,10 @@ export function SidebarFooterSection({
   }, [isMobile, onOpenSettings, setOpenMobile]);
 
   return (
-    <SidebarFooter className="border-t border-sidebar-border p-2 group-data-[collapsible=icon]:p-2 relative bg-sidebar">
+    <SidebarFooter
+      className="border-t border-sidebar-border p-2 group-data-[collapsible=icon]:p-2 relative bg-sidebar"
+      data-onboarding="sidebar-footer-bottom"
+    >
       {isSelectionMode ? (
         <SelectionFooter
           selectedCount={selectedCount}
