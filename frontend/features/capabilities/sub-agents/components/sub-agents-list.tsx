@@ -11,6 +11,7 @@ import { Badge } from "@/components/ui/badge";
 import { SkeletonShimmer } from "@/components/ui/skeleton-shimmer";
 import { StaggeredList } from "@/components/ui/staggered-entrance";
 import { CapabilityCreateCard } from "@/features/capabilities/components/capability-create-card";
+import { CapabilitySourceAvatar } from "@/features/capabilities/components/capability-source-avatar";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -94,6 +95,11 @@ export function SubAgentsList({
 
               return (
                 <div className="group flex items-center gap-4 rounded-xl border border-border/70 bg-card px-4 py-3 min-h-[64px]">
+                  <CapabilitySourceAvatar
+                    name={agent.name}
+                    source={agent.source}
+                    status={agent.enabled ? "active" : "inactive"}
+                  />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-medium font-mono">

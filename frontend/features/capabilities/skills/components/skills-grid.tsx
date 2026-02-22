@@ -16,6 +16,7 @@ import type {
 import { formatSourceLabel } from "@/features/capabilities/utils/source";
 import { useT } from "@/lib/i18n/client";
 import { CapabilityCreateCard } from "@/features/capabilities/components/capability-create-card";
+import { CapabilitySourceAvatar } from "@/features/capabilities/components/capability-source-avatar";
 
 const SKILL_LIMIT = 5;
 
@@ -118,6 +119,13 @@ export function SkillsGrid({
                 isLoading ||
                 loadingId === skill.id ||
                 loadingId === install?.id;
+              const isEnabled = install?.enabled ?? false;
+              const avatarStatus =
+                enabledCount > SKILL_LIMIT && isEnabled
+                  ? "error"
+                  : isEnabled
+                    ? "active"
+                    : "inactive";
 
               return (
                 <div
@@ -127,6 +135,11 @@ export function SkillsGrid({
                       : "border-border/40 bg-muted/20"
                   }`}
                 >
+                  <CapabilitySourceAvatar
+                    name={skill.name}
+                    source={skill.source}
+                    status={avatarStatus}
+                  />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-medium truncate">{skill.name}</span>

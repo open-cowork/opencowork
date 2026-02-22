@@ -15,6 +15,7 @@ import type {
 import { formatSourceLabel } from "@/features/capabilities/utils/source";
 import { useT } from "@/lib/i18n/client";
 import { CapabilityCreateCard } from "@/features/capabilities/components/capability-create-card";
+import { CapabilitySourceAvatar } from "@/features/capabilities/components/capability-source-avatar";
 
 interface PluginsGridProps {
   plugins: Plugin[];
@@ -108,6 +109,8 @@ export function PluginsGrid({
                 isLoading ||
                 loadingId === plugin.id ||
                 loadingId === install?.id;
+              const avatarStatus =
+                isInstalled && install?.enabled ? "active" : "inactive";
 
               return (
                 <div
@@ -117,6 +120,11 @@ export function PluginsGrid({
                       : "border-border/40 bg-muted/20"
                   }`}
                 >
+                  <CapabilitySourceAvatar
+                    name={plugin.name}
+                    source={plugin.source}
+                    status={avatarStatus}
+                  />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-medium truncate">

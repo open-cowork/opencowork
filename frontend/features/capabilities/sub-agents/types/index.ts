@@ -1,9 +1,12 @@
+import type { SourceInfo } from "@/features/capabilities/types/source";
+
 export type SubAgentMode = "raw" | "structured";
 
 export interface SubAgent {
   id: number;
   user_id: string;
   name: string;
+  source?: SourceInfo | null;
   enabled: boolean;
   mode: SubAgentMode;
 

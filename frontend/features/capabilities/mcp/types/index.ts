@@ -1,6 +1,9 @@
+import type { SourceInfo } from "@/features/capabilities/types/source";
+
 export interface McpServer {
   id: number;
   name: string;
+  source?: SourceInfo | null;
   scope: string;
   owner_user_id: string | null;
   server_config: Record<string, unknown>;

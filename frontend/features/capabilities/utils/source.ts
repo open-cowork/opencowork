@@ -9,19 +9,22 @@ export function formatSourceLabel(
   const kind = source?.kind;
 
   if (kind === "github") {
-    const base = t("library.sources.github");
     const repo = source?.repo?.trim();
     const ref = source?.ref?.trim();
-    if (repo && ref) return `${base} - ${repo}@${ref}`;
-    if (repo) return `${base} - ${repo}`;
-    return base;
+    const url = source?.url?.trim();
+    if (repo && ref) return `${repo}@${ref}`;
+    if (repo) return repo;
+    if (url) return url;
+    if (ref) return `@${ref}`;
+    return t("library.sources.unknown");
   }
 
   if (kind === "zip") {
-    const base = t("library.sources.zip");
     const filename = source?.filename?.trim();
-    if (filename) return `${base} - ${filename}`;
-    return base;
+    const url = source?.url?.trim();
+    if (filename) return filename;
+    if (url) return url;
+    return t("library.sources.unknown");
   }
 
   if (kind === "system") return t("library.sources.system");

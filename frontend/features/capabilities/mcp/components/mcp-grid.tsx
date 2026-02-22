@@ -15,6 +15,7 @@ import type {
 } from "@/features/capabilities/mcp/types";
 import { useT } from "@/lib/i18n/client";
 import { CapabilityCreateCard } from "@/features/capabilities/components/capability-create-card";
+import { CapabilitySourceAvatar } from "@/features/capabilities/components/capability-source-avatar";
 
 const MCP_LIMIT = 3;
 
@@ -116,6 +117,12 @@ export function McpGrid({
               const install = installByServerId.get(server.id);
               const isEnabled = install?.enabled ?? false;
               const isRowLoading = loadingId === server.id;
+              const avatarStatus =
+                enabledCount > MCP_LIMIT && isEnabled
+                  ? "error"
+                  : isEnabled
+                    ? "active"
+                    : "inactive";
 
               return (
                 <div
@@ -125,6 +132,11 @@ export function McpGrid({
                       : "border-border/40 bg-muted/20"
                   }`}
                 >
+                  <CapabilitySourceAvatar
+                    name={server.name}
+                    source={server.source}
+                    status={avatarStatus}
+                  />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <span className="font-medium">{server.name}</span>
