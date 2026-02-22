@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { ThemeProvider } from "@/components/shared/theme-provider";
+import { StartupSplashGate } from "@/components/shared/startup-splash-gate";
 import { fallbackLng } from "@/lib/i18n/settings";
 import { Toaster } from "@/components/ui/sonner";
 
@@ -37,8 +38,10 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
-          <Toaster position="top-right" />
+          <StartupSplashGate>
+            {children}
+            <Toaster position="top-right" />
+          </StartupSplashGate>
         </ThemeProvider>
       </body>
     </html>

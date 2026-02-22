@@ -9,6 +9,11 @@ import type {
 } from "@/features/capabilities/skills/types";
 import { skillsService } from "@/features/capabilities/skills/services/skills-service";
 import { useT } from "@/lib/i18n/client";
+import {
+  getStartupPreloadPromise,
+  getStartupPreloadValue,
+  hasStartupPreloadValue,
+} from "@/lib/startup-preload";
 import { playInstallSound } from "@/lib/utils/sound";
 
 export interface SkillDisplayItem {
@@ -18,10 +23,18 @@ export interface SkillDisplayItem {
 
 export function useSkillCatalog() {
   const { t } = useT("translation");
-  const [skills, setSkills] = useState<Skill[]>([]);
-  const [installs, setInstalls] = useState<UserSkillInstall[]>([]);
+  const preloadSkills = getStartupPreloadValue("skills");
+  const preloadInstalls = getStartupPreloadValue("skillInstalls");
+  const hasPreloadedCatalog =
+    hasStartupPreloadValue("skills") && hasStartupPreloadValue("skillInstalls");
+  const [skills, setSkills] = useState<Skill[]>(
+    hasPreloadedCatalog ? (preloadSkills ?? []) : [],
+  );
+  const [installs, setInstalls] = useState<UserSkillInstall[]>(
+    hasPreloadedCatalog ? (preloadInstalls ?? []) : [],
+  );
   const [loadingId, setLoadingId] = useState<number | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!hasPreloadedCatalog);
 
   const refresh = useCallback(async () => {
     setIsLoading(true);
@@ -41,7 +54,44 @@ export function useSkillCatalog() {
   }, [t]);
 
   useEffect(() => {
-    refresh();
+    let active = true;
+
+    const hydrateAndRefresh = async () => {
+      const canUsePreload =
+        hasStartupPreloadValue("skills") &&
+        hasStartupPreloadValue("skillInstalls");
+      if (canUsePreload) {
+        setSkills(getStartupPreloadValue("skills") ?? []);
+        setInstalls(getStartupPreloadValue("skillInstalls") ?? []);
+        setIsLoading(false);
+        return;
+      }
+
+      const preloadPromise = getStartupPreloadPromise();
+      if (preloadPromise) {
+        await preloadPromise;
+        if (!active) return;
+
+        const hasHydratedCatalog =
+          hasStartupPreloadValue("skills") &&
+          hasStartupPreloadValue("skillInstalls");
+        if (hasHydratedCatalog) {
+          setSkills(getStartupPreloadValue("skills") ?? []);
+          setInstalls(getStartupPreloadValue("skillInstalls") ?? []);
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      if (!active) return;
+      await refresh();
+    };
+
+    hydrateAndRefresh();
+
+    return () => {
+      active = false;
+    };
   }, [refresh]);
 
   const installSkill = useCallback(

@@ -26,6 +26,10 @@ import { useAppShell } from "@/components/shared/app-shell-context";
 import { cn } from "@/lib/utils";
 import { playInstallSound } from "@/lib/utils/sound";
 import { useT } from "@/lib/i18n/client";
+import {
+  getStartupPreloadValue,
+  hasStartupPreloadValue,
+} from "@/lib/startup-preload";
 import { toast } from "sonner";
 import { AlertTriangle } from "lucide-react";
 import { SkeletonText } from "@/components/ui/skeleton-shimmer";
@@ -78,15 +82,41 @@ export function CardNav({
   const isHoveringRef = useRef(false);
   const closeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  const preloadMcpServers = getStartupPreloadValue("mcpServers");
+  const preloadMcpInstalls = getStartupPreloadValue("mcpInstalls");
+  const preloadSkills = getStartupPreloadValue("skills");
+  const preloadSkillInstalls = getStartupPreloadValue("skillInstalls");
+  const preloadPlugins = getStartupPreloadValue("plugins");
+  const preloadPluginInstalls = getStartupPreloadValue("pluginInstalls");
+  const hasPreloadedCardData =
+    hasStartupPreloadValue("mcpServers") &&
+    hasStartupPreloadValue("mcpInstalls") &&
+    hasStartupPreloadValue("skills") &&
+    hasStartupPreloadValue("skillInstalls") &&
+    hasStartupPreloadValue("plugins") &&
+    hasStartupPreloadValue("pluginInstalls");
+
   // API data state
-  const [mcpServers, setMcpServers] = useState<McpServer[]>([]);
-  const [mcpInstalls, setMcpInstalls] = useState<UserMcpInstall[]>([]);
-  const [skills, setSkills] = useState<Skill[]>([]);
-  const [skillInstalls, setSkillInstalls] = useState<UserSkillInstall[]>([]);
-  const [plugins, setPlugins] = useState<Plugin[]>([]);
-  const [pluginInstalls, setPluginInstalls] = useState<UserPluginInstall[]>([]);
+  const [mcpServers, setMcpServers] = useState<McpServer[]>(
+    hasPreloadedCardData ? (preloadMcpServers ?? []) : [],
+  );
+  const [mcpInstalls, setMcpInstalls] = useState<UserMcpInstall[]>(
+    hasPreloadedCardData ? (preloadMcpInstalls ?? []) : [],
+  );
+  const [skills, setSkills] = useState<Skill[]>(
+    hasPreloadedCardData ? (preloadSkills ?? []) : [],
+  );
+  const [skillInstalls, setSkillInstalls] = useState<UserSkillInstall[]>(
+    hasPreloadedCardData ? (preloadSkillInstalls ?? []) : [],
+  );
+  const [plugins, setPlugins] = useState<Plugin[]>(
+    hasPreloadedCardData ? (preloadPlugins ?? []) : [],
+  );
+  const [pluginInstalls, setPluginInstalls] = useState<UserPluginInstall[]>(
+    hasPreloadedCardData ? (preloadPluginInstalls ?? []) : [],
+  );
   const [isLoading, setIsLoading] = useState(false);
-  const [hasFetched, setHasFetched] = useState(false);
+  const [hasFetched, setHasFetched] = useState(hasPreloadedCardData);
 
   // Fetch MCP/Skill/Plugin data
   const fetchData = useCallback(async () => {

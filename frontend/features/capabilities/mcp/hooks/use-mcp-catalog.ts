@@ -11,6 +11,11 @@ import type {
 import { mcpService } from "@/features/capabilities/mcp/services/mcp-service";
 import { useEnvVarsStore } from "@/features/capabilities/env-vars/hooks/use-env-vars-store";
 import { useT } from "@/lib/i18n/client";
+import {
+  getStartupPreloadPromise,
+  getStartupPreloadValue,
+  hasStartupPreloadValue,
+} from "@/lib/startup-preload";
 import { CheckCircle2, CircleOff } from "lucide-react";
 import { playInstallSound } from "@/lib/utils/sound";
 
@@ -21,11 +26,20 @@ export interface McpDisplayItem {
 
 export function useMcpCatalog() {
   const { t } = useT("translation");
-  const [servers, setServers] = useState<McpServer[]>([]);
-  const [installs, setInstalls] = useState<UserMcpInstall[]>([]);
+  const preloadServers = getStartupPreloadValue("mcpServers");
+  const preloadInstalls = getStartupPreloadValue("mcpInstalls");
+  const hasPreloadedCatalog =
+    hasStartupPreloadValue("mcpServers") &&
+    hasStartupPreloadValue("mcpInstalls");
+  const [servers, setServers] = useState<McpServer[]>(
+    hasPreloadedCatalog ? (preloadServers ?? []) : [],
+  );
+  const [installs, setInstalls] = useState<UserMcpInstall[]>(
+    hasPreloadedCatalog ? (preloadInstalls ?? []) : [],
+  );
   const [selectedServer, setSelectedServer] = useState<McpServer | null>(null);
   const [loadingId, setLoadingId] = useState<number | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!hasPreloadedCatalog);
   const envVarStore = useEnvVarsStore();
 
   const refresh = useCallback(async () => {
@@ -46,7 +60,44 @@ export function useMcpCatalog() {
   }, [t]);
 
   useEffect(() => {
-    refresh();
+    let active = true;
+
+    const hydrateAndRefresh = async () => {
+      const canUsePreload =
+        hasStartupPreloadValue("mcpServers") &&
+        hasStartupPreloadValue("mcpInstalls");
+      if (canUsePreload) {
+        setServers(getStartupPreloadValue("mcpServers") ?? []);
+        setInstalls(getStartupPreloadValue("mcpInstalls") ?? []);
+        setIsLoading(false);
+        return;
+      }
+
+      const preloadPromise = getStartupPreloadPromise();
+      if (preloadPromise) {
+        await preloadPromise;
+        if (!active) return;
+
+        const hasHydratedCatalog =
+          hasStartupPreloadValue("mcpServers") &&
+          hasStartupPreloadValue("mcpInstalls");
+        if (hasHydratedCatalog) {
+          setServers(getStartupPreloadValue("mcpServers") ?? []);
+          setInstalls(getStartupPreloadValue("mcpInstalls") ?? []);
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      if (!active) return;
+      await refresh();
+    };
+
+    hydrateAndRefresh();
+
+    return () => {
+      active = false;
+    };
   }, [refresh]);
 
   const toggleInstall = useCallback(

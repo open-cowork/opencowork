@@ -6,6 +6,11 @@ import {
 import { renameSessionTitleAction } from "@/features/chat/actions/session-actions";
 import type { TaskHistoryItem } from "@/features/projects/types";
 import { useT } from "@/lib/i18n/client";
+import {
+  getStartupPreloadPromise,
+  getStartupPreloadValue,
+  hasStartupPreloadValue,
+} from "@/lib/startup-preload";
 import { toast } from "sonner";
 
 interface UseTaskHistoryOptions {
@@ -13,15 +18,34 @@ interface UseTaskHistoryOptions {
 }
 
 export function useTaskHistory(options: UseTaskHistoryOptions = {}) {
+  const preloadTasks = getStartupPreloadValue("taskHistory");
+  const hasPreloadedTasks = hasStartupPreloadValue("taskHistory");
   const { initialTasks = [] } = options;
+  const seededTasks = hasPreloadedTasks ? (preloadTasks ?? []) : initialTasks;
   const { t } = useT("translation");
   const [taskHistory, setTaskHistory] =
-    useState<TaskHistoryItem[]>(initialTasks);
-  const [isLoading, setIsLoading] = useState(!initialTasks.length);
+    useState<TaskHistoryItem[]>(seededTasks);
+  const [isLoading, setIsLoading] = useState(
+    !hasPreloadedTasks && !initialTasks.length,
+  );
 
   const fetchTasks = useCallback(async () => {
     try {
       setIsLoading(true);
+      if (hasStartupPreloadValue("taskHistory")) {
+        setTaskHistory(getStartupPreloadValue("taskHistory") ?? []);
+        return;
+      }
+
+      const preloadPromise = getStartupPreloadPromise();
+      if (preloadPromise) {
+        await preloadPromise;
+        if (hasStartupPreloadValue("taskHistory")) {
+          setTaskHistory(getStartupPreloadValue("taskHistory") ?? []);
+          return;
+        }
+      }
+
       const data = await listTaskHistoryAction();
       setTaskHistory(data);
     } catch (error) {

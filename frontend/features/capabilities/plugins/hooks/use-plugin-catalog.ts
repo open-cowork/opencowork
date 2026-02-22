@@ -9,6 +9,11 @@ import type {
 } from "@/features/capabilities/plugins/types";
 import { pluginsService } from "@/features/capabilities/plugins/services/plugins-service";
 import { useT } from "@/lib/i18n/client";
+import {
+  getStartupPreloadPromise,
+  getStartupPreloadValue,
+  hasStartupPreloadValue,
+} from "@/lib/startup-preload";
 import { playInstallSound } from "@/lib/utils/sound";
 
 export interface PluginDisplayItem {
@@ -18,10 +23,19 @@ export interface PluginDisplayItem {
 
 export function usePluginCatalog() {
   const { t } = useT("translation");
-  const [plugins, setPlugins] = useState<Plugin[]>([]);
-  const [installs, setInstalls] = useState<UserPluginInstall[]>([]);
+  const preloadPlugins = getStartupPreloadValue("plugins");
+  const preloadInstalls = getStartupPreloadValue("pluginInstalls");
+  const hasPreloadedCatalog =
+    hasStartupPreloadValue("plugins") &&
+    hasStartupPreloadValue("pluginInstalls");
+  const [plugins, setPlugins] = useState<Plugin[]>(
+    hasPreloadedCatalog ? (preloadPlugins ?? []) : [],
+  );
+  const [installs, setInstalls] = useState<UserPluginInstall[]>(
+    hasPreloadedCatalog ? (preloadInstalls ?? []) : [],
+  );
   const [loadingId, setLoadingId] = useState<number | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(!hasPreloadedCatalog);
 
   const refresh = useCallback(async () => {
     setIsLoading(true);
@@ -41,7 +55,44 @@ export function usePluginCatalog() {
   }, [t]);
 
   useEffect(() => {
-    refresh();
+    let active = true;
+
+    const hydrateAndRefresh = async () => {
+      const canUsePreload =
+        hasStartupPreloadValue("plugins") &&
+        hasStartupPreloadValue("pluginInstalls");
+      if (canUsePreload) {
+        setPlugins(getStartupPreloadValue("plugins") ?? []);
+        setInstalls(getStartupPreloadValue("pluginInstalls") ?? []);
+        setIsLoading(false);
+        return;
+      }
+
+      const preloadPromise = getStartupPreloadPromise();
+      if (preloadPromise) {
+        await preloadPromise;
+        if (!active) return;
+
+        const hasHydratedCatalog =
+          hasStartupPreloadValue("plugins") &&
+          hasStartupPreloadValue("pluginInstalls");
+        if (hasHydratedCatalog) {
+          setPlugins(getStartupPreloadValue("plugins") ?? []);
+          setInstalls(getStartupPreloadValue("pluginInstalls") ?? []);
+          setIsLoading(false);
+          return;
+        }
+      }
+
+      if (!active) return;
+      await refresh();
+    };
+
+    hydrateAndRefresh();
+
+    return () => {
+      active = false;
+    };
   }, [refresh]);
 
   const installPlugin = useCallback(

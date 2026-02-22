@@ -6,6 +6,11 @@ import {
   updateProjectAction,
 } from "@/features/projects/actions/project-actions";
 import type { ProjectItem } from "@/features/projects/types";
+import {
+  getStartupPreloadPromise,
+  getStartupPreloadValue,
+  hasStartupPreloadValue,
+} from "@/lib/startup-preload";
 import type {
   ProjectRepoDefaultsInput,
   ProjectUpdatesInput,
@@ -17,15 +22,35 @@ interface UseProjectsOptions {
 }
 
 export function useProjects(options: UseProjectsOptions = {}) {
+  const preloadProjects = getStartupPreloadValue("projects");
+  const hasPreloadedProjects = hasStartupPreloadValue("projects");
   const { initialProjects = [] } = options;
+  const seededProjects = hasPreloadedProjects
+    ? (preloadProjects ?? [])
+    : initialProjects;
   const enableClientFetch =
-    options.enableClientFetch ?? initialProjects.length === 0;
-  const [projects, setProjects] = useState<ProjectItem[]>(initialProjects);
+    options.enableClientFetch ??
+    (!hasPreloadedProjects && initialProjects.length === 0);
+  const [projects, setProjects] = useState<ProjectItem[]>(seededProjects);
   const [isLoading, setIsLoading] = useState(enableClientFetch);
 
   const fetchProjects = useCallback(async () => {
     try {
       setIsLoading(true);
+      if (hasStartupPreloadValue("projects")) {
+        setProjects(getStartupPreloadValue("projects") ?? []);
+        return;
+      }
+
+      const preloadPromise = getStartupPreloadPromise();
+      if (preloadPromise) {
+        await preloadPromise;
+        if (hasStartupPreloadValue("projects")) {
+          setProjects(getStartupPreloadValue("projects") ?? []);
+          return;
+        }
+      }
+
       const data = await listProjectsAction();
       setProjects(data);
     } catch (error) {
