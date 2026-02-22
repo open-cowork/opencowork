@@ -162,17 +162,6 @@ export function EnvVarsGrid({
                       >
                         {t("library.envVars.scope.system")}
                       </Badge>
-                      <div className="flex items-center">
-                        {envVar.is_set ? (
-                          <span title={t("library.envVars.status.set")}>
-                            <CheckCircle2 className="size-4 text-muted-foreground" />
-                          </span>
-                        ) : (
-                          <span title={t("library.envVars.status.unset")}>
-                            <CircleOff className="size-4 text-muted-foreground" />
-                          </span>
-                        )}
-                      </div>
                       {isOverridden && (
                         <Badge variant="secondary" className="text-xs">
                           {t("library.envVars.status.overridden")}
@@ -186,7 +175,7 @@ export function EnvVarsGrid({
                     )}
                   </div>
 
-                  <div className="flex items-center gap-2 flex-shrink-0">
+                  <div className="flex items-center gap-3 flex-shrink-0">
                     <Button
                       variant="outline"
                       size="sm"
@@ -203,6 +192,21 @@ export function EnvVarsGrid({
                         ? t("library.envVars.actions.editOverride")
                         : t("library.envVars.actions.override")}
                     </Button>
+                    {envVar.is_set ? (
+                      <span
+                        title={t("library.envVars.status.set")}
+                        className="shrink-0"
+                      >
+                        <CheckCircle2 className="size-4 text-primary" />
+                      </span>
+                    ) : (
+                      <span
+                        title={t("library.envVars.status.unset")}
+                        className="shrink-0"
+                      >
+                        <CircleOff className="size-4 text-muted-foreground" />
+                      </span>
+                    )}
                   </div>
                 </div>
               );
@@ -237,11 +241,6 @@ export function EnvVarsGrid({
                       >
                         {t("library.envVars.scope.user")}
                       </Badge>
-                      <div className="flex items-center">
-                        <span title={t("library.envVars.status.set")}>
-                          <CheckCircle2 className="size-4 text-muted-foreground" />
-                        </span>
-                      </div>
                       {overridesSystem && (
                         <Badge variant="secondary" className="text-xs">
                           {t("library.envVars.status.overridesSystem")}
@@ -255,31 +254,39 @@ export function EnvVarsGrid({
                     )}
                   </div>
 
-                  <div className={hoverActionsClass}>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-8"
-                      onClick={() => onEdit?.(envVar)}
-                      disabled={isBusy}
-                      title={t("common.edit")}
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <div className={hoverActionsClass}>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-8"
+                        onClick={() => onEdit?.(envVar)}
+                        disabled={isBusy}
+                        title={t("common.edit")}
+                      >
+                        {isBusy ? (
+                          <Loader2 className="size-4 animate-spin" />
+                        ) : (
+                          <Settings className="size-4" />
+                        )}
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="size-8 text-muted-foreground hover:text-destructive"
+                        onClick={() => onDelete?.(envVar.id)}
+                        title={t("common.delete")}
+                        disabled={isBusy}
+                      >
+                        <Trash2 className="size-4" />
+                      </Button>
+                    </div>
+                    <span
+                      title={t("library.envVars.status.set")}
+                      className="shrink-0"
                     >
-                      {isBusy ? (
-                        <Loader2 className="size-4 animate-spin" />
-                      ) : (
-                        <Settings className="size-4" />
-                      )}
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="size-8 text-muted-foreground hover:text-destructive"
-                      onClick={() => onDelete?.(envVar.id)}
-                      title={t("common.delete")}
-                      disabled={isBusy}
-                    >
-                      <Trash2 className="size-4" />
-                    </Button>
+                      <CheckCircle2 className="size-4 text-primary" />
+                    </span>
                   </div>
                 </div>
               );
